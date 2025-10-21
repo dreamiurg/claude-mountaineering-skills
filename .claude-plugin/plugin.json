@@ -6,6 +6,19 @@
   "homepage": "https://github.com/dreamiurg/claude-mountaineering-skills",
   "repository": "https://github.com/dreamiurg/claude-mountaineering-skills",
   "license": "MIT",
-  "keywords": ["mountaineering", "climbing", "alpine", "route-beta", "trip-planning", "weather", "avalanche", "cascades", "pacific-northwest", "peakbagger"],
-  "skills": ["route-researcher"]
+  "keywords": [
+    "mountaineering",
+    "climbing",
+    "alpine",
+    "route-beta",
+    "trip-planning",
+    "weather",
+    "avalanche",
+    "cascades",
+    "pacific-northwest",
+    "peakbagger"
+  ],
+  "skills": [
+    "route-researcher"
+  ]
 }

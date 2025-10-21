@@ -716,6 +716,6 @@ Skill Actions:
 
 ---
 
-**Skill Version:** 1.0
-**Last Updated:** 2025-10-20
+**Skill Version:** --help
+**Last Updated:** 2025-10-21
 **Status:** Ready for execution (with Python scripts pending)
