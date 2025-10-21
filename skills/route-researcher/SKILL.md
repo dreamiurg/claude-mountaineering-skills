@@ -258,6 +258,7 @@ Prompt: "Parse the JSON response and extract:
 - Snow depth if applicable
 - Wind speeds and gusts
 - Organize by calendar date with day-of-week
+- **IMPORTANT:** The timezone parameter is set to 'auto', so dates are in local time. Calculate day-of-week from the actual date strings in the JSON response (YYYY-MM-DD format). Today's date in local time is {current_date}.
 - Map weather_code to descriptive conditions (0=clear, 1-3=partly cloudy, 45-48=fog, 51-67=rain, 71-77=snow, 80-82=showers, 95-99=thunderstorms)"
 ```
 
