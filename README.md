@@ -48,21 +48,9 @@ Claude will automatically invoke the route-researcher skill and generate a compr
 
 ### Generated Output
 
-Reports are created as Markdown files in your current working directory:
+Reports are created as Markdown files in your current working directory with comprehensive route information, current conditions, trip reports, and safety disclaimers.
 
-```
-2025-10-20-mount-baker.md
-```
-
-Each report includes:
-- Summit information (elevation, coordinates, location)
-- Route description (approach, standard route, crux)
-- Current conditions (weather, avalanche, daylight)
-- Recent trip reports with links
-- Access and permit information
-- Explicit documentation of information gaps
-
-See [examples](skills/route-researcher/examples/) for sample outputs.
+**Example:** See [Granite Mountain (Snoqualmie) route beta](skills/route-researcher/examples/2025-10-21-granite-mountain-snoqualmie.md) for a sample report.
 
 ## Features
 
@@ -91,51 +79,7 @@ If data sources are unavailable:
 
 ## Python Tools
 
-The plugin includes Python utilities for enhanced functionality:
-
-- `cloudscrape.py` - Bypasses Cloudflare protection for PeakBagger, SummitPost
-- `fetch_weather.py` - Mountain weather forecasts (in development)
-- `fetch_avalanche.py` - NWAC avalanche data (in development)
-- `calculate_daylight.py` - Sunrise/sunset calculations (in development)
-
-### Manual Installation
-
-If automatic installation failed or you don't have `uv`:
-
-```bash
-# Navigate to plugin installation
-cd ~/.claude/plugins/mountaineering-skills/skills/route-researcher/tools
-
-# Install dependencies with uv
-uv sync
-
-# Or with pip
-pip install -r requirements.txt
-```
-
-The skill will work without these tools, falling back to available data sources.
-
-## Troubleshooting
-
-### Hook Installation Failed
-
-If you see "post-install hook failed":
-
-1. Check if `uv` is installed: `uv --version`
-2. Try manual installation (see above)
-3. The skill will still work, just without some Python tools
-
-### Cloudflare Blocking Requests
-
-The `cloudscrape.py` tool handles Cloudflare protection, but may occasionally fail:
-
-- Skill automatically falls back to available sources
-- Check "Information Gaps" section in generated reports
-- Use manual verification links provided
-
-### No Route Beta Generated
-
-Ensure you're in a directory where you have write permissions. Reports are created in your current working directory, not in the plugin installation.
+The plugin includes Python utilities for enhanced data gathering (weather forecasts, avalanche conditions, daylight calculations). See [skills/route-researcher/tools/README.md](skills/route-researcher/tools/README.md) for details on available tools, manual installation, and troubleshooting.
 
 ## Updates
 
