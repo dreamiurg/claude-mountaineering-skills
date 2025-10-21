@@ -1,3 +1,16 @@
+## [1.2.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.1.2...v1.2.0) (2025-10-21)
+
+
+### Features
+
+* updated report format ([#6](https://github.com/dreamiurg/claude-mountaineering-skills/issues/6)) ([79c591c](https://github.com/dreamiurg/claude-mountaineering-skills/commit/79c591cb5014b5146bd0ab9ffd8e15238f9e7624))
+
+
+### Bug Fixes
+
+* configure semantic-release to use deploy key for branch protection bypass ([#7](https://github.com/dreamiurg/claude-mountaineering-skills/issues/7)) ([a1640b0](https://github.com/dreamiurg/claude-mountaineering-skills/commit/a1640b00cc31e1192fbb78600bf61f6e3935ef62))
+* use SSH remote for semantic-release git operations ([#8](https://github.com/dreamiurg/claude-mountaineering-skills/issues/8)) ([80b6489](https://github.com/dreamiurg/claude-mountaineering-skills/commit/80b6489c891e89c7bb0058bced9fc833596bea25))
+
 ## [1.1.2](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.1.1...v1.1.2) (2025-10-21)
 
 
