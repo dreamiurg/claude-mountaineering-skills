@@ -169,29 +169,16 @@ Get all available ascent data regardless of age.
 - `--with-gpx`: Focus on ascents with GPS tracks (useful for route finding)
 - `--with-tr`: Focus on ascents with trip reports (useful for conditions)
 
-**Extract for report:**
+**Extract and save for Phase 4 (Report Generation):**
 - Total ascent statistics (total count, temporal breakdown, monthly distribution)
-- **High-value ascents (prioritized list of 5-10):**
-  - **Priority 1:** Ascents with GPX tracks AND substantial trip reports (>30 words)
-  - **Priority 2:** Ascents with GPX tracks only
-  - **Priority 3:** Ascents with substantial trip reports (>30 words) but no GPX
-  - Sort by date (most recent first) within each priority tier
-  - **Format each entry:**
-    - Date, climber name, and report details
-    - Indicators: `📍 GPX` if has_gpx=true, `📝 Report (X words)` if has report
-    - Direct link to the ascent page
-    - Example: `- 2025-01-14 - [Emma Meersman](https://www.peakbagger.com/climber/ascent.aspx?aid=2746168) - 📍 GPX | 📝 Report (52 words)`
-  - Limit to 5-10 most valuable ascents
-- **Links to all trip report sources:**
-  - **PeakBagger ascents list:** `https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}` (always include)
-  - **Washington Trails Association (WTA):** If peak has a WTA page, include trip reports link (search: "{peak_name} site:wta.org")
-  - **AllTrails:** Include reviews/reports link if found (search: "{peak_name} site:alltrails.com")
-  - **SummitPost:** Include trip reports link if route page found during Phase 2B
-  - **Mountaineers.org:** Include route page link if found during Phase 2B
-  - **CascadeClimbers.com:** Include forum search link (search: "{peak_name} site:cascadeclimbers.com")
-  - Format: Provide direct links to trip report sections, not just main route pages
-- Seasonal patterns from monthly distribution (helps identify best climbing seasons)
-- Note the timeframe of data included (e.g., "last 1 year", "last 5 years", "all available data")
+- **All ascents from JSON with the following data:**
+  - Date (`date` field)
+  - Climber name (`climber.name` field)
+  - Trip report word count (`trip_report.word_count` field)
+  - GPX availability (`has_gpx` field)
+  - Ascent URL (`url` field)
+- Seasonal patterns (monthly distribution data)
+- Timeframe used for the query (1y, 5y, or all)
 
 **Error Handling:**
 - If peakbagger-cli fails: Fall back to WebSearch for trip reports
@@ -210,16 +197,16 @@ WebSearch queries (run in parallel):
 5. "{peak_name} trip report site:cascadeclimbers.com" - Forum discussions
 ```
 
-**Extract and save URLs for report template:**
-- **WTA:** Trip reports section URL (usually: `https://www.wta.org/go-hiking/hikes/{hike-name}` - trip reports tab)
-- **AllTrails:** Trail page URL (includes reviews section)
-- **SummitPost:** Route page URL (has trip reports section)
-- **Mountaineers.org:** Route/place page URL
-- **CascadeClimbers:** Forum search URL or relevant threads
+**Extract and save URLs for Phase 4 (Report Generation):**
+- WTA trip reports URL (if found)
+- AllTrails trail page URL (if found)
+- SummitPost route/trip reports URL (if found)
+- Mountaineers.org route page URL (if found)
+- CascadeClimbers forum search URL or relevant thread URLs (if found)
 
-**Optional WebFetch:**
-- If specific high-value trip reports identified on any platform, fetch 1-2 for detailed conditions
-- Extract recent dates and conditions mentioned in snippets for "Recent Conditions" section
+**Optional WebFetch for conditions data:**
+- If specific high-value trip reports identified, fetch 1-2 for detailed conditions
+- Extract recent dates and conditions mentioned for "Recent Conditions" section
 
 #### 2E. Weather Forecast (Multiple Sources)
 
@@ -370,7 +357,15 @@ Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowerca
 
 **Location:** Reports are generated in the user's current working directory, not in the plugin installation directory.
 
-**Structure:** Follow the template in `assets/report-template.md` exactly. Read that file and use it as your template for generating route beta reports.
+**Structure and Formatting:**
+
+**CRITICAL:** Read `assets/report-template.md` and follow it exactly for:
+- Section structure and headings
+- Content formatting (how to present ascent data, trip report links, etc.)
+- Conditional sections (when to include/exclude sections based on available data)
+- All layout and presentation decisions
+
+The template is the **single source of truth** for report formatting. Phase 2 (Data Gathering) specifies **what data to extract**. This phase (Phase 4) uses the template to determine **how to present that data**.
 
 #### 4B. Markdown Formatting Rules
 

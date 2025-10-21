@@ -101,34 +101,43 @@ Daylight calculations not available. Check sunrise/sunset times for your planned
 
 ## Recent Trip Reports
 
-{Summary paragraph: Brief overview of recent activity from PeakBagger ascent statistics - total ascents in timeframe, seasonal patterns, availability of GPX/reports}
+{1-2 sentence summary of recent activity: total ascents in timeframe, peak months, GPX/report availability}
 
 ### High-Value Ascents
 
-{Prioritized list of 5-10 most valuable recent ascents, sorted by value (GPX+detailed report > GPX only > detailed report only), then by date:}
+{Prioritize ascents using 3-tier system, limit to 5-10 total:
+  Priority 1: GPX tracks + substantial reports (>30 words)
+  Priority 2: GPX tracks only
+  Priority 3: Substantial reports (>30 words) without GPX
+Sort by date (most recent first) within each tier}
 
-- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - {📍 GPX if available} | {📝 Report (X words) if available}
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📍 GPX | 📝 Report (X words)
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📍 GPX | 📝 Report (X words)
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 Report (X words)
 
-{Example:}
-- **2025-01-14** - [Emma Meersman](https://www.peakbagger.com/climber/ascent.aspx?aid=2746168) - 📍 GPX | 📝 Report (52 words)
-- **2024-12-15** - [Brad Wagenaar](https://www.peakbagger.com/climber/ascent.aspx?aid=2910767) - 📍 GPX | 📝 Report (8 words)
-- **2024-10-30** - [Ryan Rodman](https://www.peakbagger.com/climber/ascent.aspx?aid=2688709) - 📝 Report (6 words)
+{Format notes:
+- Include 📍 GPX indicator if has_gpx=true
+- Include 📝 Report (X words) if trip report exists
+- Use actual word count from trip_report.word_count field
+- Link to individual ascent page URL}
 
 ### Browse All Trip Reports
 
-- [PeakBagger Ascents]({peakbagger_ascents_url}) - Individual climb logs with optional GPX tracks and reports
-{If WTA page found:}
-- [Washington Trails Association Trip Reports]({wta_trip_reports_url}) - User-submitted trip reports with photos
-{If AllTrails page found:}
-- [AllTrails Reviews]({alltrails_url}) - User reviews and recent activity
-{If SummitPost page found:}
-- [SummitPost Trip Reports]({summitpost_trip_reports_url}) - Route-specific trip reports
-{If Mountaineers page found:}
-- [Mountaineers.org Route Page]({mountaineers_url}) - Route information and conditions
-{If applicable:}
-- [CascadeClimbers Forum]({cascadeclimbers_search_url}) - Forum discussions and beta
+{Always include PeakBagger. Include other platforms only if URLs were found during data gathering}
 
-{If limited reports:}
+- [PeakBagger Ascents](https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
+{If WTA URL found:}
+- [Washington Trails Association Trip Reports]({wta_url}) - User-submitted trip reports with photos
+{If AllTrails URL found:}
+- [AllTrails Reviews]({alltrails_url}) - User reviews and recent activity
+{If SummitPost URL found:}
+- [SummitPost Trip Reports]({summitpost_url}) - Route-specific trip reports
+{If Mountaineers URL found:}
+- [Mountaineers.org Route Page]({mountaineers_url}) - Route information and conditions
+{If CascadeClimbers URL found:}
+- [CascadeClimbers Forum]({cascadeclimbers_url}) - Forum discussions and beta
+
+{If very limited ascent data (<5 total):}
 **Note:** Limited recent trip reports available. Consider posting your own after your climb!
 
 ## Access & Permits
