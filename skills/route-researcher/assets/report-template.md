@@ -108,19 +108,33 @@ Use bold for: weather patterns, precipitation types/timing, temperature ranges, 
 
 | Day | Conditions | Temperature | Precipitation |
 |-----|-----------|-------------|---------------|
-| {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Conditions} | High: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {22}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {23}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {24}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {25}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {26}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Icon} {Conditions} | High: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {22}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {23}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {24}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {25}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {26}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
 
 {Format notes:
 - Use actual calendar dates from the report generation date
 - Include year (2025) for clarity
 - Mark first day as "(Today)" if appropriate
 - Use day-of-week abbreviations: Mon, Tue, Wed, Thu, Fri, Sat, Sun
-- Example: "Mon Oct 21, 2025 (Today)" or "Tue Oct 22, 2025"}
+- Example: "Mon Oct 21, 2025 (Today)" or "Tue Oct 22, 2025"
+
+Weather icons to use:
+- ☀️ Clear/Sunny
+- 🌤️ Mostly sunny
+- ⛅ Partly cloudy
+- ☁️ Cloudy/Overcast
+- 🌧️ Rain
+- ⛈️ Thunderstorms
+- 🌨️ Snow/Rain mix
+- ❄️ Snow
+- 💨 Windy (can combine with other icons)
+- 🌫️ Fog
+- Use multiple icons for mixed conditions (e.g., "🌧️❄️ Rain transitioning to snow")
+- Example: "☀️ Mostly sunny, calm" or "🌧️ Rain (80% chance)"}
 
 **Check Current Forecasts:**
 
