@@ -12,7 +12,7 @@
         "url": "https://github.com/dreamiurg/claude-mountaineering-skills.git"
       },
       "description": "Automated mountain route research combining PeakBagger data, weather forecasts, avalanche conditions, and trip reports into comprehensive beta documents",
-      "version": "1.1.0"
+      "version": "1.1.1"
     }
   ]
 }

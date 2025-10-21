@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.1.0...v1.1.1) (2025-10-21)
+
+
+### Bug Fixes
+
+* correct marketplace.json source field format ([#1](https://github.com/dreamiurg/claude-mountaineering-skills/issues/1)) ([8df43c8](https://github.com/dreamiurg/claude-mountaineering-skills/commit/8df43c89901f8eb17bc4105e3249c67c0c593c66))
+
 ## [1.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.0.0...v1.1.0) (2025-10-21)
 
 
