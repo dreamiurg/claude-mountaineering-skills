@@ -39,16 +39,26 @@ Examples:
 
 3. **Handle Multiple Matches:**
    - If **multiple peaks** found: Use AskUserQuestion to present options
-     - Show peak name, elevation, and location for each
+     - For each option, show: peak name, elevation, location, AND PeakBagger URL
+     - Format each option description as: "[Peak Name] ([Elevation], [Location]) - [PeakBagger URL]"
+     - This allows user to click through and verify the correct peak
      - Let user select the correct peak
      - Provide "Other" option if none match
 
    - If **single match** found: Confirm with user
-     - Show: "Found: [Peak Name] ([Elevation], [Location]) - [PeakBagger URL]"
-     - Use AskUserQuestion: "Is this the correct peak?"
+     - Present confirmation message with peak details and PeakBagger link
+     - Show: "Found: [Peak Name] ([Elevation], [Location])"
+     - Include PeakBagger URL in the message so user can verify: "[PeakBagger URL]"
+     - Use AskUserQuestion: "Is this the correct peak? You can verify at [PeakBagger URL]"
 
    - If **no matches** found:
-     - Try peak name variations (Mt/Mount, with state/range)
+     - Try peak name variations systematically (see "Peak Name Variations" section):
+       - **Word order reversal:** "Mountain Pratt" → "Pratt Mountain"
+       - **Title variations:** Mt/Mount, St/Saint
+       - **Add location:** Include state or range name
+       - **Remove titles:** Try just the core name
+     - Run multiple searches in parallel with different variations
+     - Combine results and present best matches to user
      - If still no results, use AskUserQuestion to ask for:
        - A different peak name variation
        - Direct PeakBagger peak ID or URL
@@ -116,17 +126,23 @@ WebSearch queries (run in parallel):
 
 **Step 2:** Fetch top relevant pages:
 
-**For Cloudflare-protected sites (SummitPost, PeakBagger, Mountaineers.org):**
-```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{summitpost_or_peakbagger_or_mountaineers_url}"
-```
-Parse the returned HTML to extract route information.
+**Universal Fetching Strategy:**
 
-**For AllTrails:**
-Use WebFetch with prompt:
+For ANY website, use this two-tier approach:
+
+1. **Try WebFetch first** with appropriate extraction prompt
+2. **If WebFetch fails or returns incomplete data,** use cloudscrape.py as fallback:
+   ```bash
+   cd skills/route-researcher/tools
+   uv run python cloudscrape.py "{url}"
+   ```
+   Then parse the returned HTML to extract needed information.
+
+**Common sites and their extraction prompts:**
+
+**AllTrails (try WebFetch, fallback to cloudscrape.py):**
 ```
-Prompt: "Extract route information including:
+WebFetch Prompt: "Extract route information including:
 - Trail name
 - Route description and key features
 - Difficulty rating
@@ -142,10 +158,22 @@ Prompt: "Extract route information including:
 - Overview sources section (primary route information sources)
 - Trip reports "Browse All" section (for reviews)
 
-**For other sites (Mountain Project, WTA, etc.):**
-Use WebFetch with prompt:
+**SummitPost, Mountaineers.org, PeakBagger (try WebFetch, fallback to cloudscrape.py):**
 ```
-Prompt: "Extract route information including:
+WebFetch Prompt: "Extract route information including:
+- Route name and difficulty rating
+- Approach details and trailhead
+- Route description and key sections
+- Technical difficulty (YDS class, scramble grade, etc.)
+- Crux description
+- Distance and elevation gain
+- Estimated time
+- Known hazards and conditions"
+```
+
+**Mountain Project, WTA (try WebFetch, fallback to cloudscrape.py):**
+```
+WebFetch Prompt: "Extract route information including:
 - Approach details
 - Route description and key sections
 - Technical difficulty (YDS class, scramble grade, etc.)
@@ -156,9 +184,10 @@ Prompt: "Extract route information including:
 ```
 
 **Error Handling:**
-- If no route descriptions found: Note in gaps and provide general guidance
-- If conflicting information: Note discrepancies in report
-- If cloudscrape.py fails: Try WebFetch as fallback, then note if both fail
+- If WebFetch fails or returns incomplete data: Automatically retry with cloudscrape.py
+- If cloudscrape.py also fails: Note in "Information Gaps" section with URL for manual checking
+- If no route descriptions found from any source: Note in gaps and provide general guidance
+- If conflicting information between sources: Note discrepancies in report
 
 #### 2C. Peak Ascent Statistics (peakbagger-cli) - PARALLEL
 
@@ -380,6 +409,207 @@ WebSearch queries:
 - Required permits (if any)
 - Access notes (road conditions, seasonal closures)
 
+#### 2I. High-Quality Trip Report Identification - PARALLEL
+
+**CRITICAL: This step is MANDATORY and must be executed even if PeakBagger has some trip reports.**
+
+**Goal:** Identify the most informative trip reports across all sources for detailed route beta.
+
+This step runs in parallel with other data gathering steps and synthesizes information from:
+- PeakBagger ascent data (from Step 2C)
+- Trip report source URLs (from Step 2D)
+
+**Strategy:** Identify reports by two criteria:
+1. **Most Detailed Reports** - Highest information density (word count >100 words, detail level) regardless of age
+2. **Recent Reports** - Most current conditions (last 1-2 years)
+
+**Quality Threshold:** Prioritize reports with >100 words. If PeakBagger reports are mostly brief (<100 words), WTA and Mountaineers sources become CRITICAL.
+
+**PeakBagger Trip Reports (uses data from Step 2C):**
+
+From the ascent data already retrieved in Step 2C:
+
+1. **Sort by word count** (descending) to find most detailed reports
+   - Filter: Only ascents where `trip_report.word_count > 0`
+   - Take top 5-10 highest word count reports
+   - These provide the most comprehensive route beta
+
+2. **Extract for each high-quality report:**
+   - Date (`date` field)
+   - Climber name (`climber.name` field)
+   - Word count (`trip_report.word_count` field)
+   - Ascent URL (`url` field)
+   - Mark as "Detailed Report" category
+
+3. **Also identify recent reports:**
+   - Filter: Reports from last 1-2 years with trip reports
+   - Sort by date (most recent first)
+   - Take top 3-5 most recent
+   - Mark as "Recent Report" category
+
+**WTA Trip Reports (if WTA URL found in Step 2D):**
+
+**MANDATORY EXECUTION:** If WTA URL was found in Step 2D, you MUST attempt to extract trip reports.
+
+**CRITICAL:** WTA loads trip reports via JavaScript/AJAX. You MUST use the AJAX endpoint, not the main page.
+
+**Step 1: Construct the AJAX endpoint URL**
+```
+WTA AJAX endpoint: {wta_url}/@@related_tripreport_listing
+```
+Example: If WTA URL is `https://www.wta.org/go-hiking/hikes/mount-defiance`
+Then AJAX URL is: `https://www.wta.org/go-hiking/hikes/mount-defiance/@@related_tripreport_listing`
+
+**Step 2: Fetch using cloudscrape.py (MANDATORY - WebFetch will not work for this endpoint):**
+```bash
+cd skills/route-researcher/tools
+uv run python cloudscrape.py "{wta_url}/@@related_tripreport_listing"
+```
+
+**Step 3: Parse the returned HTML to extract trip report metadata:**
+
+The AJAX endpoint returns HTML with trip reports in `<div class="item">` elements. Look for:
+- **Trip report URL**: Extract from `<h3 class="listitem-title"><a href="...">`
+  - URLs follow pattern: `https://www.wta.org/go-hiking/trip-reports/trip_report-YYYY-MM-DD.XXXXXXXXXX`
+- **Date**: Extract from the `<a>` title text (e.g., "Mount Defiance, Ira Spring Trail - Mason Lake — Oct. 13, 2025")
+  - Date format in title: "Oct. 13, 2025", "Sep. 20, 2025", etc.
+- **Author**: Extract from `<a class="wta-icon-headline" href="https://www.wta.org/@@backpacks/..."><span class="wta-icon-headline__text">{author}</span>`
+- **Photo count**: Look for `<div class="media-indicator">X photos</div>`
+
+**Parsing example structure:**
+```html
+<div class="item">
+  <h3 class="listitem-title">
+    <a href="https://www.wta.org/go-hiking/trip-reports/trip_report-2025-10-14.120817657219">
+      Mount Defiance, Ira Spring Trail - Mason Lake — Oct. 13, 2025
+    </a>
+  </h3>
+  <div class="CreatorInfo">
+    <a class="wta-icon-headline" href="https://www.wta.org/@@backpacks/scrnm-LoganWV">
+      <span class="wta-icon-headline__text">LoganWV</span>
+    </a>
+  </div>
+  <div class="media-indicator">4 photos</div>
+</div>
+```
+
+**Extract from the HTML:**
+- Date, author/title, trip report URL for each report
+- **CRITICAL:** Extract at least 10-15 individual trip report URLs (WTA typically has many reports)
+- Sort by date (most recent first) - the AJAX endpoint returns them pre-sorted
+- Identify top 5-7 most recent reports (last 1-2 years preferred)
+- **If extraction yields <5 trip reports, note as a failure in Information Gaps**
+
+**Error Handling:**
+- If cloudscrape.py fails: Note in "Information Gaps" with WTA browse link
+- If HTML parsing yields no results: Note as parsing failure in "Information Gaps"
+- Do NOT try WebFetch for the AJAX endpoint - it requires cloudscrape.py
+
+**Mountaineers.org Trip Reports (if Mountaineers URL found in Step 2D):**
+
+**MANDATORY EXECUTION:** If Mountaineers URL was found in Step 2D, you MUST attempt to extract trip reports.
+
+**CRITICAL:** Mountaineers.org loads trip reports via JavaScript. You MUST use the `/trip-reports` endpoint, not the main page.
+
+**Step 1: Construct the trip-reports endpoint URL**
+```
+Mountaineers endpoint: {mountaineers_url}/trip-reports
+```
+Example: If Mountaineers URL is `https://www.mountaineers.org/activities/routes-places/boston-basin-area-review/sahale-peak-quien-sabe-glacier`
+Then trip reports URL is: `https://www.mountaineers.org/activities/routes-places/boston-basin-area-review/sahale-peak-quien-sabe-glacier/trip-reports`
+
+**Step 2: Fetch using cloudscrape.py (MANDATORY - WebFetch will not work for this endpoint):**
+```bash
+cd skills/route-researcher/tools
+uv run python cloudscrape.py "{mountaineers_url}/trip-reports"
+```
+
+**Step 3: Parse the returned HTML to extract trip report metadata:**
+
+The endpoint returns HTML with trip reports in `<div class="result-item contenttype-mtneers-trip_report">` elements. Look for:
+- **Trip report URL**: Extract from `<h3 class="result-title"><a href="...">`
+  - URLs follow pattern: `https://www.mountaineers.org/activities/trip-reports/{slug}`
+  - Example: `https://www.mountaineers.org/activities/trip-reports/basic-glacier-climb-sahale-peak-quien-sabe-glacier-8`
+- **Date**: Extract from `<div class="result-date">`
+  - Format varies: "Sat, Aug  9, 2025 - Sun, Aug 10, 2025" (multi-day) or "Sat, Jul 19, 2025" (single day)
+  - Parse the first date for sorting purposes
+- **Title**: Extract from `<h3 class="result-title"><a>` text content
+  - Example: "Basic Glacier Climb - Sahale Peak/Quien Sabe Glacier"
+- **Author**: Extract from `<div class="result-sidebar"><div><label>By: </label>{author}</div>`
+  - Example: "Nomi Rachel Fuchs Montgomery"
+- **Summary**: Extract from `<p class="result-summary">`
+  - Provides preview of trip report content
+- **Activity Type**: Extract from `<label>Activity Type:</label>` sibling text
+  - Example: "Climbing", "Day Hiking & Climbing"
+
+**Example HTML structure:**
+```html
+<div class="result-item contenttype-mtneers-trip_report">
+  <a class="result-left" href="...">
+    <img src="..." />
+  </a>
+  <div class="result-center">
+    <h3 class="result-title">
+      <a href="https://www.mountaineers.org/activities/trip-reports/basic-glacier-climb-sahale-peak-quien-sabe-glacier-8">Basic Glacier Climb - Sahale Peak/Quien Sabe Glacier</a>
+    </h3>
+    <div class="result-date">Sat, Aug  9, 2025 - Sun, Aug 10, 2025</div>
+    <p class="result-summary">Basic Climbing students () 5and Olympia Branch Leaders (4) set out to climb Sahale Glacier...</p>
+  </div>
+  <div class="result-sidebar">
+    <div>
+      <label>By: </label>
+      Nomi Rachel Fuchs Montgomery
+    </div>
+    <div>
+      <label>Activity Type:</label>
+      Climbing
+    </div>
+    <div>
+      <label>Trip Result:</label>
+      Successful
+    </div>
+  </div>
+</div>
+```
+
+**Pagination:** The endpoint shows 20 reports per page by default. Pagination uses query parameter `?b_start:int=20` for page 2, `?b_start:int=40` for page 3, etc. For this initial implementation, extract only the first page (top 20 most recent reports).
+
+**Sort and filter:**
+- Extract all trip reports from the page
+- Sort by date (most recent first)
+- Select top 3-5 for inclusion in report
+
+**Error Handling:**
+- If cloudscrape.py fails or returns no HTML: Note in "Information Gaps": "Mountaineers.org trip report extraction failed - cloudscrape.py unsuccessful. Check Mountaineers manually for detailed trip reports."
+- If HTML is returned but no trip reports found: Note in "Information Gaps": "No trip reports found on Mountaineers.org for this route"
+
+**Extract and save for Phase 4 (Report Generation):**
+
+**High-Quality PeakBagger Reports:**
+- List of top 5-10 reports by word count (regardless of date)
+- Each with: date, climber name, word count, URL
+
+**Recent PeakBagger Reports:**
+- List of top 3-5 most recent reports with trip reports
+- Each with: date, climber name, word count, URL
+
+**WTA Reports:**
+- List of top 3-5 reports (recent or detailed)
+- Each with: date, author/title, URL
+
+**Mountaineers Reports:**
+- List of top 3-5 reports (recent or detailed)
+- Each with: date, title, URL
+
+**Error Handling:**
+- **WTA:** If cloudscrape.py fails for AJAX endpoint: Note in gaps, include WTA browse link only
+- **WTA:** If HTML parsing yields <5 reports: Note as parsing failure in gaps
+- **Mountaineers:** Do not attempt extraction - note limitation in gaps, include browse link
+- **AllTrails:** Do not attempt trip report extraction - note limitation in gaps if AllTrails URL was found
+- If no trip reports found on successfully fetched pages: Note in gaps, include browse link
+- If WTA/Mountaineers URLs not found in Step 2D: Skip those sources
+- PeakBagger data already available from Step 2C, no additional fetch needed
+
 ---
 
 ## Phase 2 Summary: Parallel Execution Strategy
@@ -395,8 +625,9 @@ WebSearch queries:
 6. Step 2F: Avalanche forecast (Python script) - *requires coordinates*
 7. Step 2G: Daylight calculations (Sunrise-Sunset API) - *requires coordinates*
 8. Step 2H: Access and permits (WebSearch)
+9. Step 2I: High-quality trip report identification - *uses data from 2C and 2D*
 
-**Performance Benefit:** By executing steps 2B-2H in parallel, total Phase 2 time = time(2A) + max(time(2B), time(2C), ..., time(2H)) instead of summing all step times sequentially.
+**Performance Benefit:** By executing steps 2B-2I in parallel, total Phase 2 time = time(2A) + max(time(2B), time(2C), ..., time(2I)) instead of summing all step times sequentially.
 
 ### Phase 3: Route Analysis and Synthesis
 
@@ -577,8 +808,10 @@ Throughout execution, follow these error handling guidelines:
 - **Provide guidance:** Suggest how to search PeakBagger manually
 
 ### WebFetch/WebSearch Issues
+- **Universal fallback pattern:** Always try WebFetch first, then cloudscrape.py if it fails
+- **Automatic retry:** If WebFetch fails or returns incomplete data, immediately retry with cloudscrape.py
 - **Graceful degradation:** Missing one source shouldn't stop entire research
-- **Document gaps:** Note which sources were unavailable
+- **Document gaps:** Note which sources were unavailable (both WebFetch AND cloudscrape.py failed)
 - **Prioritize safety:** If critical safety info (avalanche, hazards) unavailable, emphasize in gaps section
 
 ## Execution Timeouts
@@ -607,15 +840,25 @@ Every generated report must:
 - **peakbagger-cli** integration for peak search, info, and ascent data
 - Python tools directory structure
 - Report generation in user's current working directory
-- cloudscrape.py for Cloudflare-protected sites (SummitPost, Mountaineers.org only)
+- **cloudscrape.py** - Universal fallback for WebFetch failures, works with ANY website including:
+  - Cloudflare-protected sites (SummitPost, PeakBagger, Mountaineers.org)
+  - AllTrails (when WebFetch fails)
+  - WTA (when WebFetch fails)
+  - Any other site that blocks or limits WebFetch access
+- **Two-tier fetching strategy:** WebFetch first, cloudscrape.py as automatic fallback
 - **Open-Meteo Weather API** for mountain weather forecasts (temperature, precipitation, freezing level, wind)
 - **Open-Meteo Air Quality API** for AQI forecasting (US AQI scale with conditional alerts)
 - Multi-source weather gathering (Open-Meteo, NOAA/NWS, NWAC)
 - Adaptive ascent data retrieval based on peak popularity
 - **Sunrise-Sunset.org API** for daylight calculations (sunrise, sunset, civil twilight, day length)
+- **High-quality trip report identification** across PeakBagger and WTA sources
+- **WTA AJAX endpoint** for trip report extraction (`{wta_url}/@@related_tripreport_listing`)
 
 **Pending Implementation:**
 - `fetch_avalanche.py` - NWAC avalanche data (currently using WebSearch/WebFetch as fallback)
+- **Browser automation** for Mountaineers.org and AllTrails trip report extraction (requires Playwright/Chrome)
+  - Current: Both sites load content via JavaScript, cloudscrape.py cannot extract
+  - Future: Add browser automation as 3rd-tier fallback
 
 **When Python scripts are not yet implemented:**
 - Note in "Information Gaps" section
@@ -627,7 +870,7 @@ Every generated report must:
 
 **Latest Design (2025-10-21):**
 - Use **peakbagger-cli v1.0.0** (via uvx) for all PeakBagger data retrieval:
-  - `peakbagger peak search`: Peak discovery with structured JSON output
+  - `peakbagger peak search`: Peak discovery with structured JSON output (try word order variations)
   - `peakbagger peak show`: Detailed peak information (elevation, coordinates, routes, etc.)
   - `peakbagger peak stats`: Ascent statistics and temporal patterns
   - `peakbagger peak ascents`: Individual ascent listings with trip report links
@@ -635,9 +878,14 @@ Every generated report must:
   - Weather API: temperature, precipitation, freezing level, wind, weather codes
   - Air Quality API: US AQI forecasting with conditional alerts
   - Free, no authentication, elevation-aware forecasts
-- Use **cloudscrape.py** only for Cloudflare-protected beta sites:
-  - SummitPost route pages
-  - Mountaineers.org route information
+- Use **two-tier fetching strategy** for ALL websites:
+  - **Try WebFetch first** for speed and efficiency
+  - **Fallback to cloudscrape.py** if WebFetch fails or returns incomplete data
+  - Works for ANY site: AllTrails, WTA, SummitPost, Mountaineers.org, Mountain Project, etc.
+- Use **cloudscrape.py** as universal fallback tool:
+  - Handles Cloudflare-protected sites automatically
+  - Bypasses rate limiting and anti-scraping measures
+  - Returns raw HTML for parsing when WebFetch unavailable
 - Reserve Python scripts for **calculations only** (avalanche)
 
 **Previous Design (2025-10-20):**
@@ -657,10 +905,11 @@ Every generated report must:
 ### Peak Name Variations
 
 Common variations to try if initial search fails:
-- "Mt" → "Mount"
-- "St" → "Saint"
-- Add state/range: "Baker, WA" or "Baker, North Cascades"
-- Try just surname: "Baker" instead of "Mt Baker"
+- **Word order reversal:** "Mountain Pratt" → "Pratt Mountain", "Peak Sahale" → "Sahale Peak"
+- **Title expansion:** "Mt" → "Mount", "St" → "Saint"
+- **Add location:** "Baker, WA" or "Baker, North Cascades"
+- **Remove title:** "Baker" instead of "Mt Baker"
+- **Combine variations:** Try reversed order with title expansion (e.g., "Mountain Pratt" → "Pratt Mount" + "Pratt Mountain")
 
 ### Google Maps and USGS Links
 
