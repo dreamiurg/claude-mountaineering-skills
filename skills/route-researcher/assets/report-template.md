@@ -24,7 +24,7 @@
 
 {1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 
-**Sources:** [PeakBagger]({peakbagger_url}){, [Other source names and links]}
+**Sources:** [PeakBagger]({peakbagger_url}){, [AllTrails]({alltrails_url}) if found}{, [WTA]({wta_url}) if found}{, [SummitPost]({summitpost_url}) if found}{, [Mountaineers]({mountaineers_url}) if found}{, [Mountain Project]({mountain_project_url}) if found}
 
 ## Route
 

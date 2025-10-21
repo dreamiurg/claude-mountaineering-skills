@@ -98,7 +98,8 @@ WebSearch queries (run in parallel):
 2. "{peak_name} summit post route"
 3. "{peak_name} mountain project"
 4. "{peak_name} site:mountaineers.org route"
-5. "{peak_name} standard route"
+5. "{peak_name} site:alltrails.com"
+6. "{peak_name} standard route"
 ```
 
 **Step 2:** Fetch top relevant pages:
@@ -109,6 +110,25 @@ cd skills/route-researcher/tools
 uv run python cloudscrape.py "{summitpost_or_peakbagger_or_mountaineers_url}"
 ```
 Parse the returned HTML to extract route information.
+
+**For AllTrails:**
+Use WebFetch with prompt:
+```
+Prompt: "Extract route information including:
+- Trail name
+- Route description and key features
+- Difficulty rating
+- Distance and elevation gain
+- Estimated time
+- Route type (loop, out & back, point to point)
+- Best season
+- Known hazards or warnings
+- Current conditions if mentioned in recent reviews"
+```
+
+**Save AllTrails URL for Phase 4:**
+- Overview sources section (primary route information sources)
+- Trip reports "Browse All" section (for reviews)
 
 **For other sites (Mountain Project, WTA, etc.):**
 Use WebFetch with prompt:
