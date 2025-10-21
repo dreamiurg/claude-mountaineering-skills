@@ -1,3 +1,10 @@
+## [2.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.0.1...v2.1.0) (2025-10-21)
+
+
+### Features
+
+* add WTA and Mountaineers trip report extraction via cloudscrape.py ([#13](https://github.com/dreamiurg/claude-mountaineering-skills/issues/13)) ([3532a22](https://github.com/dreamiurg/claude-mountaineering-skills/commit/3532a221c6dffdbbe4a1ebc747cf52a5a362bbea))
+
 ## [2.0.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.0.0...v2.0.1) (2025-10-21)
 
 
