@@ -11,11 +11,10 @@ Claude Code plugin for researching Pacific Northwest mountain peaks and generati
 
 ### Install Plugin
 
-```bash
-# Add the marketplace
-/plugin marketplace add dreamiurg/claude-mountaineering-skills
+This repo contains both marketplace and skills. It add it to Claude Code, run the following commands:
 
-# Install the plugin
+```bash
+/plugin marketplace add dreamiurg/claude-mountaineering-skills
 /plugin install mountaineering-skills@mountaineering-skills-marketplace
 ```
 
