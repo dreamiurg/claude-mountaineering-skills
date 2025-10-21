@@ -49,10 +49,16 @@ The route covers approximately **{round trip distance}** with **{total gain}** o
 
 ### Crux
 
-{One paragraph describing the hardest/most technical section:
-- What makes it challenging
-- Where it's located on route
-- Skills/gear required for this section}
+{Format with bold highlights for key details. Structure:
+- Lead with location if known
+- Highlight difficulty rating, exposure level, key technical requirements
+- Call out conditions that make it harder (wet, snow, etc.)
+- Mention required skills/gear
+
+Example format:
+"The crux is located **near the summit at approximately 4,900 ft**, where climbers must navigate a rock band via a **Class 2-3 gully**. This section requires **basic scrambling skills** and can be more challenging **when wet or icy**. In early season conditions, the gully may be **snow-filled, requiring crampons and ice axe skills**. The **exposure is moderate** but the rock can be **loose**, requiring careful route-finding and attention to hand/foot placements."
+
+Use bold for: locations, difficulty grades, exposure descriptions, conditions, required skills/gear, key hazards}
 
 ### Hazards
 
