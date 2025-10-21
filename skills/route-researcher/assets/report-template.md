@@ -93,6 +93,19 @@ Use bold for: weather patterns, precipitation types/timing, temperature ranges, 
 
 **Summary:** {One sentence actionable summary - best weather window or caution to avoid certain days}
 
+{If freezing level is within 2000 ft of peak elevation during forecast period:}
+**🏔️ Freezing Level Alert (Peak: {elevation} ft):**
+- {Day range}: {freezing level} ft ({above/at/below summit} - expect {dry/mixed/snow} conditions)
+- {Day range}: {freezing level} ft ({above/at/below summit} - expect {dry/mixed/snow} conditions)
+
+{Example for 5,469 ft peak with dropping freezing levels:}
+**🏔️ Freezing Level Alert (Peak: 5,469 ft):**
+- Mon-Tue: 8,000+ ft (well above summit - expect dry conditions)
+- Wed-Thu: 6,000-7,000 ft (borderline - rain/snow mix possible)
+- Fri-Sun: 5,000-5,500 ft (AT or BELOW summit - expect snow)
+
+{Omit this section entirely if freezing level stays >2000 ft above peak throughout forecast period - not relevant for summer conditions}
+
 | Day | Conditions | Temperature | Precipitation |
 |-----|-----------|-------------|---------------|
 | {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Conditions} | High: {temp}°F | {Precip amount/chance} |

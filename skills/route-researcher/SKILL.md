@@ -251,7 +251,7 @@ Parse HTML to extract:
 - 6-day forecast (temperature, precipitation, wind, snow level)
 - Summit-level conditions
 - Mid-mountain conditions if available
-- Freezing level
+- **Freezing level for each day** (critical for determining rain vs snow at route elevation)
 
 **Source 2: NOAA/NWS Point Forecast**
 
@@ -375,6 +375,11 @@ From all gathered data, identify:
     - Fast: max(4mi/2mph, 2700ft/1000ft/hr) = max(2hr, 2.7hr) = ~2.5-3 hours
     - Moderate: max(4mi/1.5mph, 2700ft/800ft/hr) = max(2.7hr, 3.4hr) = ~3-4 hours
     - Leisurely: max(4mi/1mph, 2700ft/600ft/hr) = max(4hr, 4.5hr) = ~4-5 hours
+- **Freezing Level Analysis:** Compare peak elevation with forecasted freezing levels:
+  - **Include Freezing Level Alert if:** Any day in forecast has freezing level within 2000 ft of peak elevation
+  - **Omit if:** Freezing level stays >2000 ft above peak throughout forecast (typical summer conditions)
+  - Example: 5,469 ft peak with 5,000-8,000 ft freezing levels → Include alert (marginal conditions)
+  - Example: 4,000 ft peak with 10,000+ ft freezing levels → Omit alert (well above summit)
 
 #### 3C. Identify Information Gaps
 
