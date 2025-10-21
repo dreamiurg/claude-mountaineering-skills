@@ -1,3 +1,10 @@
+## [1.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.0.0...v1.1.0) (2025-10-21)
+
+
+### Features
+
+* extract report template to separate file for consistency ([d8ef768](https://github.com/dreamiurg/claude-mountaineering-skills/commit/d8ef768f04b9d116ad712ac8d1660162830117ed))
+
 ## 1.0.0 (2025-10-21)
 
 

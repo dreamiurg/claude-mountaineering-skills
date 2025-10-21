@@ -1,6 +1,6 @@
 {
   "name": "mountaineering-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Automated mountain route research combining PeakBagger data, weather forecasts, avalanche conditions, and trip reports into comprehensive beta documents",
   "author": "dreamiurg",
   "homepage": "https://github.com/dreamiurg/claude-mountaineering-skills",
