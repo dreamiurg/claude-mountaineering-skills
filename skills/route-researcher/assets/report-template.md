@@ -24,7 +24,7 @@
 
 {1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 
-**Sources:** [PeakBagger]({peakbagger_url}){, [Other source names and links]}
+**Sources:** [PeakBagger]({peakbagger_url}){, [AllTrails]({alltrails_url}) if found}{, [WTA]({wta_url}) if found}{, [SummitPost]({summitpost_url}) if found}{, [Mountaineers]({mountaineers_url}) if found}{, [Mountain Project]({mountain_project_url}) if found}
 
 ## Route
 
@@ -36,14 +36,29 @@
 
 ### Route
 
-{Route description synthesized from multiple sources, incorporating: The route covers **{round trip distance}** with **{total gain}** of elevation gain, typically taking **{typical completion time}** to complete.}
+{Route description synthesized from multiple sources}
+
+The route covers approximately **{round trip distance}** with **{total gain}** of elevation gain.
+
+**Typical completion times:**
+- **{fast time range}** (~{fast mph} mph, {fast gain rate}+ ft/hr): Experienced hikers, trail runners, solo climbers
+- **{moderate time range}** (~{moderate mph} mph, {moderate gain rate} ft/hr): Average fitness, steady pace with brief breaks
+- **{leisurely time range}** (~{leisurely mph} mph, {leisurely gain rate} ft/hr): Relaxed pace, groups, taking time for photos
+
+{Continue with detailed route description}
 
 ### Crux
 
-{One paragraph describing the hardest/most technical section:
-- What makes it challenging
-- Where it's located on route
-- Skills/gear required for this section}
+{Format with bold highlights for key details. Structure:
+- Lead with location if known
+- Highlight difficulty rating, exposure level, key technical requirements
+- Call out conditions that make it harder (wet, snow, etc.)
+- Mention required skills/gear
+
+Example format:
+"The crux is located **near the summit at approximately 4,900 ft**, where climbers must navigate a rock band via a **Class 2-3 gully**. This section requires **basic scrambling skills** and can be more challenging **when wet or icy**. In early season conditions, the gully may be **snow-filled, requiring crampons and ice axe skills**. The **exposure is moderate** but the rock can be **loose**, requiring careful route-finding and attention to hand/foot placements."
+
+Use bold for: locations, difficulty grades, exposure descriptions, conditions, required skills/gear, key hazards}
 
 ### Hazards
 
@@ -57,29 +72,87 @@
 
 ### Daylight
 
-{If available from script:}
-For **{date}**, sunrise is at **{time}** and sunset at **{time}**, providing **{hours}** of daylight.
+{If available from API:}
+For **{date}**, sunrise is at **{time}** and sunset at **{time}**, providing **{hours}** of daylight. Civil twilight begins at **{civil_twilight_begin}**, useful for planning alpine starts.
 
 {If not available:}
-Daylight calculations not available. Check sunrise/sunset times for your planned date.
+Daylight calculations not available. Check sunrise/sunset times for your planned date at [Sunrise-Sunset.org](https://sunrise-sunset.org/us/{location}) or [TimeAndDate.com](https://www.timeanddate.com/sun/).
 
 ### Weather Forecast
 
-{Synthesized weather patterns, notable conditions (storms, good weather windows, etc.), freezing levels and cloud levels if available.}
+{Synthesized summary paragraph with bold formatting for key details. Structure:
+- Describe overall pattern (stable/transitioning/stormy)
+- Highlight weather windows, storms, precipitation timing
+- Note temperature trends, freezing levels, snow levels
+- Call out significant hazards (high winds, heavy precip, rapid changes)
 
-| Day | Mountain-Forecast.com | NOAA/NWS Point Forecast |
-|-----|----------------------|-------------------------|
-| {Day 1 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 2 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 3 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 4 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 5 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 6 date} | {Temps, precip, wind} | {Conditions, temps} |
+Example format:
+"The forecast shows a transition from **relatively dry conditions** to a **wet, cold pattern arriving mid-week**. Tuesday afternoon is **mostly sunny and calm (48°F high)**, but a weather system brings **rain Wednesday through Friday** with **increasing precipitation chances**. Snow levels will drop significantly by Friday, **transitioning to snow at summit elevations**. The weekend looks particularly challenging with **heavy snow possible** and temperatures in the **low 30s°F**."
+
+Use bold for: weather patterns, precipitation types/timing, temperature ranges, snow levels, wind conditions, weather windows, significant hazards}
+
+**Summary:** {One sentence actionable summary - best weather window or caution to avoid certain days}
+
+{If freezing level is within 2000 ft of peak elevation during forecast period:}
+**🏔️ Freezing Level Alert (Peak: {elevation} ft):**
+- {Day range}: {freezing level} ft ({above/at/below summit} - expect {dry/mixed/snow} conditions)
+- {Day range}: {freezing level} ft ({above/at/below summit} - expect {dry/mixed/snow} conditions)
+
+{Example for 5,469 ft peak with dropping freezing levels:}
+**🏔️ Freezing Level Alert (Peak: 5,469 ft):**
+- Mon-Tue: 8,000+ ft (well above summit - expect dry conditions)
+- Wed-Thu: 6,000-7,000 ft (borderline - rain/snow mix possible)
+- Fri-Sun: 5,000-5,500 ft (AT or BELOW summit - expect snow)
+
+{Omit this section entirely if freezing level stays >2000 ft above peak throughout forecast period - not relevant for summer conditions}
+
+| Day | Conditions | Temperature | Precipitation |
+|-----|-----------|-------------|---------------|
+| {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Icon} {Conditions} | High: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {22}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {23}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {24}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {25}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {26}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+
+{Format notes:
+- Use actual calendar dates from the report generation date
+- Include year (2025) for clarity
+- Mark first day as "(Today)" if appropriate
+- Use day-of-week abbreviations: Mon, Tue, Wed, Thu, Fri, Sat, Sun
+- Example: "Mon Oct 21, 2025 (Today)" or "Tue Oct 22, 2025"
+
+Weather icons to use:
+- ☀️ Clear/Sunny
+- 🌤️ Mostly sunny
+- ⛅ Partly cloudy
+- ☁️ Cloudy/Overcast
+- 🌧️ Rain
+- ⛈️ Thunderstorms
+- 🌨️ Snow/Rain mix
+- ❄️ Snow
+- 💨 Windy (can combine with other icons)
+- 🌫️ Fog
+- Use multiple icons for mixed conditions (e.g., "🌧️❄️ Rain transitioning to snow")
+- Example: "☀️ Mostly sunny, calm" or "🌧️ Rain (80% chance)"}
+
+**Air Quality:**
+
+{If AQI >100 on any day (unhealthy for sensitive groups or worse):}
+⚠️ **Air Quality Alert:** Air quality is forecast to be **{moderate/unhealthy for sensitive groups/unhealthy/very unhealthy}** on **{dates}** with AQI values of **{values}**. Sensitive individuals (respiratory/heart conditions) should consider rescheduling. Reduced visibility and breathing difficulties possible during strenuous activity.
+
+{If AQI 51-100 (moderate):}
+Air quality is **moderate** (AQI 51-100) during the forecast period. Generally acceptable for most people, though unusually sensitive individuals may experience minor respiratory symptoms.
+
+{If AQI 0-50 (good):}
+Air quality is **good** (AQI <50) during the forecast period.
 
 **Check Current Forecasts:**
 
-- [Mountain-Forecast.com]({mountain_forecast_link})
-- [NOAA Point Forecast]({noaa_link})
+- [Mountain-Forecast.com]({mountain_forecast_link}) - Summit-level forecast with multiple elevations
+- [Open-Meteo Weather]({open_meteo_weather_link}) - Detailed mountain weather data (source for this report)
+- [Open-Meteo Air Quality]({open_meteo_air_quality_link}) - Air quality forecast for this location
+- [NOAA Point Forecast]({noaa_link}) - Official NWS forecast and alerts
 
 {If winter season:}
 - [NWAC Mountain Weather](https://nwac.us/mountain-weather-forecast/)
@@ -101,11 +174,44 @@ Daylight calculations not available. Check sunrise/sunset times for your planned
 
 ## Recent Trip Reports
 
-{List 5-10 most recent reports with dates and links:}
-- **{Date}** - [{Source}]({url}) - {Brief note if available from snippet, including any unusual or important gear mentioned}
+{1-2 sentence summary of recent activity: total ascents in timeframe, peak months, GPX/report availability}
 
-{If limited reports:}
-- **Note:** Limited recent trip reports available. Consider posting your own after your climb!
+### High-Value Ascents
+
+{Prioritize ascents using 3-tier system, limit to 5-10 total:
+  Priority 1: GPX tracks + substantial reports (>30 words)
+  Priority 2: GPX tracks only
+  Priority 3: Substantial reports (>30 words) without GPX
+Sort by date (most recent first) within each tier}
+
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📍 GPX | 📝 Report (X words)
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📍 GPX | 📝 Report (X words)
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 Report (X words)
+
+{Format notes:
+- Include 📍 GPX indicator if has_gpx=true
+- Include 📝 Report (X words) if trip report exists
+- Use actual word count from trip_report.word_count field
+- Link to individual ascent page URL}
+
+### Browse All Trip Reports
+
+{Always include PeakBagger. Include other platforms only if URLs were found during data gathering}
+
+- [PeakBagger Ascents](https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
+{If WTA URL found:}
+- [Washington Trails Association Trip Reports]({wta_url}) - User-submitted trip reports with photos
+{If AllTrails URL found:}
+- [AllTrails Reviews]({alltrails_url}) - User reviews and recent activity
+{If SummitPost URL found:}
+- [SummitPost Trip Reports]({summitpost_url}) - Route-specific trip reports
+{If Mountaineers URL found:}
+- [Mountaineers.org Route Page]({mountaineers_url}) - Route information and conditions
+{If CascadeClimbers URL found:}
+- [CascadeClimbers Forum]({cascadeclimbers_url}) - Forum discussions and beta
+
+{If very limited ascent data (<5 total):}
+**Note:** Limited recent trip reports available. Consider posting your own after your climb!
 
 ## Access & Permits
 

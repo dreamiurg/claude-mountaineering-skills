@@ -77,7 +77,28 @@ If data sources are unavailable:
 - Provides manual check links
 - Always generates a report, even with partial data
 
-## Python Tools
+## Dependencies
+
+### PeakBagger CLI
+
+This plugin uses [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) for retrieving peak information and trip reports from PeakBagger.com.
+
+**Current Version:** Pinned to `v1.0.0`
+
+The CLI is run via `uvx` without installation. The version is pinned to prevent breaking changes:
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak search ...
+```
+
+**v1.0.0 Changes:** Introduces resource-action pattern with new command structure:
+- `peakbagger peak search` - Search for peaks by name
+- `peakbagger peak show` - Get detailed peak information
+- `peakbagger peak stats` - Analyze ascent statistics and patterns
+- `peakbagger peak ascents` - List individual ascents with filtering
+
+**Future:** Once peakbagger-cli is published to PyPI, the plugin will use semantic version constraints (`>=1.0,<2.0`) to automatically receive patch and minor updates while protecting against breaking changes.
+
+### Python Tools
 
 The plugin includes Python utilities for enhanced data gathering (weather forecasts, avalanche conditions, daylight calculations). See [skills/route-researcher/tools/README.md](skills/route-researcher/tools/README.md) for details on available tools, manual installation, and troubleshooting.
 
@@ -99,11 +120,50 @@ Update to the latest version:
 
 Found a bug or have a feature request? Please [open an issue](https://github.com/dreamiurg/claude-mountaineering-skills/issues).
 
-Pull requests welcome! This project uses:
-- Conventional commits for automated releases
-- `feat:` for new features (minor version bump)
-- `fix:` for bug fixes (patch version bump)
-- `feat!:` or `BREAKING CHANGE:` for breaking changes (major version bump)
+Pull requests welcome! This project follows [Conventional Commits](https://www.conventionalcommits.org/) for automated semantic versioning.
+
+### Commit Message Format
+
+```
+<type>: <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types that trigger releases:**
+- `feat:` - New feature (MINOR version bump: 0.1.0 → 0.2.0)
+- `fix:` - Bug fix (PATCH version bump: 0.1.0 → 0.1.1)
+- `perf:` - Performance improvement (PATCH version bump)
+
+**Types that don't trigger releases:**
+- `docs:` - Documentation changes
+- `chore:` - Maintenance, dependencies, configs
+- `refactor:` - Code restructuring
+- `test:` - Test changes
+- `ci:` - CI/CD changes
+- `build:` - Build system changes
+
+**Breaking changes:**
+- Add `!` after type: `feat!:` or `fix!:` (MAJOR bump: 0.1.0 → 1.0.0)
+- Or add `BREAKING CHANGE:` in footer
+
+### Git Commit Template
+
+Configure your local repository to use the commit message template:
+
+```bash
+git config commit.template .gitmessage
+```
+
+### Pull Request Guidelines
+
+- PR titles must follow the same format: `type: description`
+- Use the PR template (auto-populated when creating PR)
+- Ensure all tests pass and code quality checks succeed
+
+See [.gitmessage](.gitmessage) for examples and detailed guidelines.
 
 ## License
 

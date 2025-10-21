@@ -30,12 +30,12 @@ Examples:
    - Look for peak names, mountain names, or climbing objectives
    - Common patterns: "Mt Baker", "Mount Rainier", "Sahale Peak", etc.
 
-2. **Search PeakBagger** using WebSearch:
+2. **Search PeakBagger** using peakbagger-cli:
+   ```bash
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak search "{peak_name}" --format json
    ```
-   Query: "{peak_name} site:peakbagger.com peak"
-   ```
-   - Parse search results for PeakBagger peak page URLs (format: `https://www.peakbagger.com/peak.aspx?pid=...`)
-   - Extract peak names, elevations, and locations from search snippets
+   - Parse JSON output to extract peak matches
+   - Each result includes: peak_id, name, elevation (feet/meters), location, url
 
 3. **Handle Multiple Matches:**
    - If **multiple peaks** found: Use AskUserQuestion to present options
@@ -48,45 +48,60 @@ Examples:
      - Use AskUserQuestion: "Is this the correct peak?"
 
    - If **no matches** found:
-     - Use AskUserQuestion to ask user to provide PeakBagger URL directly
-     - Suggest trying a different name variation
-     - Provide general PeakBagger search URL
+     - Try peak name variations (Mt/Mount, with state/range)
+     - If still no results, use AskUserQuestion to ask for:
+       - A different peak name variation
+       - Direct PeakBagger peak ID or URL
+       - General PeakBagger search
 
-4. **Validate PeakBagger URL:**
-   - Ensure URL matches pattern: `https://www.peakbagger.com/peak.aspx?pid=\d+`
-   - If user provides URL directly, validate format before proceeding
+4. **Extract Peak ID:**
+   - From search results JSON, extract the `peak_id` field
+   - Store for use in subsequent peakbagger-cli commands
+   - Also store the PeakBagger URL for reference links
 
 ### Phase 2: Data Gathering
 
 **Goal:** Gather comprehensive information from all available sources.
 
-Execute the following data collection steps **in parallel where possible** to minimize total execution time:
+**Execution Strategy:**
+1. **Step 2A (Sequential):** Get peak information including coordinates - this is required for location-dependent steps
+2. **Steps 2B-2H (Parallel):** Once coordinates are available, execute ALL remaining steps in parallel to minimize total execution time
 
-#### 2A. PeakBagger Peak Information (cloudscrape.py)
+**CRITICAL:** After Step 2A completes and coordinates are obtained, immediately launch Steps 2B through 2H in parallel. Do not wait for any step to complete before starting others.
 
-PeakBagger is protected by Cloudflare, so use the cloudscrape.py tool:
+#### 2A. PeakBagger Peak Information (peakbagger-cli) - EXECUTE FIRST
+
+Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{peakbagger_url}"
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak show {peak_id} --format json
 ```
 
-This returns the full HTML. Parse it to extract:
-- Peak name (from title or h1)
+This returns structured JSON with:
+- Peak name and alternate names
 - Elevation (feet and meters)
 - Prominence (feet and meters)
+- Isolation (miles and kilometers)
 - Coordinates (latitude, longitude in decimal degrees)
-- Location description (state, range, area)
-- Standard route description if available
-- Difficulty rating or class if mentioned
-- Any notable hazards or warnings mentioned
+- Location (county, state, country)
+- Routes (if available): trailhead, distance, vertical gain
+- Peak list memberships and rankings
+- Standard route description (if available in routes data)
 
 **Error Handling:**
-- If cloudscrape.py fails: Note in "Information Gaps" and continue with WebSearch results
-- If specific fields missing in HTML: Mark as "Not available" in gaps section
-- Timeout: 60 seconds for cloudscrape.py
+- If peakbagger-cli fails: Fall back to WebSearch/WebFetch and note in "Information Gaps"
+- If specific fields missing in JSON: Mark as "Not available" in gaps section
+- Rate limiting: Built into peakbagger-cli (default 2 second delay)
 
-#### 2B. Route Description Research (WebSearch + WebFetch)
+**Once coordinates are obtained from this step, immediately proceed to launch Steps 2B-2H in parallel.**
+
+---
+
+## Steps 2B-2H: Execute in Parallel (After 2A Completes)
+
+The following steps can all run simultaneously once coordinates are available:
+
+#### 2B. Route Description Research (WebSearch + WebFetch) - PARALLEL
 
 **Step 1:** Search for route descriptions:
 ```
@@ -95,7 +110,8 @@ WebSearch queries (run in parallel):
 2. "{peak_name} summit post route"
 3. "{peak_name} mountain project"
 4. "{peak_name} site:mountaineers.org route"
-5. "{peak_name} standard route"
+5. "{peak_name} site:alltrails.com"
+6. "{peak_name} standard route"
 ```
 
 **Step 2:** Fetch top relevant pages:
@@ -106,6 +122,25 @@ cd skills/route-researcher/tools
 uv run python cloudscrape.py "{summitpost_or_peakbagger_or_mountaineers_url}"
 ```
 Parse the returned HTML to extract route information.
+
+**For AllTrails:**
+Use WebFetch with prompt:
+```
+Prompt: "Extract route information including:
+- Trail name
+- Route description and key features
+- Difficulty rating
+- Distance and elevation gain
+- Estimated time
+- Route type (loop, out & back, point to point)
+- Best season
+- Known hazards or warnings
+- Current conditions if mentioned in recent reviews"
+```
+
+**Save AllTrails URL for Phase 4:**
+- Overview sources section (primary route information sources)
+- Trip reports "Browse All" section (for reviews)
 
 **For other sites (Mountain Project, WTA, etc.):**
 Use WebFetch with prompt:
@@ -125,86 +160,170 @@ Prompt: "Extract route information including:
 - If conflicting information: Note discrepancies in report
 - If cloudscrape.py fails: Try WebFetch as fallback, then note if both fail
 
-#### 2C. Recent Trip Reports (WebSearch)
+#### 2C. Peak Ascent Statistics (peakbagger-cli) - PARALLEL
 
-Search for recent conditions:
+Retrieve ascent data and patterns using the peak ID:
+
+**Step 1: Get overall ascent statistics**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak stats {peak_id} --format json
 ```
-WebSearch queries:
-1. "{peak_name} trip report site:cascadeclimbers.com"
-2. "{peak_name} conditions site:peakbagger.com"
-3. "{peak_name} recent climb 2025"
+
+This returns:
+- Total ascent count (all-time)
+- Seasonal distribution (by month)
+- Count of ascents with GPX tracks
+- Count of ascents with trip reports
+
+**Step 2: Get detailed ascent list based on activity level**
+
+Based on the total count from Step 1, adaptively retrieve ascents:
+
+**For popular peaks (>50 ascents total):**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak ascents {peak_id} --format json --within 1y
+```
+Recent data (1 year) is sufficient for active peaks.
+
+**For moderate peaks (10-50 ascents total):**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak ascents {peak_id} --format json --within 5y
+```
+Expand to 5 years to get meaningful sample size.
+
+**For rarely-climbed peaks (<10 ascents total):**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak ascents {peak_id} --format json
+```
+Get all available ascent data regardless of age.
+
+**Additional filters (apply as needed):**
+- `--with-gpx`: Focus on ascents with GPS tracks (useful for route finding)
+- `--with-tr`: Focus on ascents with trip reports (useful for conditions)
+
+**Extract and save for Phase 4 (Report Generation):**
+- Total ascent statistics (total count, temporal breakdown, monthly distribution)
+- **All ascents from JSON with the following data:**
+  - Date (`date` field)
+  - Climber name (`climber.name` field)
+  - Trip report word count (`trip_report.word_count` field)
+  - GPX availability (`has_gpx` field)
+  - Ascent URL (`url` field)
+- Seasonal patterns (monthly distribution data)
+- Timeframe used for the query (1y, 5y, or all)
+
+**Error Handling:**
+- If peakbagger-cli fails: Fall back to WebSearch for trip reports
+- If no ascents found: Note in report and continue with other sources
+
+#### 2D. Trip Report Sources Discovery (WebSearch) - PARALLEL
+
+Systematically search for trip report pages across major platforms:
+
+```
+WebSearch queries (run in parallel):
+1. "{peak_name} site:wta.org" - WTA hike page with trip reports
+2. "{peak_name} site:alltrails.com" - AllTrails page with reviews
+3. "{peak_name} site:summitpost.org" - SummitPost route page
+4. "{peak_name} site:mountaineers.org" - Mountaineers route information
+5. "{peak_name} trip report site:cascadeclimbers.com" - Forum discussions
 ```
 
-**Extract from results:**
-- Report dates (most recent 5-10)
-- Links to full reports
-- Any conditions mentioned in snippets
+**Extract and save URLs for Phase 4 (Report Generation):**
+- WTA trip reports URL (if found)
+- AllTrails trail page URL (if found)
+- SummitPost route/trip reports URL (if found)
+- Mountaineers.org route page URL (if found)
+- CascadeClimbers forum search URL or relevant thread URLs (if found)
 
-**Optional WebFetch:**
+**Optional WebFetch for conditions data:**
 - If specific high-value trip reports identified, fetch 1-2 for detailed conditions
+- Extract recent dates and conditions mentioned for "Recent Conditions" section
 
-#### 2D. Weather Forecast (Multiple Sources)
+#### 2E. Weather Forecast (Open-Meteo API + NOAA) - PARALLEL
 
-**Only if coordinates available from Step 2A:**
+**Requires coordinates from Step 2A (latitude, longitude, elevation):**
 
 Gather weather data from multiple sources in parallel:
 
-**Source 1: Mountain-Forecast.com (Cloudflare-protected)**
+**Source 1: Open-Meteo Weather API (Primary)**
 
-First, search for the peak's mountain-forecast.com page:
+Use WebFetch to get detailed mountain weather forecast:
 ```
-WebSearch: "{peak_name} site:mountain-forecast.com"
+URL: https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&elevation={peak_elevation_m}&hourly=temperature_2m,precipitation,freezing_level_height,snow_depth,wind_speed_10m,wind_gusts_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=auto&forecast_days=7
+
+Prompt: "Parse the JSON response and extract:
+- Daily weather summary for 6-7 days (date, conditions based on weather_code, temps, precip probability)
+- Freezing level height in feet for each day (convert from meters)
+- Snow depth if applicable
+- Wind speeds and gusts
+- Organize by calendar date with day-of-week
+- Map weather_code to descriptive conditions (0=clear, 1-3=partly cloudy, 45-48=fog, 51-67=rain, 71-77=snow, 80-82=showers, 95-99=thunderstorms)"
 ```
 
-Then use cloudscrape.py to fetch the forecast page:
-```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "https://www.mountain-forecast.com/peaks/{peak-slug}/forecasts/{elevation_m}"
+**Weather Code to Icon/Description mapping:**
+- 0: ☀️ Clear
+- 1-3: ⛅ Partly cloudy
+- 45-48: 🌫️ Fog
+- 51-67: 🌧️ Rain
+- 71-77: ❄️ Snow
+- 80-82: 🌧️ Showers
+- 95-99: ⛈️ Thunderstorms
+
+**Source 2: Open-Meteo Air Quality API**
+
+Use WebFetch to get air quality forecast:
+```
+URL: https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat}&longitude={lon}&hourly=pm2_5,pm10,us_aqi&timezone=auto&forecast_days=7
+
+Prompt: "Parse the JSON and determine air quality for the forecast period:
+- Check US AQI values: 0-50 (good), 51-100 (moderate), 101-150 (unhealthy for sensitive), 151-200 (unhealthy), 201-300 (very unhealthy), 301+ (hazardous)
+- Check PM2.5 and PM10 levels
+- Identify any days with AQI >100 (concerning for outdoor activities)
+- Return overall assessment and any days to be cautious"
 ```
 
-Parse HTML to extract:
-- 6-day forecast (temperature, precipitation, wind, snow level)
-- Summit-level conditions
-- Mid-mountain conditions if available
-- Freezing level
+**Source 3: NOAA/NWS Point Forecast (Supplemental)**
 
-**Source 2: NOAA/NWS Point Forecast**
-
-Use WebFetch to get NOAA point forecast:
+Use WebFetch for detailed text forecast and warnings:
 ```
 URL: https://forecast.weather.gov/MapClick.php?textField1={lat}&textField2={lon}
-Prompt: "Extract the 7-day weather forecast including:
-- Daily high/low temperatures
-- Precipitation chances
-- Wind speed and direction
-- Detailed day/night forecasts
-- Any weather warnings or alerts"
+Prompt: "Extract:
+- Detailed text forecasts for context
+- Any weather warnings or alerts
+- Hazardous weather outlook"
 ```
 
-**Source 3: NWAC Mountain Weather (if available)**
+**Source 4: NWAC Mountain Weather (if applicable)**
 
 If in avalanche season (roughly Nov-Apr), check NWAC mountain weather:
 ```
 WebFetch: https://nwac.us/mountain-weather-forecast/
-Prompt: "Extract general mountain weather patterns for the Cascades region including:
-- Synoptic weather pattern
-- Freezing levels
-- Snow level
-- Wind forecast
-- Multi-day weather trend"
+Prompt: "Extract general mountain weather patterns for the Cascades region including synoptic pattern and multi-day trend"
 ```
 
+**Data to extract and save for Phase 4:**
+- 6-7 day forecast with conditions, temps, precipitation, wind
+- **Freezing level height for each day** (from Open-Meteo)
+- Snow depth changes (from Open-Meteo)
+- **Air quality assessment** (good/moderate/poor, note any concerning days)
+- Weather warnings or alerts (from NOAA)
+- Mountain-Forecast.com URL for manual checking (find via WebSearch, don't scrape)
+- **Open-Meteo Weather Link:** Construct from coordinates and elevation:
+  `https://open-meteo.com/en/docs#latitude={lat}&longitude={lon}&elevation={peak_elevation_m}&hourly=&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`
+- **Open-Meteo Air Quality Link:** Construct from coordinates:
+  `https://open-meteo.com/en/docs/air-quality-api#latitude={lat}&longitude={lon}&hourly=&daily=&timezone=auto`
+
 **Error Handling:**
-- If mountain-forecast.com URL not found: Continue with other sources
-- If cloudscrape.py fails: Note in gaps, provide manual link
-- If NOAA WebFetch fails: Note in gaps
+- If Open-Meteo API fails: Fall back to NOAA only, note reduced data quality in gaps
+- If Air Quality API fails: Note in gaps, continue without AQ data
+- If NOAA WebFetch fails: Continue with Open-Meteo data only
 - If NWAC not in season or fails: Skip this source
-- Timeout: 60s for cloudscrape.py, default for WebFetch
-- **Always provide manual check links** even when data successfully retrieved
+- **Always provide manual check links** for Mountain-Forecast.com and NOAA even when API data retrieved
 
-#### 2E. Avalanche Forecast (Python Script)
+#### 2F. Avalanche Forecast (Python Script) - PARALLEL
 
-**Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
+**Requires coordinates from Step 2A. Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
 
 ```bash
 cd skills/route-researcher/tools
@@ -218,21 +337,35 @@ uv run python fetch_avalanche.py --region "North Cascades" --coordinates "{lat},
 - Script fails: Note in gaps with link to NWAC
 - Not applicable (low elevation, summer): Skip this step
 
-#### 2F. Daylight Calculations (Python Script)
+#### 2G. Daylight Calculations (Sunrise-Sunset.org API) - PARALLEL
 
-```bash
-cd skills/route-researcher/tools
-uv run python calculate_daylight.py --date "{YYYY-MM-DD}" --coordinates "{lat},{lon}"
+**Requires coordinates from Step 2A (latitude, longitude):**
+
+Use WebFetch to get sunrise/sunset data from Sunrise-Sunset.org API:
+
+```
+URL: https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={YYYY-MM-DD}&formatted=0
+Prompt: "Extract the following data from the JSON response:
+- Sunrise time (convert from UTC to local time if needed)
+- Sunset time (convert from UTC to local time if needed)
+- Day length (convert seconds to hours and minutes)
+- Civil twilight begin/end (useful for alpine starts)
+- Solar noon
+Format times in a user-friendly way (e.g., '6:45 AM', '8:30 PM')"
 ```
 
-**Expected Output:** JSON with sunrise, sunset, daylight hours
+**Data to extract and save for Phase 4:**
+- Sunrise time (local)
+- Sunset time (local)
+- Day length in hours and minutes
+- Civil twilight begin (useful for alpine starts)
 
 **Error Handling:**
-- Script not yet implemented: Use general guidance or note gap
-- Script fails: Calculate approximate values or note gap
-- No coordinates: Skip this step
+- If API call fails: Note in gaps section with link to timeanddate.com or sunrise-sunset.org
+- If no coordinates available: Skip this step and note in gaps
+- If date is far in future: API should still work, but note that times are calculated
 
-#### 2G. Access and Permits (WebSearch)
+#### 2H. Access and Permits (WebSearch) - PARALLEL
 
 ```
 WebSearch queries:
@@ -245,6 +378,24 @@ WebSearch queries:
 - Trailhead names and locations
 - Required permits (if any)
 - Access notes (road conditions, seasonal closures)
+
+---
+
+## Phase 2 Summary: Parallel Execution Strategy
+
+**Sequential (blocking):**
+1. Step 2A: Get peak info and coordinates
+
+**Parallel (non-blocking - execute simultaneously after 2A):**
+2. Step 2B: Route descriptions (WebSearch + WebFetch)
+3. Step 2C: Ascent statistics (peakbagger-cli)
+4. Step 2D: Trip report sources (WebSearch)
+5. Step 2E: Weather forecast (Open-Meteo + NOAA) - *requires coordinates*
+6. Step 2F: Avalanche forecast (Python script) - *requires coordinates*
+7. Step 2G: Daylight calculations (Sunrise-Sunset API) - *requires coordinates*
+8. Step 2H: Access and permits (WebSearch)
+
+**Performance Benefit:** By executing steps 2B-2H in parallel, total Phase 2 time = time(2A) + max(time(2B), time(2C), ..., time(2H)) instead of summing all step times sequentially.
 
 ### Phase 3: Route Analysis and Synthesis
 
@@ -267,7 +418,20 @@ From all gathered data, identify:
 - **Notable Gear:** Any unusual or important gear mentioned in trip reports or beta (to be included in relevant sections, not as standalone section)
 - **Trailhead:** Name and approximate location
 - **Distance/Gain:** Round-trip distance and elevation gain
-- **Time Estimate:** Typical completion time
+- **Time Estimates:** Calculate three-tier pacing based on distance and gain:
+  - **Fast pace:** Calculate based on 2+ mph and 1000+ ft/hr gain rate
+  - **Moderate pace:** Calculate based on 1.5-2 mph and 700-900 ft/hr gain rate
+  - **Leisurely pace:** Calculate based on 1-1.5 mph and 500-700 ft/hr gain rate
+  - Use the **slower** of distance-based or gain-based calculations for each tier
+  - Example: For 4 miles, 2700 ft gain:
+    - Fast: max(4mi/2mph, 2700ft/1000ft/hr) = max(2hr, 2.7hr) = ~2.5-3 hours
+    - Moderate: max(4mi/1.5mph, 2700ft/800ft/hr) = max(2.7hr, 3.4hr) = ~3-4 hours
+    - Leisurely: max(4mi/1mph, 2700ft/600ft/hr) = max(4hr, 4.5hr) = ~4-5 hours
+- **Freezing Level Analysis:** Compare peak elevation with forecasted freezing levels:
+  - **Include Freezing Level Alert if:** Any day in forecast has freezing level within 2000 ft of peak elevation
+  - **Omit if:** Freezing level stays >2000 ft above peak throughout forecast (typical summer conditions)
+  - Example: 5,469 ft peak with 5,000-8,000 ft freezing levels → Include alert (marginal conditions)
+  - Example: 4,000 ft peak with 10,000+ ft freezing levels → Omit alert (well above summit)
 
 #### 3C. Identify Information Gaps
 
@@ -292,7 +456,15 @@ Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowerca
 
 **Location:** Reports are generated in the user's current working directory, not in the plugin installation directory.
 
-**Structure:** Follow the template in `assets/report-template.md` exactly. Read that file and use it as your template for generating route beta reports.
+**Structure and Formatting:**
+
+**CRITICAL:** Read `assets/report-template.md` and follow it exactly for:
+- Section structure and headings
+- Content formatting (how to present ascent data, trip report links, etc.)
+- Conditional sections (when to include/exclude sections based on available data)
+- All layout and presentation decisions
+
+The template is the **single source of truth** for report formatting. Phase 2 (Data Gathering) specifies **what data to extract**. This phase (Phase 4) uses the template to determine **how to present that data**.
 
 #### 4B. Markdown Formatting Rules
 
@@ -428,18 +600,21 @@ Every generated report must:
 
 ## Implementation Notes
 
-### Current Status (as of 2025-10-20)
+### Current Status (as of 2025-10-21)
 
 **Implemented:**
-- PeakBagger search functionality
+- **peakbagger-cli** integration for peak search, info, and ascent data
 - Python tools directory structure
 - Report generation in user's current working directory
-- cloudscrape.py for Cloudflare-protected sites (PeakBagger, SummitPost, Mountaineers.org, Mountain-Forecast.com)
-- Multi-source weather gathering (Mountain-Forecast.com, NOAA/NWS, NWAC)
+- cloudscrape.py for Cloudflare-protected sites (SummitPost, Mountaineers.org only)
+- **Open-Meteo Weather API** for mountain weather forecasts (temperature, precipitation, freezing level, wind)
+- **Open-Meteo Air Quality API** for AQI forecasting (US AQI scale with conditional alerts)
+- Multi-source weather gathering (Open-Meteo, NOAA/NWS, NWAC)
+- Adaptive ascent data retrieval based on peak popularity
+- **Sunrise-Sunset.org API** for daylight calculations (sunrise, sunset, civil twilight, day length)
 
 **Pending Implementation:**
 - `fetch_avalanche.py` - NWAC avalanche data (currently using WebSearch/WebFetch as fallback)
-- `calculate_daylight.py` - Sunrise/sunset calculations
 
 **When Python scripts are not yet implemented:**
 - Note in "Information Gaps" section
@@ -447,20 +622,36 @@ Every generated report must:
 - Continue with available data
 - Don't block report generation
 
-### Design Change: WebSearch/WebFetch Instead of Scraping
+### Design Evolution: peakbagger-cli Integration
 
-**Original Design:** Use `peakbagger.py` to scrape PeakBagger pages directly
+**Latest Design (2025-10-21):**
+- Use **peakbagger-cli v1.0.0** (via uvx) for all PeakBagger data retrieval:
+  - `peakbagger peak search`: Peak discovery with structured JSON output
+  - `peakbagger peak show`: Detailed peak information (elevation, coordinates, routes, etc.)
+  - `peakbagger peak stats`: Ascent statistics and temporal patterns
+  - `peakbagger peak ascents`: Individual ascent listings with trip report links
+- Use **Open-Meteo APIs** for weather and air quality data:
+  - Weather API: temperature, precipitation, freezing level, wind, weather codes
+  - Air Quality API: US AQI forecasting with conditional alerts
+  - Free, no authentication, elevation-aware forecasts
+- Use **cloudscrape.py** only for Cloudflare-protected beta sites:
+  - SummitPost route pages
+  - Mountaineers.org route information
+- Reserve Python scripts for **calculations only** (avalanche)
 
-**Current Design:**
-- Use **WebSearch** to find PeakBagger peak pages
-- Use **WebFetch** to extract data from those pages
-- Reserve Python scripts for **calculations only** (weather, avalanche, daylight)
+**Previous Design (2025-10-20):**
+- Used WebSearch to find PeakBagger peak pages
+- Used WebFetch or cloudscrape.py to extract data from PeakBagger
+- Required HTML parsing of PeakBagger pages
 
-**Rationale:**
-- WebFetch is more reliable than custom scraping
-- Reduces maintenance burden (no HTML parsing to maintain)
-- Leverages Claude's built-in tools effectively
-- Python scripts focus on computation, not scraping
+**Rationale for peakbagger-cli:**
+- Structured JSON output eliminates HTML parsing complexity
+- Built-in rate limiting and Cloudflare bypass
+- Reliable ascent data and trip report discovery
+- Better maintainability (less brittle than HTML parsing)
+- Native support for filtering ascents by date, GPX, and trip reports
+- Adaptive timeframe selection based on peak popularity
+- **v1.0.0 resource-action pattern:** Clear command structure (`peak search`, `peak show`, `peak stats`, `peak ascents`)
 
 ### Peak Name Variations
 
@@ -507,12 +698,15 @@ Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead
 ## Testing Checklist
 
 When testing this skill, verify:
-- [ ] Peak validation works with single match
+- [ ] Peak validation works with single match (peakbagger-cli search)
 - [ ] Peak validation works with multiple matches
 - [ ] Peak validation handles no matches gracefully
-- [ ] WebFetch extracts PeakBagger data correctly
+- [ ] peakbagger-cli info extracts peak data correctly (JSON format)
+- [ ] peakbagger-cli peak-ascents retrieves ascent statistics
+- [ ] Adaptive timeframe selection works (1y/5y/all based on popularity)
+- [ ] Ascent trip report links are included in output
 - [ ] Route description synthesis is comprehensive
-- [ ] Trip reports are recent and relevant
+- [ ] Trip reports from multiple sources (PeakBagger + CascadeClimbers)
 - [ ] Python scripts execute (when implemented)
 - [ ] Python script failures handled gracefully
 - [ ] Information gaps documented explicitly
@@ -529,11 +723,16 @@ When testing this skill, verify:
 User: "Research Mt Baker"
 
 Skill Actions:
-1. WebSearch: "Mt Baker site:peakbagger.com peak"
-2. Find: Mount Baker (10,786 ft) - North Cascades, WA
+1. uvx peakbagger search "Mt Baker" --format json
+2. Find: Mount Baker (10,786 ft, peak_id: 2296) - North Cascades, WA
 3. Confirm with user
-4. Gather data from all sources
-5. Generate report: 2025-10-20-mount-baker.md (in current directory)
+4. Gather data from all sources in parallel:
+   - uvx peakbagger info 2296 --format json
+   - uvx peakbagger peak-ascents 2296 --format json (check total count)
+   - uvx peakbagger peak-ascents 2296 --format json --within 1y --list-ascents (popular peak)
+   - Route descriptions via WebSearch/WebFetch
+   - Weather forecasts
+5. Generate report: 2025-10-21-mount-baker.md (in current directory)
 6. Report completion
 ```
 
@@ -542,28 +741,28 @@ Skill Actions:
 User: "Research Sahale Peak"
 
 Skill Actions:
-1. WebSearch: "Sahale Peak site:peakbagger.com peak"
+1. uvx peakbagger search "Sahale Peak" --format json
 2. Find: Multiple results:
-   - Sahale Peak (8,680 ft) - North Cascades, WA
-   - Sahale Arm (7,600 ft) - North Cascades, WA
+   - Sahale Peak (8,680 ft, peak_id: 1798) - North Cascades, WA
+   - Sahale Arm (7,600 ft, peak_id: 1799) - North Cascades, WA
 3. Present options to user with AskUserQuestion
-4. User selects Sahale Peak
-5. Continue with data gathering
+4. User selects Sahale Peak (peak_id: 1798)
+5. Continue with data gathering using peak_id 1798
 ```
 
-**Example 3: Peak not found**
+**Example 3: Rarely-climbed peak**
 ```
-User: "Research Mailbox Peak"
+User: "Research Vesper Peak"
 
 Skill Actions:
-1. WebSearch: "Mailbox Peak site:peakbagger.com peak"
-2. No clear PeakBagger results
-3. Try variation: "Mailbox Peak Washington"
-4. Still no clear results
-5. AskUserQuestion: "I couldn't find this peak on PeakBagger. Would you like to:
-   - Provide a direct PeakBagger URL
-   - Try a different peak name
-   - Continue research with general web sources only"
+1. uvx peakbagger search "Vesper Peak" --format json
+2. Find: Vesper Peak (6,214 ft, peak_id: 1234) - North Cascades, WA
+3. Confirm with user
+4. uvx peakbagger peak-ascents 1234 --format json
+5. Discover: Only 8 total ascents recorded
+6. uvx peakbagger peak-ascents 1234 --format json --list-ascents (get all ascents, no date filter)
+7. Note in report: "Limited ascent data available (8 total ascents recorded)"
+8. Continue with other data sources
 ```
 
 ---
