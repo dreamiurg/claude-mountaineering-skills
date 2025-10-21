@@ -77,7 +77,22 @@ If data sources are unavailable:
 - Provides manual check links
 - Always generates a report, even with partial data
 
-## Python Tools
+## Dependencies
+
+### PeakBagger CLI
+
+This plugin uses [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) for retrieving peak information and trip reports from PeakBagger.com.
+
+**Current Version:** Pinned to `v0.6.2`
+
+The CLI is run via `uvx` without installation. The version is pinned to prevent breaking changes:
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger ...
+```
+
+**Future:** Once peakbagger-cli is published to PyPI, the plugin will use semantic version constraints (`>=0.6,<1.0`) to automatically receive patch and minor updates while protecting against breaking changes.
+
+### Python Tools
 
 The plugin includes Python utilities for enhanced data gathering (weather forecasts, avalanche conditions, daylight calculations). See [skills/route-researcher/tools/README.md](skills/route-researcher/tools/README.md) for details on available tools, manual installation, and troubleshooting.
 
