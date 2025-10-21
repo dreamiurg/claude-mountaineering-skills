@@ -303,19 +303,33 @@ uv run python fetch_avalanche.py --region "North Cascades" --coordinates "{lat},
 - Script fails: Note in gaps with link to NWAC
 - Not applicable (low elevation, summer): Skip this step
 
-#### 2G. Daylight Calculations (Python Script)
+#### 2G. Daylight Calculations (Sunrise-Sunset.org API)
 
-```bash
-cd skills/route-researcher/tools
-uv run python calculate_daylight.py --date "{YYYY-MM-DD}" --coordinates "{lat},{lon}"
+**Only if coordinates available from Step 2A:**
+
+Use WebFetch to get sunrise/sunset data from Sunrise-Sunset.org API:
+
+```
+URL: https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={YYYY-MM-DD}&formatted=0
+Prompt: "Extract the following data from the JSON response:
+- Sunrise time (convert from UTC to local time if needed)
+- Sunset time (convert from UTC to local time if needed)
+- Day length (convert seconds to hours and minutes)
+- Civil twilight begin/end (useful for alpine starts)
+- Solar noon
+Format times in a user-friendly way (e.g., '6:45 AM', '8:30 PM')"
 ```
 
-**Expected Output:** JSON with sunrise, sunset, daylight hours
+**Data to extract and save for Phase 4:**
+- Sunrise time (local)
+- Sunset time (local)
+- Day length in hours and minutes
+- Civil twilight begin (useful for alpine starts)
 
 **Error Handling:**
-- Script not yet implemented: Use general guidance or note gap
-- Script fails: Calculate approximate values or note gap
-- No coordinates: Skip this step
+- If API call fails: Note in gaps section with link to timeanddate.com or sunrise-sunset.org
+- If no coordinates available: Skip this step and note in gaps
+- If date is far in future: API should still work, but note that times are calculated
 
 #### 2H. Access and Permits (WebSearch)
 
@@ -538,10 +552,10 @@ Every generated report must:
 - cloudscrape.py for Cloudflare-protected sites (SummitPost, Mountaineers.org, Mountain-Forecast.com)
 - Multi-source weather gathering (Mountain-Forecast.com, NOAA/NWS, NWAC)
 - Adaptive ascent data retrieval based on peak popularity
+- **Sunrise-Sunset.org API** for daylight calculations (sunrise, sunset, civil twilight, day length)
 
 **Pending Implementation:**
 - `fetch_avalanche.py` - NWAC avalanche data (currently using WebSearch/WebFetch as fallback)
-- `calculate_daylight.py` - Sunrise/sunset calculations
 
 **When Python scripts are not yet implemented:**
 - Note in "Information Gaps" section

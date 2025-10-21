@@ -72,11 +72,11 @@ Use bold for: locations, difficulty grades, exposure descriptions, conditions, r
 
 ### Daylight
 
-{If available from script:}
-For **{date}**, sunrise is at **{time}** and sunset at **{time}**, providing **{hours}** of daylight.
+{If available from API:}
+For **{date}**, sunrise is at **{time}** and sunset at **{time}**, providing **{hours}** of daylight. Civil twilight begins at **{civil_twilight_begin}**, useful for planning alpine starts.
 
 {If not available:}
-Daylight calculations not available. Check sunrise/sunset times for your planned date.
+Daylight calculations not available. Check sunrise/sunset times for your planned date at [Sunrise-Sunset.org](https://sunrise-sunset.org/us/{location}) or [TimeAndDate.com](https://www.timeanddate.com/sun/).
 
 ### Weather Forecast
 
