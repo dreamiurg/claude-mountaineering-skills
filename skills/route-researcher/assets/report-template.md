@@ -20,25 +20,11 @@
 
 ## Overview
 
-### Summit
+{Peak name} rises to **{elevation with units}** with {prominence with units} of prominence in the {state, range}. The peak is located at {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [USGS Topo]({usgs_topo_link})). The standard route is a **{route type}** rated **{difficulty}**.
 
-- **Elevation:** {elevation with units}
-- **Prominence:** {prominence with units}
+{1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 
-### Route
-
-- **Route Type:** {glacier/rock/scramble/hike}
-- **Difficulty:** {e.g., "Class 3 scramble" or "5.7 rock" or "Moderate glacier"}
-
-### Location
-
-- **Location:** {state, range}
-- **Coordinates:** {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [USGS Topo]({usgs_topo_link}))
-
-### Sources
-
-- **PeakBagger:** [{peak name}]({peakbagger_url})
-- {Other source names and URLs}
+**Sources:** [PeakBagger]({peakbagger_url}){, [Other source names and links]}
 
 ## Route
 
@@ -50,13 +36,7 @@
 
 ### Route
 
-{Route description synthesized from multiple sources}
-
-**Key Details:**
-
-- **Distance:** {round trip distance}
-- **Elevation Gain:** {total gain}
-- **Estimated Time:** {typical completion time}
+{Route description synthesized from multiple sources, incorporating: The route covers **{round trip distance}** with **{total gain}** of elevation gain, typically taking **{typical completion time}** to complete.}
 
 ### Crux
 
@@ -78,27 +58,23 @@
 ### Daylight
 
 {If available from script:}
-- **Date:** {date}
-- **Sunrise:** {time}
-- **Sunset:** {time}
-- **Daylight Hours:** {hours}
+For **{date}**, sunrise is at **{time}** and sunset at **{time}**, providing **{hours}** of daylight.
 
 {If not available:}
-- **Note:** Daylight calculations not available. Check sunrise/sunset times for your planned date.
+Daylight calculations not available. Check sunrise/sunset times for your planned date.
 
 ### Weather Forecast
 
-{Synthesize data from multiple sources when available:}
+{Synthesized weather patterns, notable conditions (storms, good weather windows, etc.), freezing levels and cloud levels if available.}
 
-**Mountain-Forecast.com:** {6-day forecast summary with temps, precip, wind}
-
-**NOAA/NWS Point Forecast:** {7-day forecast with detailed conditions}
-
-**Key Takeaways:**
-
-- {Synthesized weather patterns}
-- {Notable conditions (storms, good weather windows, etc.)}
-- {Freezing levels if available}
+| Day | Mountain-Forecast.com | NOAA/NWS Point Forecast |
+|-----|----------------------|-------------------------|
+| {Day 1 date} | {Temps, precip, wind} | {Conditions, temps} |
+| {Day 2 date} | {Temps, precip, wind} | {Conditions, temps} |
+| {Day 3 date} | {Temps, precip, wind} | {Conditions, temps} |
+| {Day 4 date} | {Temps, precip, wind} | {Conditions, temps} |
+| {Day 5 date} | {Temps, precip, wind} | {Conditions, temps} |
+| {Day 6 date} | {Temps, precip, wind} | {Conditions, temps} |
 
 **Check Current Forecasts:**
 
@@ -114,16 +90,14 @@
 {If no data available:}
 **Weather data not available.** Check the links above for current conditions.
 
+{If applicable (avalanche season/terrain):}
 ### Avalanche Forecast
 
-{If applicable and available:}
+{If available:}
 {Current danger rating, problems, travel advice}
 
-{If not applicable:}
-- **Not applicable** for this route type/season.
-
-{If applicable but not available:}
-- **Avalanche forecast not available.** Check [NWAC.us](https://nwac.us) for current conditions.
+{If not available:}
+**Avalanche forecast not available.** Check [NWAC.us](https://nwac.us) for current conditions.
 
 ## Recent Trip Reports
 
@@ -162,5 +136,4 @@
 
 ---
 
-- **Research completed:** {timestamp}
-- **Skill:** route-researcher v{version}
+*Research completed {timestamp} using [route-researcher v{version}](https://github.com/dreamiurg/claude-mountaineering-skills/tree/main/skills/route-researcher) from the [Claude Mountaineering Skills](https://github.com/dreamiurg/claude-mountaineering-skills) repository.*
