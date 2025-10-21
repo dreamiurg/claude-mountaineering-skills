@@ -19,7 +19,8 @@ This repo contains both marketplace and skills. It add it to Claude Code, run th
   ⎿  Successfully added marketplace: mountaineering-skills-marketplace
 
 > /plugin install mountaineering-skills@mountaineering-skills-marketplace
-  ⎿  ✓ Installed mountaineering-skills. Restart Claude Code to load new plugins.```
+  ⎿  ✓ Installed mountaineering-skills. Restart Claude Code to load new plugins.
+```
 
 The plugin installs Python dependencies automatically if `uv` is available. If not, see [Manual Installation](#manual-installation) below.
 
