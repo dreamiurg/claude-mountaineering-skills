@@ -170,11 +170,18 @@ Get all available ascent data regardless of age.
 - `--with-tr`: Focus on ascents with trip reports (useful for conditions)
 
 **Extract for report:**
-- Recent ascent dates (shows current popularity)
-- Links to ascents with trip reports (most valuable for conditions)
+- Total ascent statistics (total count, temporal breakdown, monthly distribution)
+- **For each ascent with trip report in the `ascents` array:**
+  - Date (`date` field)
+  - Climber name (`climber.name` field)
+  - Trip report length (`trip_report.word_count` field)
+  - Direct link to ascent page (`url` field)
+  - GPX availability (`has_gpx` field)
+  - **Format:** `YYYY-MM-DD - [Climber Name](url) - Report (X words)` + GPX indicator if available
 - Links to ascents with GPX tracks (useful for route planning)
-- Seasonal patterns (helps identify best climbing seasons)
-- Note the timeframe of data included in the report
+- Seasonal patterns from monthly distribution (helps identify best climbing seasons)
+- Note the timeframe of data included (e.g., "last 1 year", "last 5 years", "all available data")
+- **Include ALL ascents from the JSON array, not just a subset**
 
 **Error Handling:**
 - If peakbagger-cli fails: Fall back to WebSearch for trip reports
