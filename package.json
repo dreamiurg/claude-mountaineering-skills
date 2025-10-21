@@ -5,7 +5,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/dreamiurg/claude-mountaineering-skills.git"
+    "url": "git@github.com:dreamiurg/claude-mountaineering-skills.git"
   },
   "keywords": ["claude-code", "mountaineering", "climbing"],
   "author": "dreamiurg",
