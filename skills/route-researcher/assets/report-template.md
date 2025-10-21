@@ -136,10 +136,23 @@ Weather icons to use:
 - Use multiple icons for mixed conditions (e.g., "🌧️❄️ Rain transitioning to snow")
 - Example: "☀️ Mostly sunny, calm" or "🌧️ Rain (80% chance)"}
 
+**Air Quality:**
+
+{If AQI >100 on any day (unhealthy for sensitive groups or worse):}
+⚠️ **Air Quality Alert:** Air quality is forecast to be **{moderate/unhealthy for sensitive groups/unhealthy/very unhealthy}** on **{dates}** with AQI values of **{values}**. Sensitive individuals (respiratory/heart conditions) should consider rescheduling. Reduced visibility and breathing difficulties possible during strenuous activity.
+
+{If AQI 51-100 (moderate):}
+Air quality is **moderate** (AQI 51-100) during the forecast period. Generally acceptable for most people, though unusually sensitive individuals may experience minor respiratory symptoms.
+
+{If AQI 0-50 (good):}
+Air quality is **good** (AQI <50) during the forecast period.
+
 **Check Current Forecasts:**
 
-- [Mountain-Forecast.com]({mountain_forecast_link})
-- [NOAA Point Forecast]({noaa_link})
+- [Mountain-Forecast.com]({mountain_forecast_link}) - Summit-level forecast with multiple elevations
+- [Open-Meteo Weather]({open_meteo_weather_link}) - Detailed mountain weather data (source for this report)
+- [Open-Meteo Air Quality]({open_meteo_air_quality_link}) - Air quality forecast for this location
+- [NOAA Point Forecast]({noaa_link}) - Official NWS forecast and alerts
 
 {If winter season:}
 - [NWAC Mountain Weather](https://nwac.us/mountain-weather-forecast/)

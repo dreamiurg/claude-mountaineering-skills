@@ -228,64 +228,86 @@ WebSearch queries (run in parallel):
 - If specific high-value trip reports identified, fetch 1-2 for detailed conditions
 - Extract recent dates and conditions mentioned for "Recent Conditions" section
 
-#### 2E. Weather Forecast (Multiple Sources)
+#### 2E. Weather Forecast (Open-Meteo API + NOAA)
 
 **Only if coordinates available from Step 2A:**
 
 Gather weather data from multiple sources in parallel:
 
-**Source 1: Mountain-Forecast.com (Cloudflare-protected)**
+**Source 1: Open-Meteo Weather API (Primary)**
 
-First, search for the peak's mountain-forecast.com page:
+Use WebFetch to get detailed mountain weather forecast:
 ```
-WebSearch: "{peak_name} site:mountain-forecast.com"
+URL: https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&elevation={peak_elevation_m}&hourly=temperature_2m,precipitation,freezing_level_height,snow_depth,wind_speed_10m,wind_gusts_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=auto&forecast_days=7
+
+Prompt: "Parse the JSON response and extract:
+- Daily weather summary for 6-7 days (date, conditions based on weather_code, temps, precip probability)
+- Freezing level height in feet for each day (convert from meters)
+- Snow depth if applicable
+- Wind speeds and gusts
+- Organize by calendar date with day-of-week
+- Map weather_code to descriptive conditions (0=clear, 1-3=partly cloudy, 45-48=fog, 51-67=rain, 71-77=snow, 80-82=showers, 95-99=thunderstorms)"
 ```
 
-Then use cloudscrape.py to fetch the forecast page:
-```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "https://www.mountain-forecast.com/peaks/{peak-slug}/forecasts/{elevation_m}"
+**Weather Code to Icon/Description mapping:**
+- 0: ☀️ Clear
+- 1-3: ⛅ Partly cloudy
+- 45-48: 🌫️ Fog
+- 51-67: 🌧️ Rain
+- 71-77: ❄️ Snow
+- 80-82: 🌧️ Showers
+- 95-99: ⛈️ Thunderstorms
+
+**Source 2: Open-Meteo Air Quality API**
+
+Use WebFetch to get air quality forecast:
+```
+URL: https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat}&longitude={lon}&hourly=pm2_5,pm10,us_aqi&timezone=auto&forecast_days=7
+
+Prompt: "Parse the JSON and determine air quality for the forecast period:
+- Check US AQI values: 0-50 (good), 51-100 (moderate), 101-150 (unhealthy for sensitive), 151-200 (unhealthy), 201-300 (very unhealthy), 301+ (hazardous)
+- Check PM2.5 and PM10 levels
+- Identify any days with AQI >100 (concerning for outdoor activities)
+- Return overall assessment and any days to be cautious"
 ```
 
-Parse HTML to extract:
-- 6-day forecast (temperature, precipitation, wind, snow level)
-- Summit-level conditions
-- Mid-mountain conditions if available
-- **Freezing level for each day** (critical for determining rain vs snow at route elevation)
+**Source 3: NOAA/NWS Point Forecast (Supplemental)**
 
-**Source 2: NOAA/NWS Point Forecast**
-
-Use WebFetch to get NOAA point forecast:
+Use WebFetch for detailed text forecast and warnings:
 ```
 URL: https://forecast.weather.gov/MapClick.php?textField1={lat}&textField2={lon}
-Prompt: "Extract the 7-day weather forecast including:
-- Daily high/low temperatures
-- Precipitation chances
-- Wind speed and direction
-- Detailed day/night forecasts
-- Any weather warnings or alerts"
+Prompt: "Extract:
+- Detailed text forecasts for context
+- Any weather warnings or alerts
+- Hazardous weather outlook"
 ```
 
-**Source 3: NWAC Mountain Weather (if available)**
+**Source 4: NWAC Mountain Weather (if applicable)**
 
 If in avalanche season (roughly Nov-Apr), check NWAC mountain weather:
 ```
 WebFetch: https://nwac.us/mountain-weather-forecast/
-Prompt: "Extract general mountain weather patterns for the Cascades region including:
-- Synoptic weather pattern
-- Freezing levels
-- Snow level
-- Wind forecast
-- Multi-day weather trend"
+Prompt: "Extract general mountain weather patterns for the Cascades region including synoptic pattern and multi-day trend"
 ```
 
+**Data to extract and save for Phase 4:**
+- 6-7 day forecast with conditions, temps, precipitation, wind
+- **Freezing level height for each day** (from Open-Meteo)
+- Snow depth changes (from Open-Meteo)
+- **Air quality assessment** (good/moderate/poor, note any concerning days)
+- Weather warnings or alerts (from NOAA)
+- Mountain-Forecast.com URL for manual checking (find via WebSearch, don't scrape)
+- **Open-Meteo Weather Link:** Construct from coordinates and elevation:
+  `https://open-meteo.com/en/docs#latitude={lat}&longitude={lon}&elevation={peak_elevation_m}&hourly=&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`
+- **Open-Meteo Air Quality Link:** Construct from coordinates:
+  `https://open-meteo.com/en/docs/air-quality-api#latitude={lat}&longitude={lon}&hourly=&daily=&timezone=auto`
+
 **Error Handling:**
-- If mountain-forecast.com URL not found: Continue with other sources
-- If cloudscrape.py fails: Note in gaps, provide manual link
-- If NOAA WebFetch fails: Note in gaps
+- If Open-Meteo API fails: Fall back to NOAA only, note reduced data quality in gaps
+- If Air Quality API fails: Note in gaps, continue without AQ data
+- If NOAA WebFetch fails: Continue with Open-Meteo data only
 - If NWAC not in season or fails: Skip this source
-- Timeout: 60s for cloudscrape.py, default for WebFetch
-- **Always provide manual check links** even when data successfully retrieved
+- **Always provide manual check links** for Mountain-Forecast.com and NOAA even when API data retrieved
 
 #### 2F. Avalanche Forecast (Python Script)
 
