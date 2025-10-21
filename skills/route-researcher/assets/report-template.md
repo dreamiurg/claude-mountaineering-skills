@@ -95,12 +95,19 @@ Use bold for: weather patterns, precipitation types/timing, temperature ranges, 
 
 | Day | Conditions | Temperature | Precipitation |
 |-----|-----------|-------------|---------------|
-| {Day 1 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
-| {Day 2 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
-| {Day 3 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
-| {Day 4 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
-| {Day 5 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
-| {Day 6 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Conditions} | High: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {22}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {23}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {24}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {25}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| {DayOfWeek} {Mon} {Day} {26}, {2025} | {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+
+{Format notes:
+- Use actual calendar dates from the report generation date
+- Include year (2025) for clarity
+- Mark first day as "(Today)" if appropriate
+- Use day-of-week abbreviations: Mon, Tue, Wed, Thu, Fri, Sat, Sun
+- Example: "Mon Oct 21, 2025 (Today)" or "Tue Oct 22, 2025"}
 
 **Check Current Forecasts:**
 
