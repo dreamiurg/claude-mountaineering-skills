@@ -63,9 +63,13 @@ Examples:
 
 **Goal:** Gather comprehensive information from all available sources.
 
-Execute the following data collection steps **in parallel where possible** to minimize total execution time:
+**Execution Strategy:**
+1. **Step 2A (Sequential):** Get peak information including coordinates - this is required for location-dependent steps
+2. **Steps 2B-2H (Parallel):** Once coordinates are available, execute ALL remaining steps in parallel to minimize total execution time
 
-#### 2A. PeakBagger Peak Information (peakbagger-cli)
+**CRITICAL:** After Step 2A completes and coordinates are obtained, immediately launch Steps 2B through 2H in parallel. Do not wait for any step to complete before starting others.
+
+#### 2A. PeakBagger Peak Information (peakbagger-cli) - EXECUTE FIRST
 
 Retrieve detailed peak information using the peak ID from Phase 1:
 
@@ -89,7 +93,15 @@ This returns structured JSON with:
 - If specific fields missing in JSON: Mark as "Not available" in gaps section
 - Rate limiting: Built into peakbagger-cli (default 2 second delay)
 
-#### 2B. Route Description Research (WebSearch + WebFetch)
+**Once coordinates are obtained from this step, immediately proceed to launch Steps 2B-2H in parallel.**
+
+---
+
+## Steps 2B-2H: Execute in Parallel (After 2A Completes)
+
+The following steps can all run simultaneously once coordinates are available:
+
+#### 2B. Route Description Research (WebSearch + WebFetch) - PARALLEL
 
 **Step 1:** Search for route descriptions:
 ```
@@ -148,7 +160,7 @@ Prompt: "Extract route information including:
 - If conflicting information: Note discrepancies in report
 - If cloudscrape.py fails: Try WebFetch as fallback, then note if both fail
 
-#### 2C. Peak Ascent Statistics (peakbagger-cli)
+#### 2C. Peak Ascent Statistics (peakbagger-cli) - PARALLEL
 
 Retrieve ascent data and patterns using the peak ID:
 
@@ -204,7 +216,7 @@ Get all available ascent data regardless of age.
 - If peakbagger-cli fails: Fall back to WebSearch for trip reports
 - If no ascents found: Note in report and continue with other sources
 
-#### 2D. Trip Report Sources Discovery (WebSearch)
+#### 2D. Trip Report Sources Discovery (WebSearch) - PARALLEL
 
 Systematically search for trip report pages across major platforms:
 
@@ -228,9 +240,9 @@ WebSearch queries (run in parallel):
 - If specific high-value trip reports identified, fetch 1-2 for detailed conditions
 - Extract recent dates and conditions mentioned for "Recent Conditions" section
 
-#### 2E. Weather Forecast (Open-Meteo API + NOAA)
+#### 2E. Weather Forecast (Open-Meteo API + NOAA) - PARALLEL
 
-**Only if coordinates available from Step 2A:**
+**Requires coordinates from Step 2A (latitude, longitude, elevation):**
 
 Gather weather data from multiple sources in parallel:
 
@@ -309,9 +321,9 @@ Prompt: "Extract general mountain weather patterns for the Cascades region inclu
 - If NWAC not in season or fails: Skip this source
 - **Always provide manual check links** for Mountain-Forecast.com and NOAA even when API data retrieved
 
-#### 2F. Avalanche Forecast (Python Script)
+#### 2F. Avalanche Forecast (Python Script) - PARALLEL
 
-**Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
+**Requires coordinates from Step 2A. Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
 
 ```bash
 cd skills/route-researcher/tools
@@ -325,9 +337,9 @@ uv run python fetch_avalanche.py --region "North Cascades" --coordinates "{lat},
 - Script fails: Note in gaps with link to NWAC
 - Not applicable (low elevation, summer): Skip this step
 
-#### 2G. Daylight Calculations (Sunrise-Sunset.org API)
+#### 2G. Daylight Calculations (Sunrise-Sunset.org API) - PARALLEL
 
-**Only if coordinates available from Step 2A:**
+**Requires coordinates from Step 2A (latitude, longitude):**
 
 Use WebFetch to get sunrise/sunset data from Sunrise-Sunset.org API:
 
@@ -353,7 +365,7 @@ Format times in a user-friendly way (e.g., '6:45 AM', '8:30 PM')"
 - If no coordinates available: Skip this step and note in gaps
 - If date is far in future: API should still work, but note that times are calculated
 
-#### 2H. Access and Permits (WebSearch)
+#### 2H. Access and Permits (WebSearch) - PARALLEL
 
 ```
 WebSearch queries:
@@ -366,6 +378,24 @@ WebSearch queries:
 - Trailhead names and locations
 - Required permits (if any)
 - Access notes (road conditions, seasonal closures)
+
+---
+
+## Phase 2 Summary: Parallel Execution Strategy
+
+**Sequential (blocking):**
+1. Step 2A: Get peak info and coordinates
+
+**Parallel (non-blocking - execute simultaneously after 2A):**
+2. Step 2B: Route descriptions (WebSearch + WebFetch)
+3. Step 2C: Ascent statistics (peakbagger-cli)
+4. Step 2D: Trip report sources (WebSearch)
+5. Step 2E: Weather forecast (Open-Meteo + NOAA) - *requires coordinates*
+6. Step 2F: Avalanche forecast (Python script) - *requires coordinates*
+7. Step 2G: Daylight calculations (Sunrise-Sunset API) - *requires coordinates*
+8. Step 2H: Access and permits (WebSearch)
+
+**Performance Benefit:** By executing steps 2B-2H in parallel, total Phase 2 time = time(2A) + max(time(2B), time(2C), ..., time(2H)) instead of summing all step times sequentially.
 
 ### Phase 3: Route Analysis and Synthesis
 
