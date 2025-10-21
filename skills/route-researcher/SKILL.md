@@ -32,7 +32,7 @@ Examples:
 
 2. **Search PeakBagger** using peakbagger-cli:
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger search "{peak_name}" --format json
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger search "{peak_name}" --format json
    ```
    - Parse JSON output to extract peak matches
    - Each result includes: peak_id, name, elevation (feet/meters), location, url
@@ -70,7 +70,7 @@ Execute the following data collection steps **in parallel where possible** to mi
 Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger info {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger info {peak_id} --format json
 ```
 
 This returns structured JSON with:
@@ -154,7 +154,7 @@ Retrieve ascent data and patterns using the peak ID:
 
 **Step 1: Get overall ascent statistics**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger peak-ascents {peak_id} --format json
 ```
 
 This returns:
@@ -169,19 +169,19 @@ Based on the total count from Step 1, adaptively retrieve ascents:
 
 **For popular peaks (>50 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json --within 1y --list-ascents
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger peak-ascents {peak_id} --format json --within 1y --list-ascents
 ```
 Recent data (1 year) is sufficient for active peaks.
 
 **For moderate peaks (10-50 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json --within 5y --list-ascents
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger peak-ascents {peak_id} --format json --within 5y --list-ascents
 ```
 Expand to 5 years to get meaningful sample size.
 
 **For rarely-climbed peaks (<10 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json --list-ascents
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v0.6.2 peakbagger peak-ascents {peak_id} --format json --list-ascents
 ```
 Get all available ascent data regardless of age.
 
