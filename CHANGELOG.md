@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.0.0...v2.0.1) (2025-10-21)
+
+
+### Bug Fixes
+
+* post-v2.0.0 report formatting and URL fixes ([#12](https://github.com/dreamiurg/claude-mountaineering-skills/issues/12)) ([47d4aee](https://github.com/dreamiurg/claude-mountaineering-skills/commit/47d4aee3e7f9c3ac97a938c42aba2e680eb09c91))
+
 ## [2.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.2.0...v2.0.0) (2025-10-21)
 
 
