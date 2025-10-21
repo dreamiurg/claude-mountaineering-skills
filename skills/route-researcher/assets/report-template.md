@@ -186,46 +186,85 @@ Air quality is **good** (AQI <50) during the forecast period.
 {If not available:}
 **Avalanche forecast not available.** Check [NWAC.us](https://nwac.us) for current conditions.
 
-## Recent Trip Reports
+## Trip Reports
 
-{1-2 sentence summary of recent activity: total ascents in timeframe, peak months, GPX/report availability}
+{1-2 sentence summary of trip report availability: total ascents in timeframe, availability across sources (PeakBagger, WTA, Mountaineers), GPX/report counts. Note average word count if PeakBagger reports are brief.}
 
-### High-Value Ascents
+### Most Detailed Reports
 
-{Prioritize ascents using 3-tier system, limit to 5-10 total:
-  Priority 1: GPX tracks + substantial reports (>30 words)
-  Priority 2: GPX tracks only
-  Priority 3: Substantial reports (>30 words) without GPX
-Sort by date (most recent first) within each tier}
+{CRITICAL: This section is MANDATORY. These are the most comprehensive trip reports regardless of date, sorted by content depth (word count/detail level). These provide the best route beta and detailed experience reports.
 
-- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📍 GPX | 📝 Report (X words)
-- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📍 GPX | 📝 Report (X words)
-- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 Report (X words)
+List top 5-10 reports across all sources, sorted by word count/detail descending.
+
+IMPORTANT PRIORITY RULES:
+1. If PeakBagger has reports >200 words, prioritize those first
+2. If PeakBagger reports are mostly <100 words, PRIORITIZE WTA/Mountaineers reports
+3. WTA trip reports are typically longer and more detailed than brief PeakBagger logs
+4. Mix sources by quality, not by platform - a detailed WTA report should appear before a brief PeakBagger report
+5. If you have WTA trip report URLs from Step 2I, you MUST include them here}
+
+{If detailed PeakBagger reports exist (>100 words):}
+**PeakBagger:**
+
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 {word_count} words{, 📍 GPX if available}
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 {word_count} words{, 📍 GPX if available}
+
+{If WTA reports found in Step 2I - MANDATORY to include if extracted:}
+**Washington Trails Association:**
+
+- **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
+- **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
+- **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
+- **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
+- **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
+
+{If Mountaineers reports found in Step 2I:}
+**Mountaineers.org:**
+
+- **{YYYY-MM-DD}** - [{Report Title}]({mountaineers_trip_report_url})
+- **{YYYY-MM-DD}** - [{Report Title}]({mountaineers_trip_report_url})
 
 {Format notes:
-- Include 📍 GPX indicator if has_gpx=true
-- Include 📝 Report (X words) if trip report exists
-- Use actual word count from trip_report.word_count field
-- Link to individual ascent page URL}
+- Sort by word count/detail level (highest first) - WTA reports typically rank higher than brief PeakBagger logs
+- Include 📝 word count for PeakBagger reports only (WTA word counts usually not available)
+- Include 📍 GPX indicator if has_gpx=true (PeakBagger only)
+- Link to individual report page URL (not the main hike page)
+- Mix sources by quality - don't group by platform
+- Limit to top 5-10 total across all sources
+- If no WTA reports were extracted but WTA URL exists, note this as a failure in Information Gaps}
+
+### Recent Reports (Last 1-2 Years)
+
+{These are the most recent reports for current conditions. List top 3-5 most recent reports with actual trip report content, sorted by date descending:}
+
+- **{YYYY-MM-DD}** - [{Source}: {Climber/Author Name}]({report_url}) - 📝 {word_count if PeakBagger}{, 📍 GPX if available}
+- **{YYYY-MM-DD}** - [{Source}: {Climber/Author Name}]({report_url}) - 📝 {word_count if PeakBagger}{, 📍 GPX if available}
+
+{Format notes:
+- Only include reports from last 1-2 years
+- Sort by date (most recent first)
+- Prefix with source: [PeakBagger], [WTA], [Mountaineers]
+- Limit to top 3-5 most recent
+- If overlap with "Most Detailed Reports" section above, that's okay - recent AND detailed reports can appear in both}
 
 ### Browse All Trip Reports
 
-{Always include PeakBagger. Include other platforms only if URLs were found during data gathering}
+{Always include PeakBagger. Include other platforms only if URLs were found during data gathering (Step 2D)}
 
-- [PeakBagger Ascents](https://www.peakbagger.com/peakascents.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
+- [PeakBagger Ascents](https://www.peakbagger.com/climber/PeakAscents.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
 {If WTA URL found:}
-- [Washington Trails Association Trip Reports]({wta_url}) - User-submitted trip reports with photos
-{If AllTrails URL found:}
-- [AllTrails Reviews]({alltrails_url}) - User reviews and recent activity
-{If SummitPost URL found:}
-- [SummitPost Trip Reports]({summitpost_url}) - Route-specific trip reports
+- [Washington Trails Association]({wta_url}) - User-submitted trip reports with photos and conditions
 {If Mountaineers URL found:}
-- [Mountaineers.org Route Page]({mountaineers_url}) - Route information and conditions
+- [Mountaineers.org]({mountaineers_url}) - Route information and trip reports
+{If AllTrails URL found:}
+- [AllTrails]({alltrails_url}) - User reviews and recent activity
+{If SummitPost URL found:}
+- [SummitPost]({summitpost_url}) - Route-specific trip reports and photos
 {If CascadeClimbers URL found:}
 - [CascadeClimbers Forum]({cascadeclimbers_url}) - Forum discussions and beta
 
-{If very limited ascent data (<5 total):}
-**Note:** Limited recent trip reports available. Consider posting your own after your climb!
+{If very limited trip report data (<5 reports total across all sources):}
+**Note:** Limited trip reports available for this peak. Consider posting your own after your climb!
 
 ## Access & Permits
 
@@ -242,7 +281,11 @@ Sort by date (most recent first) within each tier}
 
 ## Information Gaps
 
-{Explicit list of what data was not found or is uncertain:}
+{Explicit list of what data was not found or is uncertain. MANDATORY items to check:}
+- {If WTA URL found but <3 individual trip report URLs extracted: "WTA trip report extraction failed - cloudscrape.py unsuccessful. Check WTA manually for detailed trip reports."}
+- {If Mountaineers URL found but <3 individual trip report URLs extracted: "Mountaineers.org trip report extraction failed - cloudscrape.py unsuccessful. Check Mountaineers manually for detailed trip reports."}
+- {If AllTrails WebFetch failed and cloudscrape.py not attempted: "AllTrails access blocked and cloudscrape.py fallback not attempted"}
+- {If PeakBagger reports all <100 words: "Limited detailed trip reports on PeakBagger (average {X} words). WTA/Mountaineers sources recommended for comprehensive beta."}
 - {Example: "Limited trip reports available for winter season"}
 - {Example: "Weather forecast unavailable - script not yet implemented"}
 - {Example: "No GPS tracks found on PeakBagger"}
