@@ -212,7 +212,7 @@ Sort by date (most recent first) within each tier}
 
 {Always include PeakBagger. Include other platforms only if URLs were found during data gathering}
 
-- [PeakBagger Ascents](https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
+- [PeakBagger Ascents](https://www.peakbagger.com/peakascents.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
 {If WTA URL found:}
 - [Washington Trails Association Trip Reports]({wta_url}) - User-submitted trip reports with photos
 {If AllTrails URL found:}
