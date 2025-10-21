@@ -120,7 +120,9 @@ Use bold for: weather patterns, precipitation types/timing, temperature ranges, 
 - Include year (2025) for clarity
 - Mark first day as "(Today)" if appropriate
 - Use day-of-week abbreviations: Mon, Tue, Wed, Thu, Fri, Sat, Sun
-- Example: "Mon Oct 21, 2025 (Today)" or "Tue Oct 22, 2025"
+- **CRITICAL:** Calculate day-of-week from the actual date (YYYY-MM-DD). Open-Meteo returns dates in local timezone (timezone=auto), so use those dates directly to determine day-of-week. Do NOT assume or calculate based on UTC.
+- Example: If date is "2025-10-21" (Tuesday), use "Tue Oct 21, 2025 (Today)"
+- Example: If date is "2025-10-22" (Wednesday), use "Wed Oct 22, 2025"
 
 Weather icons to use:
 - ☀️ Clear/Sunny
