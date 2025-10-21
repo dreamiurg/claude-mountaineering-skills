@@ -1,4 +1,4 @@
-# {Peak Name} - Route Beta Research
+# {Peak Name} - Route Beta Research ({YYYY-MM-DD})
 
 > **⚠️ AI-Generated Research Document**
 >
@@ -18,25 +18,37 @@
 >
 > The mountains are inherently dangerous. You are responsible for your own safety.
 
-**Generated:** {YYYY-MM-DD}
-**Route Type:** {glacier/rock/scramble/hike}
-**Difficulty:** {e.g., "Class 3 scramble" or "5.7 rock" or "Moderate glacier"}
+## Overview
 
-## Summit Information
+### Summit
 
 - **Elevation:** {elevation with units}
 - **Prominence:** {prominence with units}
+
+### Route
+
+- **Route Type:** {glacier/rock/scramble/hike}
+- **Difficulty:** {e.g., "Class 3 scramble" or "5.7 rock" or "Moderate glacier"}
+
+### Location
+
 - **Location:** {state, range}
 - **Coordinates:** {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [USGS Topo]({usgs_topo_link}))
-- **PeakBagger:** [{peak name}]({peakbagger_url})
 
-## Route Description
+### Sources
+
+- **PeakBagger:** [{peak name}]({peakbagger_url})
+- {Other source names and URLs}
+
+## Route
 
 ### Approach
 
-{Trailhead information, access details}
+{Trailhead name and location}
 
-### Standard Route
+**Directions:** [View on Google Maps]({google_maps_link})
+
+### Route
 
 {Route description synthesized from multiple sources}
 
@@ -53,13 +65,12 @@
 - Where it's located on route
 - Skills/gear required for this section}
 
-### Hazards & Safety
+### Hazards
 
 {Synthesized from multiple sources:
 - Known hazards (crevasses, rockfall, exposure)
 - Seasonal considerations
 - Bailout options
-- Emergency contacts
 - If trip reports mention unusual or important gear (e.g., "approach shoes recommended for talus" or "bring extra pickets"), include brief mention here}
 
 ## Current Conditions
@@ -71,7 +82,6 @@
 - **Sunrise:** {time}
 - **Sunset:** {time}
 - **Daylight Hours:** {hours}
-- **Considerations:** {alpine start recommendations, etc.}
 
 {If not available:}
 - **Note:** Daylight calculations not available. Check sunrise/sunset times for your planned date.
@@ -125,12 +135,6 @@
 
 ## Access & Permits
 
-### Trailhead
-
-{Trailhead name and location}
-
-**Directions:** [View on Google Maps]({google_maps_link})
-
 ### Permits & Regulations
 
 {Required permits, fees, regulations}
@@ -158,5 +162,5 @@
 
 ---
 
-**Research completed:** {timestamp}
-**Skill:** route-researcher v{version}
+- **Research completed:** {timestamp}
+- **Skill:** route-researcher v{version}
