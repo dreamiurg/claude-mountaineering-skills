@@ -80,16 +80,27 @@ Daylight calculations not available. Check sunrise/sunset times for your planned
 
 ### Weather Forecast
 
-{Synthesized weather patterns, notable conditions (storms, good weather windows, etc.), freezing levels and cloud levels if available.}
+{Synthesized summary paragraph with bold formatting for key details. Structure:
+- Describe overall pattern (stable/transitioning/stormy)
+- Highlight weather windows, storms, precipitation timing
+- Note temperature trends, freezing levels, snow levels
+- Call out significant hazards (high winds, heavy precip, rapid changes)
 
-| Day | Mountain-Forecast.com | NOAA/NWS Point Forecast |
-|-----|----------------------|-------------------------|
-| {Day 1 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 2 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 3 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 4 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 5 date} | {Temps, precip, wind} | {Conditions, temps} |
-| {Day 6 date} | {Temps, precip, wind} | {Conditions, temps} |
+Example format:
+"The forecast shows a transition from **relatively dry conditions** to a **wet, cold pattern arriving mid-week**. Tuesday afternoon is **mostly sunny and calm (48°F high)**, but a weather system brings **rain Wednesday through Friday** with **increasing precipitation chances**. Snow levels will drop significantly by Friday, **transitioning to snow at summit elevations**. The weekend looks particularly challenging with **heavy snow possible** and temperatures in the **low 30s°F**."
+
+Use bold for: weather patterns, precipitation types/timing, temperature ranges, snow levels, wind conditions, weather windows, significant hazards}
+
+**Summary:** {One sentence actionable summary - best weather window or caution to avoid certain days}
+
+| Day | Conditions | Temperature | Precipitation |
+|-----|-----------|-------------|---------------|
+| {Day 1 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
+| {Day 2 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
+| {Day 3 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
+| {Day 4 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
+| {Day 5 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
+| {Day 6 date} | {Conditions} | High: {temp}, Low: {temp} | {Precip amount/chance} |
 
 **Check Current Forecasts:**
 
