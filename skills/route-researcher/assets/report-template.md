@@ -49,16 +49,22 @@ The route covers approximately **{round trip distance}** with **{total gain}** o
 
 ### Crux
 
-{Format with bold highlights for key details. Structure:
+{Format with selective bold highlights for ONLY the most critical details. Structure:
 - Lead with location if known
-- Highlight difficulty rating, exposure level, key technical requirements
-- Call out conditions that make it harder (wet, snow, etc.)
+- Highlight difficulty rating and exposure level
+- Call out key technical requirements or hazards
 - Mention required skills/gear
 
-Example format:
-"The crux is located **near the summit at approximately 4,900 ft**, where climbers must navigate a rock band via a **Class 2-3 gully**. This section requires **basic scrambling skills** and can be more challenging **when wet or icy**. In early season conditions, the gully may be **snow-filled, requiring crampons and ice axe skills**. The **exposure is moderate** but the rock can be **loose**, requiring careful route-finding and attention to hand/foot placements."
+Use bold SPARINGLY - only for:
+- Specific location (if notable)
+- Difficulty grade (Class 3-4, 5.x, etc.)
+- Critical hazards or exposures
+- Essential gear requirements
 
-Use bold for: locations, difficulty grades, exposure descriptions, conditions, required skills/gear, key hazards}
+Example format:
+"The crux is located near the summit at approximately 4,900 ft, where climbers must navigate a rock band via a **Class 2-3 gully**. This section requires basic scrambling skills and can be more challenging when wet or icy. In early season conditions, the gully may be snow-filled, requiring **crampons and ice axe**. The exposure is moderate but the rock can be loose, requiring careful route-finding and attention to hand/foot placements."
+
+AVOID bolding: common descriptors (wet, icy, loose), general skills (scrambling, route-finding), non-critical details}
 
 ### Hazards
 
@@ -80,16 +86,22 @@ Daylight calculations not available. Check sunrise/sunset times for your planned
 
 ### Weather Forecast
 
-{Synthesized summary paragraph with bold formatting for key details. Structure:
+{Synthesized summary paragraph with selective bold formatting for ONLY the most important details. Structure:
 - Describe overall pattern (stable/transitioning/stormy)
 - Highlight weather windows, storms, precipitation timing
 - Note temperature trends, freezing levels, snow levels
 - Call out significant hazards (high winds, heavy precip, rapid changes)
 
-Example format:
-"The forecast shows a transition from **relatively dry conditions** to a **wet, cold pattern arriving mid-week**. Tuesday afternoon is **mostly sunny and calm (48°F high)**, but a weather system brings **rain Wednesday through Friday** with **increasing precipitation chances**. Snow levels will drop significantly by Friday, **transitioning to snow at summit elevations**. The weekend looks particularly challenging with **heavy snow possible** and temperatures in the **low 30s°F**."
+Use bold SPARINGLY - only for:
+- Major weather transitions or pattern changes
+- Specific weather windows (best days to climb)
+- Critical hazards (heavy precipitation, extreme temps, high winds)
+- Significant precipitation amounts (>20mm, heavy snow)
 
-Use bold for: weather patterns, precipitation types/timing, temperature ranges, snow levels, wind conditions, weather windows, significant hazards}
+Example format:
+"The forecast shows stable, dry conditions Monday transitioning to an **extended wet, cold pattern beginning Wednesday**. Monday offers the best weather window with clear to partly cloudy skies, light winds, and highs near 32°F. However, a significant weather system arrives mid-week bringing rain/snow Wednesday (51% chance, 3.3mm precip) with conditions deteriorating sharply. Friday through Sunday sees **heavy precipitation (96%, 90%, 83% chances) with 22-47mm total**, transitioning from rain/snow mix to all snow as freezing levels drop. Temperatures will plummet into the teens and low 20s°F by the weekend, with significant snowfall accumulation likely. The multi-day storm pattern makes **weekend travel inadvisable**."
+
+AVOID bolding: descriptive terms (dry, wet, cold), common conditions (partly cloudy, sunny), moderate temps, low precipitation amounts}
 
 **Summary:** {One sentence actionable summary - best weather window or caution to avoid certain days}
 
@@ -120,7 +132,9 @@ Use bold for: weather patterns, precipitation types/timing, temperature ranges, 
 - Include year (2025) for clarity
 - Mark first day as "(Today)" if appropriate
 - Use day-of-week abbreviations: Mon, Tue, Wed, Thu, Fri, Sat, Sun
-- Example: "Mon Oct 21, 2025 (Today)" or "Tue Oct 22, 2025"
+- **CRITICAL:** Calculate day-of-week from the actual date (YYYY-MM-DD). Open-Meteo returns dates in local timezone (timezone=auto), so use those dates directly to determine day-of-week. Do NOT assume or calculate based on UTC.
+- Example: If date is "2025-10-21" (Tuesday), use "Tue Oct 21, 2025 (Today)"
+- Example: If date is "2025-10-22" (Wednesday), use "Wed Oct 22, 2025"
 
 Weather icons to use:
 - ☀️ Clear/Sunny
@@ -198,7 +212,7 @@ Sort by date (most recent first) within each tier}
 
 {Always include PeakBagger. Include other platforms only if URLs were found during data gathering}
 
-- [PeakBagger Ascents](https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
+- [PeakBagger Ascents](https://www.peakbagger.com/peakascents.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
 {If WTA URL found:}
 - [Washington Trails Association Trip Reports]({wta_url}) - User-submitted trip reports with photos
 {If AllTrails URL found:}
