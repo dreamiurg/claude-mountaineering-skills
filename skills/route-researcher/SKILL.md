@@ -30,12 +30,12 @@ Examples:
    - Look for peak names, mountain names, or climbing objectives
    - Common patterns: "Mt Baker", "Mount Rainier", "Sahale Peak", etc.
 
-2. **Search PeakBagger** using WebSearch:
+2. **Search PeakBagger** using peakbagger-cli:
+   ```bash
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger search "{peak_name}" --format json
    ```
-   Query: "{peak_name} site:peakbagger.com peak"
-   ```
-   - Parse search results for PeakBagger peak page URLs (format: `https://www.peakbagger.com/peak.aspx?pid=...`)
-   - Extract peak names, elevations, and locations from search snippets
+   - Parse JSON output to extract peak matches
+   - Each result includes: peak_id, name, elevation (feet/meters), location, url
 
 3. **Handle Multiple Matches:**
    - If **multiple peaks** found: Use AskUserQuestion to present options
@@ -48,13 +48,16 @@ Examples:
      - Use AskUserQuestion: "Is this the correct peak?"
 
    - If **no matches** found:
-     - Use AskUserQuestion to ask user to provide PeakBagger URL directly
-     - Suggest trying a different name variation
-     - Provide general PeakBagger search URL
+     - Try peak name variations (Mt/Mount, with state/range)
+     - If still no results, use AskUserQuestion to ask for:
+       - A different peak name variation
+       - Direct PeakBagger peak ID or URL
+       - General PeakBagger search
 
-4. **Validate PeakBagger URL:**
-   - Ensure URL matches pattern: `https://www.peakbagger.com/peak.aspx?pid=\d+`
-   - If user provides URL directly, validate format before proceeding
+4. **Extract Peak ID:**
+   - From search results JSON, extract the `peak_id` field
+   - Store for use in subsequent peakbagger-cli commands
+   - Also store the PeakBagger URL for reference links
 
 ### Phase 2: Data Gathering
 
@@ -62,29 +65,29 @@ Examples:
 
 Execute the following data collection steps **in parallel where possible** to minimize total execution time:
 
-#### 2A. PeakBagger Peak Information (cloudscrape.py)
+#### 2A. PeakBagger Peak Information (peakbagger-cli)
 
-PeakBagger is protected by Cloudflare, so use the cloudscrape.py tool:
+Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{peakbagger_url}"
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger info {peak_id} --format json
 ```
 
-This returns the full HTML. Parse it to extract:
-- Peak name (from title or h1)
+This returns structured JSON with:
+- Peak name and alternate names
 - Elevation (feet and meters)
 - Prominence (feet and meters)
+- Isolation (miles and kilometers)
 - Coordinates (latitude, longitude in decimal degrees)
-- Location description (state, range, area)
-- Standard route description if available
-- Difficulty rating or class if mentioned
-- Any notable hazards or warnings mentioned
+- Location (county, state, country)
+- Routes (if available): trailhead, distance, vertical gain
+- Peak list memberships and rankings
+- Standard route description (if available in routes data)
 
 **Error Handling:**
-- If cloudscrape.py fails: Note in "Information Gaps" and continue with WebSearch results
-- If specific fields missing in HTML: Mark as "Not available" in gaps section
-- Timeout: 60 seconds for cloudscrape.py
+- If peakbagger-cli fails: Fall back to WebSearch/WebFetch and note in "Information Gaps"
+- If specific fields missing in JSON: Mark as "Not available" in gaps section
+- Rate limiting: Built into peakbagger-cli (default 2 second delay)
 
 #### 2B. Route Description Research (WebSearch + WebFetch)
 
@@ -125,14 +128,67 @@ Prompt: "Extract route information including:
 - If conflicting information: Note discrepancies in report
 - If cloudscrape.py fails: Try WebFetch as fallback, then note if both fail
 
-#### 2C. Recent Trip Reports (WebSearch)
+#### 2C. Peak Ascent Statistics (peakbagger-cli)
 
-Search for recent conditions:
+Retrieve ascent data and patterns using the peak ID:
+
+**Step 1: Get overall ascent statistics**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json
+```
+
+This returns:
+- Total ascent count (all-time)
+- Seasonal distribution (by month)
+- Count of ascents with GPX tracks
+- Count of ascents with trip reports
+
+**Step 2: Get detailed ascent list based on activity level**
+
+Based on the total count from Step 1, adaptively retrieve ascents:
+
+**For popular peaks (>50 ascents total):**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json --within 1y --list-ascents
+```
+Recent data (1 year) is sufficient for active peaks.
+
+**For moderate peaks (10-50 ascents total):**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json --within 5y --list-ascents
+```
+Expand to 5 years to get meaningful sample size.
+
+**For rarely-climbed peaks (<10 ascents total):**
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git peakbagger peak-ascents {peak_id} --format json --list-ascents
+```
+Get all available ascent data regardless of age.
+
+**Additional filters (apply as needed):**
+- `--with-gpx`: Focus on ascents with GPS tracks (useful for route finding)
+- `--with-tr`: Focus on ascents with trip reports (useful for conditions)
+
+**Extract for report:**
+- Recent ascent dates (shows current popularity)
+- Links to ascents with trip reports (most valuable for conditions)
+- Links to ascents with GPX tracks (useful for route planning)
+- Seasonal patterns (helps identify best climbing seasons)
+- Note the timeframe of data included in the report
+
+**Error Handling:**
+- If peakbagger-cli fails: Fall back to WebSearch for trip reports
+- If no ascents found: Note in report and continue with other sources
+
+#### 2D. Recent Trip Reports (WebSearch - Supplemental)
+
+Use WebSearch to find trip reports from additional sources not in PeakBagger:
+
 ```
 WebSearch queries:
 1. "{peak_name} trip report site:cascadeclimbers.com"
-2. "{peak_name} conditions site:peakbagger.com"
-3. "{peak_name} recent climb 2025"
+2. "{peak_name} recent climb 2025"
+3. "{peak_name} conditions report"
 ```
 
 **Extract from results:**
@@ -143,7 +199,7 @@ WebSearch queries:
 **Optional WebFetch:**
 - If specific high-value trip reports identified, fetch 1-2 for detailed conditions
 
-#### 2D. Weather Forecast (Multiple Sources)
+#### 2E. Weather Forecast (Multiple Sources)
 
 **Only if coordinates available from Step 2A:**
 
@@ -202,7 +258,7 @@ Prompt: "Extract general mountain weather patterns for the Cascades region inclu
 - Timeout: 60s for cloudscrape.py, default for WebFetch
 - **Always provide manual check links** even when data successfully retrieved
 
-#### 2E. Avalanche Forecast (Python Script)
+#### 2F. Avalanche Forecast (Python Script)
 
 **Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
 
@@ -218,7 +274,7 @@ uv run python fetch_avalanche.py --region "North Cascades" --coordinates "{lat},
 - Script fails: Note in gaps with link to NWAC
 - Not applicable (low elevation, summer): Skip this step
 
-#### 2F. Daylight Calculations (Python Script)
+#### 2G. Daylight Calculations (Python Script)
 
 ```bash
 cd skills/route-researcher/tools
@@ -232,7 +288,7 @@ uv run python calculate_daylight.py --date "{YYYY-MM-DD}" --coordinates "{lat},{
 - Script fails: Calculate approximate values or note gap
 - No coordinates: Skip this step
 
-#### 2G. Access and Permits (WebSearch)
+#### 2H. Access and Permits (WebSearch)
 
 ```
 WebSearch queries:
@@ -428,14 +484,15 @@ Every generated report must:
 
 ## Implementation Notes
 
-### Current Status (as of 2025-10-20)
+### Current Status (as of 2025-10-21)
 
 **Implemented:**
-- PeakBagger search functionality
+- **peakbagger-cli** integration for peak search, info, and ascent data
 - Python tools directory structure
 - Report generation in user's current working directory
-- cloudscrape.py for Cloudflare-protected sites (PeakBagger, SummitPost, Mountaineers.org, Mountain-Forecast.com)
+- cloudscrape.py for Cloudflare-protected sites (SummitPost, Mountaineers.org, Mountain-Forecast.com)
 - Multi-source weather gathering (Mountain-Forecast.com, NOAA/NWS, NWAC)
+- Adaptive ascent data retrieval based on peak popularity
 
 **Pending Implementation:**
 - `fetch_avalanche.py` - NWAC avalanche data (currently using WebSearch/WebFetch as fallback)
@@ -447,20 +504,31 @@ Every generated report must:
 - Continue with available data
 - Don't block report generation
 
-### Design Change: WebSearch/WebFetch Instead of Scraping
+### Design Evolution: peakbagger-cli Integration
 
-**Original Design:** Use `peakbagger.py` to scrape PeakBagger pages directly
-
-**Current Design:**
-- Use **WebSearch** to find PeakBagger peak pages
-- Use **WebFetch** to extract data from those pages
+**Latest Design (2025-10-21):**
+- Use **peakbagger-cli** (via uvx) for all PeakBagger data retrieval:
+  - Peak search with structured JSON output
+  - Peak information (elevation, coordinates, routes, etc.)
+  - Ascent statistics and trip report links
+- Use **cloudscrape.py** only for non-PeakBagger Cloudflare-protected sites:
+  - SummitPost route pages
+  - Mountaineers.org route information
+  - Mountain-Forecast.com weather forecasts
 - Reserve Python scripts for **calculations only** (weather, avalanche, daylight)
 
-**Rationale:**
-- WebFetch is more reliable than custom scraping
-- Reduces maintenance burden (no HTML parsing to maintain)
-- Leverages Claude's built-in tools effectively
-- Python scripts focus on computation, not scraping
+**Previous Design (2025-10-20):**
+- Used WebSearch to find PeakBagger peak pages
+- Used WebFetch or cloudscrape.py to extract data from PeakBagger
+- Required HTML parsing of PeakBagger pages
+
+**Rationale for peakbagger-cli:**
+- Structured JSON output eliminates HTML parsing complexity
+- Built-in rate limiting and Cloudflare bypass
+- Reliable ascent data and trip report discovery
+- Better maintainability (less brittle than HTML parsing)
+- Native support for filtering ascents by date, GPX, and trip reports
+- Adaptive timeframe selection based on peak popularity
 
 ### Peak Name Variations
 
@@ -507,12 +575,15 @@ Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead
 ## Testing Checklist
 
 When testing this skill, verify:
-- [ ] Peak validation works with single match
+- [ ] Peak validation works with single match (peakbagger-cli search)
 - [ ] Peak validation works with multiple matches
 - [ ] Peak validation handles no matches gracefully
-- [ ] WebFetch extracts PeakBagger data correctly
+- [ ] peakbagger-cli info extracts peak data correctly (JSON format)
+- [ ] peakbagger-cli peak-ascents retrieves ascent statistics
+- [ ] Adaptive timeframe selection works (1y/5y/all based on popularity)
+- [ ] Ascent trip report links are included in output
 - [ ] Route description synthesis is comprehensive
-- [ ] Trip reports are recent and relevant
+- [ ] Trip reports from multiple sources (PeakBagger + CascadeClimbers)
 - [ ] Python scripts execute (when implemented)
 - [ ] Python script failures handled gracefully
 - [ ] Information gaps documented explicitly
@@ -529,11 +600,16 @@ When testing this skill, verify:
 User: "Research Mt Baker"
 
 Skill Actions:
-1. WebSearch: "Mt Baker site:peakbagger.com peak"
-2. Find: Mount Baker (10,786 ft) - North Cascades, WA
+1. uvx peakbagger search "Mt Baker" --format json
+2. Find: Mount Baker (10,786 ft, peak_id: 2296) - North Cascades, WA
 3. Confirm with user
-4. Gather data from all sources
-5. Generate report: 2025-10-20-mount-baker.md (in current directory)
+4. Gather data from all sources in parallel:
+   - uvx peakbagger info 2296 --format json
+   - uvx peakbagger peak-ascents 2296 --format json (check total count)
+   - uvx peakbagger peak-ascents 2296 --format json --within 1y --list-ascents (popular peak)
+   - Route descriptions via WebSearch/WebFetch
+   - Weather forecasts
+5. Generate report: 2025-10-21-mount-baker.md (in current directory)
 6. Report completion
 ```
 
@@ -542,28 +618,28 @@ Skill Actions:
 User: "Research Sahale Peak"
 
 Skill Actions:
-1. WebSearch: "Sahale Peak site:peakbagger.com peak"
+1. uvx peakbagger search "Sahale Peak" --format json
 2. Find: Multiple results:
-   - Sahale Peak (8,680 ft) - North Cascades, WA
-   - Sahale Arm (7,600 ft) - North Cascades, WA
+   - Sahale Peak (8,680 ft, peak_id: 1798) - North Cascades, WA
+   - Sahale Arm (7,600 ft, peak_id: 1799) - North Cascades, WA
 3. Present options to user with AskUserQuestion
-4. User selects Sahale Peak
-5. Continue with data gathering
+4. User selects Sahale Peak (peak_id: 1798)
+5. Continue with data gathering using peak_id 1798
 ```
 
-**Example 3: Peak not found**
+**Example 3: Rarely-climbed peak**
 ```
-User: "Research Mailbox Peak"
+User: "Research Vesper Peak"
 
 Skill Actions:
-1. WebSearch: "Mailbox Peak site:peakbagger.com peak"
-2. No clear PeakBagger results
-3. Try variation: "Mailbox Peak Washington"
-4. Still no clear results
-5. AskUserQuestion: "I couldn't find this peak on PeakBagger. Would you like to:
-   - Provide a direct PeakBagger URL
-   - Try a different peak name
-   - Continue research with general web sources only"
+1. uvx peakbagger search "Vesper Peak" --format json
+2. Find: Vesper Peak (6,214 ft, peak_id: 1234) - North Cascades, WA
+3. Confirm with user
+4. uvx peakbagger peak-ascents 1234 --format json
+5. Discover: Only 8 total ascents recorded
+6. uvx peakbagger peak-ascents 1234 --format json --list-ascents (get all ascents, no date filter)
+7. Note in report: "Limited ascent data available (8 total ascents recorded)"
+8. Continue with other data sources
 ```
 
 ---
