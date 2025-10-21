@@ -114,12 +114,19 @@ Daylight calculations not available. Check sunrise/sunset times for your planned
 - **2024-12-15** - [Brad Wagenaar](https://www.peakbagger.com/climber/ascent.aspx?aid=2910767) - 📍 GPX | 📝 Report (8 words)
 - **2024-10-30** - [Ryan Rodman](https://www.peakbagger.com/climber/ascent.aspx?aid=2688709) - 📝 Report (6 words)
 
-### Browse All Ascents
+### Browse All Trip Reports
 
-- [PeakBagger Ascents List](https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id})
-{If found during route research:}
-- [SummitPost Trip Reports]({summitpost_url})
-- [Mountaineers.org Route Page]({mountaineers_url})
+- [PeakBagger Ascents]({peakbagger_ascents_url}) - Individual climb logs with optional GPX tracks and reports
+{If WTA page found:}
+- [Washington Trails Association Trip Reports]({wta_trip_reports_url}) - User-submitted trip reports with photos
+{If AllTrails page found:}
+- [AllTrails Reviews]({alltrails_url}) - User reviews and recent activity
+{If SummitPost page found:}
+- [SummitPost Trip Reports]({summitpost_trip_reports_url}) - Route-specific trip reports
+{If Mountaineers page found:}
+- [Mountaineers.org Route Page]({mountaineers_url}) - Route information and conditions
+{If applicable:}
+- [CascadeClimbers Forum]({cascadeclimbers_search_url}) - Forum discussions and beta
 
 {If limited reports:}
 **Note:** Limited recent trip reports available. Consider posting your own after your climb!

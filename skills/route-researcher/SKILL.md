@@ -182,9 +182,14 @@ Get all available ascent data regardless of age.
     - Direct link to the ascent page
     - Example: `- 2025-01-14 - [Emma Meersman](https://www.peakbagger.com/climber/ascent.aspx?aid=2746168) - 📍 GPX | 📝 Report (52 words)`
   - Limit to 5-10 most valuable ascents
-- **Links to all ascents pages:**
-  - PeakBagger ascents list: `https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}`
-  - Include links to SummitPost and Mountaineers.org route pages if found during route research (Phase 2B)
+- **Links to all trip report sources:**
+  - **PeakBagger ascents list:** `https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}` (always include)
+  - **Washington Trails Association (WTA):** If peak has a WTA page, include trip reports link (search: "{peak_name} site:wta.org")
+  - **AllTrails:** Include reviews/reports link if found (search: "{peak_name} site:alltrails.com")
+  - **SummitPost:** Include trip reports link if route page found during Phase 2B
+  - **Mountaineers.org:** Include route page link if found during Phase 2B
+  - **CascadeClimbers.com:** Include forum search link (search: "{peak_name} site:cascadeclimbers.com")
+  - Format: Provide direct links to trip report sections, not just main route pages
 - Seasonal patterns from monthly distribution (helps identify best climbing seasons)
 - Note the timeframe of data included (e.g., "last 1 year", "last 5 years", "all available data")
 
@@ -192,24 +197,29 @@ Get all available ascent data regardless of age.
 - If peakbagger-cli fails: Fall back to WebSearch for trip reports
 - If no ascents found: Note in report and continue with other sources
 
-#### 2D. Recent Trip Reports (WebSearch - Supplemental)
+#### 2D. Trip Report Sources Discovery (WebSearch)
 
-Use WebSearch to find trip reports from additional sources not in PeakBagger:
+Systematically search for trip report pages across major platforms:
 
 ```
-WebSearch queries:
-1. "{peak_name} trip report site:cascadeclimbers.com"
-2. "{peak_name} recent climb 2025"
-3. "{peak_name} conditions report"
+WebSearch queries (run in parallel):
+1. "{peak_name} site:wta.org" - WTA hike page with trip reports
+2. "{peak_name} site:alltrails.com" - AllTrails page with reviews
+3. "{peak_name} site:summitpost.org" - SummitPost route page
+4. "{peak_name} site:mountaineers.org" - Mountaineers route information
+5. "{peak_name} trip report site:cascadeclimbers.com" - Forum discussions
 ```
 
-**Extract from results:**
-- Report dates (most recent 5-10)
-- Links to full reports
-- Any conditions mentioned in snippets
+**Extract and save URLs for report template:**
+- **WTA:** Trip reports section URL (usually: `https://www.wta.org/go-hiking/hikes/{hike-name}` - trip reports tab)
+- **AllTrails:** Trail page URL (includes reviews section)
+- **SummitPost:** Route page URL (has trip reports section)
+- **Mountaineers.org:** Route/place page URL
+- **CascadeClimbers:** Forum search URL or relevant threads
 
 **Optional WebFetch:**
-- If specific high-value trip reports identified, fetch 1-2 for detailed conditions
+- If specific high-value trip reports identified on any platform, fetch 1-2 for detailed conditions
+- Extract recent dates and conditions mentioned in snippets for "Recent Conditions" section
 
 #### 2E. Weather Forecast (Multiple Sources)
 
