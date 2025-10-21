@@ -36,7 +36,16 @@
 
 ### Route
 
-{Route description synthesized from multiple sources, incorporating: The route covers **{round trip distance}** with **{total gain}** of elevation gain, typically taking **{typical completion time}** to complete.}
+{Route description synthesized from multiple sources}
+
+The route covers approximately **{round trip distance}** with **{total gain}** of elevation gain.
+
+**Typical completion times:**
+- **{fast time range}** (~{fast mph} mph, {fast gain rate}+ ft/hr): Experienced hikers, trail runners, solo climbers
+- **{moderate time range}** (~{moderate mph} mph, {moderate gain rate} ft/hr): Average fitness, steady pace with brief breaks
+- **{leisurely time range}** (~{leisurely mph} mph, {leisurely gain rate} ft/hr): Relaxed pace, groups, taking time for photos
+
+{Continue with detailed route description}
 
 ### Crux
 

@@ -352,7 +352,15 @@ From all gathered data, identify:
 - **Notable Gear:** Any unusual or important gear mentioned in trip reports or beta (to be included in relevant sections, not as standalone section)
 - **Trailhead:** Name and approximate location
 - **Distance/Gain:** Round-trip distance and elevation gain
-- **Time Estimate:** Typical completion time
+- **Time Estimates:** Calculate three-tier pacing based on distance and gain:
+  - **Fast pace:** Calculate based on 2+ mph and 1000+ ft/hr gain rate
+  - **Moderate pace:** Calculate based on 1.5-2 mph and 700-900 ft/hr gain rate
+  - **Leisurely pace:** Calculate based on 1-1.5 mph and 500-700 ft/hr gain rate
+  - Use the **slower** of distance-based or gain-based calculations for each tier
+  - Example: For 4 miles, 2700 ft gain:
+    - Fast: max(4mi/2mph, 2700ft/1000ft/hr) = max(2hr, 2.7hr) = ~2.5-3 hours
+    - Moderate: max(4mi/1.5mph, 2700ft/800ft/hr) = max(2.7hr, 3.4hr) = ~3-4 hours
+    - Leisurely: max(4mi/1mph, 2700ft/600ft/hr) = max(4hr, 4.5hr) = ~4-5 hours
 
 #### 3C. Identify Information Gaps
 
