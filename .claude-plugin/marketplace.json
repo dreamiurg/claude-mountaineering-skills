@@ -1,0 +1,15 @@
+{
+  "name": "mountaineering-skills-marketplace",
+  "owner": {
+    "name": "dreamiurg",
+    "url": "https://github.com/dreamiurg"
+  },
+  "plugins": [
+    {
+      "name": "mountaineering-skills",
+      "source": ".",
+      "description": "Automated mountain route research combining PeakBagger data, weather forecasts, avalanche conditions, and trip reports into comprehensive beta documents",
+      "version": "1.0.0"
+    }
+  ]
+}

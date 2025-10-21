@@ -1,0 +1,7 @@
+{
+  "post-install": {
+    "command": "bash",
+    "args": ["-c", "cd skills/route-researcher/tools && uv sync"],
+    "description": "Installing Python dependencies for route-researcher tools"
+  }
+}

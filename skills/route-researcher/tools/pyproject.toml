@@ -1,0 +1,23 @@
+[project]
+name = "route-researcher-tools"
+version = "0.1.0"
+description = "Data gathering tools for Pacific Northwest route beta research"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.1.0",
+    "httpx>=0.27.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+    "pytest>=8.0.0",
+    "astral>=3.2",
+    "cloudscraper>=1.2.71",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
