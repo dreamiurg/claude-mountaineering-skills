@@ -576,8 +576,10 @@ Every generated report must:
 - **peakbagger-cli** integration for peak search, info, and ascent data
 - Python tools directory structure
 - Report generation in user's current working directory
-- cloudscrape.py for Cloudflare-protected sites (SummitPost, Mountaineers.org, Mountain-Forecast.com)
-- Multi-source weather gathering (Mountain-Forecast.com, NOAA/NWS, NWAC)
+- cloudscrape.py for Cloudflare-protected sites (SummitPost, Mountaineers.org only)
+- **Open-Meteo Weather API** for mountain weather forecasts (temperature, precipitation, freezing level, wind)
+- **Open-Meteo Air Quality API** for AQI forecasting (US AQI scale with conditional alerts)
+- Multi-source weather gathering (Open-Meteo, NOAA/NWS, NWAC)
 - Adaptive ascent data retrieval based on peak popularity
 - **Sunrise-Sunset.org API** for daylight calculations (sunrise, sunset, civil twilight, day length)
 
@@ -597,11 +599,14 @@ Every generated report must:
   - Peak search with structured JSON output
   - Peak information (elevation, coordinates, routes, etc.)
   - Ascent statistics and trip report links
-- Use **cloudscrape.py** only for non-PeakBagger Cloudflare-protected sites:
+- Use **Open-Meteo APIs** for weather and air quality data:
+  - Weather API: temperature, precipitation, freezing level, wind, weather codes
+  - Air Quality API: US AQI forecasting with conditional alerts
+  - Free, no authentication, elevation-aware forecasts
+- Use **cloudscrape.py** only for Cloudflare-protected beta sites:
   - SummitPost route pages
   - Mountaineers.org route information
-  - Mountain-Forecast.com weather forecasts
-- Reserve Python scripts for **calculations only** (weather, avalanche, daylight)
+- Reserve Python scripts for **calculations only** (avalanche)
 
 **Previous Design (2025-10-20):**
 - Used WebSearch to find PeakBagger peak pages
