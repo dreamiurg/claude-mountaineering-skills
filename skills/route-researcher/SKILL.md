@@ -171,17 +171,22 @@ Get all available ascent data regardless of age.
 
 **Extract for report:**
 - Total ascent statistics (total count, temporal breakdown, monthly distribution)
-- **For each ascent with trip report in the `ascents` array:**
-  - Date (`date` field)
-  - Climber name (`climber.name` field)
-  - Trip report length (`trip_report.word_count` field)
-  - Direct link to ascent page (`url` field)
-  - GPX availability (`has_gpx` field)
-  - **Format:** `YYYY-MM-DD - [Climber Name](url) - Report (X words)` + GPX indicator if available
-- Links to ascents with GPX tracks (useful for route planning)
+- **High-value ascents (prioritized list of 5-10):**
+  - **Priority 1:** Ascents with GPX tracks AND substantial trip reports (>30 words)
+  - **Priority 2:** Ascents with GPX tracks only
+  - **Priority 3:** Ascents with substantial trip reports (>30 words) but no GPX
+  - Sort by date (most recent first) within each priority tier
+  - **Format each entry:**
+    - Date, climber name, and report details
+    - Indicators: `📍 GPX` if has_gpx=true, `📝 Report (X words)` if has report
+    - Direct link to the ascent page
+    - Example: `- 2025-01-14 - [Emma Meersman](https://www.peakbagger.com/climber/ascent.aspx?aid=2746168) - 📍 GPX | 📝 Report (52 words)`
+  - Limit to 5-10 most valuable ascents
+- **Links to all ascents pages:**
+  - PeakBagger ascents list: `https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id}`
+  - Include links to SummitPost and Mountaineers.org route pages if found during route research (Phase 2B)
 - Seasonal patterns from monthly distribution (helps identify best climbing seasons)
 - Note the timeframe of data included (e.g., "last 1 year", "last 5 years", "all available data")
-- **Include ALL ascents from the JSON array, not just a subset**
 
 **Error Handling:**
 - If peakbagger-cli fails: Fall back to WebSearch for trip reports

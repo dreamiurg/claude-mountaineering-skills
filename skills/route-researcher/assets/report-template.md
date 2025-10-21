@@ -101,11 +101,28 @@ Daylight calculations not available. Check sunrise/sunset times for your planned
 
 ## Recent Trip Reports
 
-{List 5-10 most recent reports with dates and links:}
-- **{Date}** - [{Source}]({url}) - {Brief note if available from snippet, including any unusual or important gear mentioned}
+{Summary paragraph: Brief overview of recent activity from PeakBagger ascent statistics - total ascents in timeframe, seasonal patterns, availability of GPX/reports}
+
+### High-Value Ascents
+
+{Prioritized list of 5-10 most valuable recent ascents, sorted by value (GPX+detailed report > GPX only > detailed report only), then by date:}
+
+- **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - {📍 GPX if available} | {📝 Report (X words) if available}
+
+{Example:}
+- **2025-01-14** - [Emma Meersman](https://www.peakbagger.com/climber/ascent.aspx?aid=2746168) - 📍 GPX | 📝 Report (52 words)
+- **2024-12-15** - [Brad Wagenaar](https://www.peakbagger.com/climber/ascent.aspx?aid=2910767) - 📍 GPX | 📝 Report (8 words)
+- **2024-10-30** - [Ryan Rodman](https://www.peakbagger.com/climber/ascent.aspx?aid=2688709) - 📝 Report (6 words)
+
+### Browse All Ascents
+
+- [PeakBagger Ascents List](https://www.peakbagger.com/climber/ascent.aspx?pid={peak_id})
+{If found during route research:}
+- [SummitPost Trip Reports]({summitpost_url})
+- [Mountaineers.org Route Page]({mountaineers_url})
 
 {If limited reports:}
-- **Note:** Limited recent trip reports available. Consider posting your own after your climb!
+**Note:** Limited recent trip reports available. Consider posting your own after your climb!
 
 ## Access & Permits
 
