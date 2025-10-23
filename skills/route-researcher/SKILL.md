@@ -1018,7 +1018,7 @@ Skill Actions:
 
 ---
 
-**Skill Version:** 2.1.0
+**Skill Version:** --help
 **Last Updated:** 2025-10-23
 **peakbagger-cli Version:** v1.4.0
 **Status:** Ready for execution (with Python scripts pending)

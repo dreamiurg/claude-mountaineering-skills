@@ -1,3 +1,24 @@
+## [3.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.1.0...v3.0.0) (2025-10-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* This major update brings significant new capabilities to the route-researcher skill:
+
+- v1.3.0: New ascent report command for generating peak ascent summaries
+- v1.4.0: --dump-html option for debugging and custom HTML extraction
+- v1.2.1: Improved reliability with table structure parsing fixes
+
+The skill now leverages the full ascent analysis capabilities including temporal patterns, GPX track availability, and trip report discovery.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-authored-by: Claude <noreply@anthropic.com>
+
+### Features
+
+* upgrade peakbagger-cli to v1.4.0 with ascent analysis capabilities ([#14](https://github.com/dreamiurg/claude-mountaineering-skills/issues/14)) ([6ba6bf0](https://github.com/dreamiurg/claude-mountaineering-skills/commit/6ba6bf067141f3d04bc1f5300733a6375d9719e7))
+
 ## [2.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.0.1...v2.1.0) (2025-10-21)
 
 
