@@ -32,7 +32,7 @@ Examples:
 
 2. **Search PeakBagger** using peakbagger-cli:
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak search "{peak_name}" --format json
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak search "{peak_name}" --format json
    ```
    - Parse JSON output to extract peak matches
    - Each result includes: peak_id, name, elevation (feet/meters), location, url
@@ -84,7 +84,7 @@ Examples:
 Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak show {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak show {peak_id} --format json
 ```
 
 This returns structured JSON with:
@@ -195,7 +195,7 @@ Retrieve ascent data and patterns using the peak ID:
 
 **Step 1: Get overall ascent statistics**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak stats {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak stats {peak_id} --format json
 ```
 
 This returns:
@@ -210,19 +210,19 @@ Based on the total count from Step 1, adaptively retrieve ascents:
 
 **For popular peaks (>50 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak ascents {peak_id} --format json --within 1y
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak ascents {peak_id} --format json --within 1y
 ```
 Recent data (1 year) is sufficient for active peaks.
 
 **For moderate peaks (10-50 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak ascents {peak_id} --format json --within 5y
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak ascents {peak_id} --format json --within 5y
 ```
 Expand to 5 years to get meaningful sample size.
 
 **For rarely-climbed peaks (<10 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.0.0 peakbagger peak ascents {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak ascents {peak_id} --format json
 ```
 Get all available ascent data regardless of age.
 
@@ -868,8 +868,8 @@ Every generated report must:
 
 ### Design Evolution: peakbagger-cli Integration
 
-**Latest Design (2025-10-21):**
-- Use **peakbagger-cli v1.0.0** (via uvx) for all PeakBagger data retrieval:
+**Latest Design (2025-10-23):**
+- Use **peakbagger-cli v1.4.0** (via uvx) for all PeakBagger data retrieval:
   - `peakbagger peak search`: Peak discovery with structured JSON output (try word order variations)
   - `peakbagger peak show`: Detailed peak information (elevation, coordinates, routes, etc.)
   - `peakbagger peak stats`: Ascent statistics and temporal patterns
@@ -900,7 +900,8 @@ Every generated report must:
 - Better maintainability (less brittle than HTML parsing)
 - Native support for filtering ascents by date, GPX, and trip reports
 - Adaptive timeframe selection based on peak popularity
-- **v1.0.0 resource-action pattern:** Clear command structure (`peak search`, `peak show`, `peak stats`, `peak ascents`)
+- **v1.4.0 resource-action pattern:** Clear command structure (`peak search`, `peak show`, `peak stats`, `peak ascents`)
+- **v1.4.0 new feature:** `--dump-html` option for debugging and custom HTML extraction when needed
 
 ### Peak Name Variations
 
@@ -1017,6 +1018,7 @@ Skill Actions:
 
 ---
 
-**Skill Version:** --help
-**Last Updated:** 2025-10-21
+**Skill Version:** 2.1.0
+**Last Updated:** 2025-10-23
+**peakbagger-cli Version:** v1.4.0
 **Status:** Ready for execution (with Python scripts pending)
