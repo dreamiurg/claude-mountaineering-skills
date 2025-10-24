@@ -1,6 +1,6 @@
 # Mountaineering Skills for Claude Code
 
-Claude Code plugin for researching Pacific Northwest mountain peaks and generating comprehensive route beta reports.
+Claude Code plugin for researching North American mountain peaks and generating comprehensive route beta reports.
 
 ## Installation
 
@@ -56,11 +56,18 @@ Reports are created as Markdown files in your current working directory with com
 
 ### Multi-Source Data Gathering
 
+The skill aggregates information from multiple specialized mountaineering websites:
+
 - **PeakBagger**: Peak information, coordinates, elevation
+- **SummitPost**: Route descriptions, conditions, beta
+- **Washington Trails Association (WTA)**: Trail reports and conditions
+- **AllTrails**: Trail information and reviews
+- **The Mountaineers**: Route guides and resources
 - **Weather**: Mountain-Forecast.com, NOAA/NWS point forecasts
-- **Avalanche**: NWAC forecasts (when applicable)
-- **Trip Reports**: CascadeClimbers, PeakBagger, Mountain Project
-- **Route Info**: SummitPost, Mountaineers.org, Mountain Project
+- **Avalanche**: Regional avalanche centers (NWAC, etc.) when applicable
+- **Trip Reports**: Multiple sources including CascadeClimbers, PeakBagger, Mountain Project
+
+**Note:** The quality of the generated report depends on the availability of peak information on these sources. If your target peak lacks coverage on these websites, the skill may produce limited output. The skill works best for well-documented peaks in North America.
 
 ### Safety-First Approach
 

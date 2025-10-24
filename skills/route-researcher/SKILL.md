@@ -1,11 +1,13 @@
 ---
 name: route-researcher
-description: Research Pacific Northwest mountain peaks and generate comprehensive route beta reports
+description: Research North American mountain peaks and generate comprehensive route beta reports
 ---
 
 # Route Researcher
 
-Research mountain peaks in the Pacific Northwest and generate comprehensive route beta reports combining data from multiple sources including PeakBagger, weather forecasts, avalanche conditions, and trip reports.
+Research mountain peaks across North America and generate comprehensive route beta reports combining data from multiple sources including PeakBagger, SummitPost, WTA, AllTrails, weather forecasts, avalanche conditions, and trip reports.
+
+**Data Sources:** This skill aggregates information from specialized mountaineering websites (PeakBagger, SummitPost, Washington Trails Association, AllTrails, The Mountaineers, and regional avalanche centers). The quality of the generated report depends on the availability of information on these sources. If your target peak lacks coverage on these websites, the report may contain limited details. The skill works best for well-documented peaks in North America.
 
 ## When to Use This Skill
 

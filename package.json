@@ -1,7 +1,7 @@
 {
   "name": "claude-mountaineering-skills",
   "version": "1.0.0",
-  "description": "Claude Code plugin for Pacific Northwest mountain route research",
+  "description": "Claude Code plugin for North American mountain route research",
   "private": true,
   "repository": {
     "type": "git",
