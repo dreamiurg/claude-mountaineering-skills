@@ -50,7 +50,7 @@ Claude will automatically invoke the route-researcher skill and generate a compr
 
 Reports are created as Markdown files in your current working directory with comprehensive route information, current conditions, trip reports, and safety disclaimers.
 
-**Example:** See [Granite Mountain (Snoqualmie) route beta](skills/route-researcher/examples/2025-10-21-granite-mountain-snoqualmie.md) for a sample report.
+**Example:** See [Mount Si route beta](skills/route-researcher/examples/2025-10-23-mount-si.md) for a sample report.
 
 ## Features
 
