@@ -26,7 +26,9 @@ Research Progress:
 - [ ] Phase 1: Peak Identification (peak validated, ID obtained)
 - [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
 - [ ] Phase 3: Data Gathering (route descriptions, trip reports, weather, conditions collected)
-- [ ] Phase 4: Route Analysis (route type, difficulty, hazards identified)
+  - [ ] Phase 3 Stage 1: Parallel data gathering (Steps 3A-3H)
+  - [ ] Phase 3 Stage 2: Fetch trip report content (Step 3I - 10-15 reports for representative sample)
+- [ ] Phase 4: Route Analysis (synthesize route, crux, hazards from all sources including trip reports)
 - [ ] Phase 5: Report Generation (markdown file created)
 - [ ] Phase 6: Completion (user notified, next steps provided)
 
@@ -83,7 +85,7 @@ Research Progress:
 
 **Goal:** Get detailed peak information and coordinates needed for location-based data gathering.
 
-**CRITICAL:** This phase must complete before Phase 3, as coordinates are required for weather, daylight, and avalanche data.
+This phase must complete before Phase 3, as coordinates are required for weather, daylight, and avalanche data.
 
 Retrieve detailed peak information using the peak ID from Phase 1:
 
@@ -115,7 +117,7 @@ This returns structured JSON with:
 
 **Execution Strategy:** Execute ALL steps in parallel to minimize total execution time.
 
-**CRITICAL:** All Phase 3 steps run simultaneously. Do not wait for any step to complete before starting others.
+All Phase 3 steps run simultaneously. Do not wait for any step to complete before starting others.
 
 #### Step 3A: Route Description Research (WebSearch + WebFetch)
 
@@ -415,132 +417,76 @@ WebSearch queries:
 - Required permits (if any)
 - Access notes (road conditions, seasonal closures)
 
-#### Step 3H: High-Quality Trip Report Identification
+#### Step 3H: Trip Report Identification
 
-**CRITICAL: This step is MANDATORY and must be executed even if PeakBagger has some trip reports.**
-
-**Goal:** Identify the most informative trip reports across all sources for detailed route beta.
+**Goal:** Identify trip reports across all sources for comprehensive route beta coverage.
 
 This step synthesizes information from:
 - PeakBagger ascent data (from Step 3B)
 - Trip report source URLs (from Step 3C)
 
-**Strategy:** Identify reports by two criteria:
-1. **Most Detailed Reports** - Highest information density (word count >100 words, detail level) regardless of age
-2. **Recent Reports** - Most current conditions (last 1-2 years)
+**Selection Strategy:**
 
-**Quality Threshold:** Prioritize reports with >100 words. If PeakBagger reports are mostly brief (<100 words), WTA and Mountaineers sources become CRITICAL.
+Gather a representative sample of reports covering different perspectives:
+- **Recency:** Recent reports (last 1-2 years) for current conditions
+- **Variety:** Mix of sources (PeakBagger, WTA, Mountaineers) for diverse experiences
+- **Temporal spread:** Include older reports if they provide unique insights
+- **Sample size:** Aim for 10-15 reports total to capture range of conditions and perspectives
+
+**Note:** Report length/word count is NOT a quality indicator. A concise 50-word report with specific route beta is more valuable than a 500-word narrative about the drive. Focus on reports that have substantive content regardless of length.
 
 **PeakBagger Trip Reports (uses data from Step 3B):**
 
 From the ascent data already retrieved in Step 3B:
 
-1. **Sort by word count** (descending) to find most detailed reports
+1. **Identify reports with trip report content:**
    - Filter: Only ascents where `trip_report.word_count > 0`
-   - Take top 5-10 highest word count reports
-   - These provide the most comprehensive route beta
+   - Sort by date (most recent first) to identify recent reports
+   - Also identify reports from various time periods (not just recent)
 
-2. **Extract for each high-quality report:**
+2. **Extract for each report:**
    - Date (`date` field)
    - Climber name (`climber.name` field)
    - Word count (`trip_report.word_count` field)
    - Ascent URL (`url` field)
-   - Mark as "Detailed Report" category
 
-3. **Also identify recent reports:**
-   - Filter: Reports from last 1-2 years with trip reports
-   - Sort by date (most recent first)
-   - Take top 3-5 most recent
-   - Mark as "Recent Report" category
+3. **Select diverse sample:**
+   - Take 5-10 recent reports (last 1-2 years)
+   - Include 2-5 older reports if they provide unique insights
+   - Include reports with GPX tracks when available (useful for users to download and verify route)
+   - Mix of seasons if available
 
 **WTA Trip Reports (if WTA URL found in Step 3C):**
 
-**MANDATORY EXECUTION:** If WTA URL was found in Step 3C, you MUST attempt to extract trip reports.
+If WTA URL was found, extract trip reports using the AJAX endpoint:
 
-**CRITICAL:** WTA loads trip reports via JavaScript/AJAX. You MUST use the AJAX endpoint, not the main page.
-
-**Step 1: Construct the AJAX endpoint URL**
-```
-WTA AJAX endpoint: {wta_url}/@@related_tripreport_listing
-```
-Example: If WTA URL is `https://www.wta.org/go-hiking/hikes/mount-defiance`
-Then AJAX URL is: `https://www.wta.org/go-hiking/hikes/mount-defiance/@@related_tripreport_listing`
-
-**Step 2: Fetch using cloudscrape.py (MANDATORY - WebFetch will not work for this endpoint):**
 ```bash
+# Construct endpoint: {wta_url}/@@related_tripreport_listing
 cd skills/route-researcher/tools
 uv run python cloudscrape.py "{wta_url}/@@related_tripreport_listing"
 ```
 
-**Step 3: Parse the returned HTML to extract trip report metadata:**
-
-The AJAX endpoint returns HTML with trip reports in `<div class="item">` elements. Look for:
-- **Trip report URL**: Extract from `<h3 class="listitem-title"><a href="...">`
-  - URLs follow pattern: `https://www.wta.org/go-hiking/trip-reports/trip_report-YYYY-MM-DD.XXXXXXXXXX`
-- **Date**: Extract from the `<a>` title text (e.g., "Mount Defiance, Ira Spring Trail - Mason Lake — Oct. 13, 2025")
-  - Date format in title: "Oct. 13, 2025", "Sep. 20, 2025", etc.
-- **Author**: Extract from `<a class="wta-icon-headline" href="https://www.wta.org/@@backpacks/..."><span class="wta-icon-headline__text">{author}</span>`
-- **Photo count**: Look for `<div class="media-indicator">X photos</div>`
-
-**Extract from the HTML:**
-- Date, author/title, trip report URL for each report
-- **CRITICAL:** Extract at least 10-15 individual trip report URLs (WTA typically has many reports)
-- Sort by date (most recent first) - the AJAX endpoint returns them pre-sorted
-- Identify top 5-7 most recent reports (last 1-2 years preferred)
-- **If extraction yields <5 trip reports, note as a failure in Information Gaps**
+Parse HTML to extract for each report: date, author, trip report URL. Target 10-15 individual URLs, prioritize recent but include variety of dates.
 
 **Error Handling:**
-- If cloudscrape.py fails: Note in "Information Gaps" with WTA browse link
-- If HTML parsing yields no results: Note as parsing failure in "Information Gaps"
-- Do NOT try WebFetch for the AJAX endpoint - it requires cloudscrape.py
+- If extraction yields <5 reports: Note in "Information Gaps"
+- If cloudscrape.py fails: Note with WTA browse link
 
 **Mountaineers.org Trip Reports (if Mountaineers URL found in Step 3C):**
 
-**MANDATORY EXECUTION:** If Mountaineers URL was found in Step 3C, you MUST attempt to extract trip reports.
+If Mountaineers URL was found, extract trip reports from the trip-reports endpoint:
 
-**CRITICAL:** Mountaineers.org loads trip reports via JavaScript. You MUST use the `/trip-reports` endpoint, not the main page.
-
-**Step 1: Construct the trip-reports endpoint URL**
-```
-Mountaineers endpoint: {mountaineers_url}/trip-reports
-```
-Example: If Mountaineers URL is `https://www.mountaineers.org/activities/routes-places/boston-basin-area-review/sahale-peak-quien-sabe-glacier`
-Then trip reports URL is: `https://www.mountaineers.org/activities/routes-places/boston-basin-area-review/sahale-peak-quien-sabe-glacier/trip-reports`
-
-**Step 2: Fetch using cloudscrape.py (MANDATORY - WebFetch will not work for this endpoint):**
 ```bash
+# Construct endpoint: {mountaineers_url}/trip-reports
 cd skills/route-researcher/tools
 uv run python cloudscrape.py "{mountaineers_url}/trip-reports"
 ```
 
-**Step 3: Parse the returned HTML to extract trip report metadata:**
-
-The endpoint returns HTML with trip reports in `<div class="result-item contenttype-mtneers-trip_report">` elements. Look for:
-- **Trip report URL**: Extract from `<h3 class="result-title"><a href="...">`
-  - URLs follow pattern: `https://www.mountaineers.org/activities/trip-reports/{slug}`
-  - Example: `https://www.mountaineers.org/activities/trip-reports/basic-glacier-climb-sahale-peak-quien-sabe-glacier-8`
-- **Date**: Extract from `<div class="result-date">`
-  - Format varies: "Sat, Aug  9, 2025 - Sun, Aug 10, 2025" (multi-day) or "Sat, Jul 19, 2025" (single day)
-  - Parse the first date for sorting purposes
-- **Title**: Extract from `<h3 class="result-title"><a>` text content
-  - Example: "Basic Glacier Climb - Sahale Peak/Quien Sabe Glacier"
-- **Author**: Extract from `<div class="result-sidebar"><div><label>By: </label>{author}</div>`
-  - Example: "Nomi Rachel Fuchs Montgomery"
-- **Summary**: Extract from `<p class="result-summary">`
-  - Provides preview of trip report content
-- **Activity Type**: Extract from `<label>Activity Type:</label>` sibling text
-  - Example: "Climbing", "Day Hiking & Climbing"
-
-**Pagination:** The endpoint shows 20 reports per page by default. Pagination uses query parameter `?b_start:int=20` for page 2, `?b_start:int=40` for page 3, etc. For this initial implementation, extract only the first page (top 20 most recent reports).
-
-**Sort and filter:**
-- Extract all trip reports from the page
-- Sort by date (most recent first)
-- Select top 3-5 for inclusion in report
+Parse HTML to extract for each report: date, title, author, trip report URL. Select top 3-5 most recent reports.
 
 **Error Handling:**
-- If cloudscrape.py fails or returns no HTML: Note in "Information Gaps": "Mountaineers.org trip report extraction failed - cloudscrape.py unsuccessful. Check Mountaineers manually for detailed trip reports."
-- If HTML is returned but no trip reports found: Note in "Information Gaps": "No trip reports found on Mountaineers.org for this route"
+- If cloudscrape.py fails: Note in "Information Gaps"
+- If no trip reports found: Note in "Information Gaps"
 
 **Extract and save for Phase 4 (Report Generation):**
 
@@ -569,9 +515,46 @@ The endpoint returns HTML with trip reports in `<div class="result-item contentt
 - If WTA/Mountaineers URLs not found in Step 3C: Skip those sources
 - PeakBagger data already available from Step 3B, no additional fetch needed
 
+#### Step 3I: Fetch Trip Report Content
+
+**Goal:** Fetch 10-15 trip reports to get representative sample of conditions and experiences (runs after Step 3H identifies candidates).
+
+**Selection from Step 3H results:**
+- Recent reports (last 1-2 years) for current conditions
+- Mix of sources (PeakBagger, WTA, Mountaineers)
+- Variety of dates/seasons to capture different conditions
+- Include some reports with GPX tracks when available (provides users with downloadable route data for verification)
+
+**Fetching:**
+
+**PeakBagger:** Use CLI to fetch full trip report content:
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
+```
+
+**WTA/Mountaineers:** Use cloudscrape.py to fetch individual trip report pages:
+```bash
+cd skills/route-researcher/tools
+uv run python cloudscrape.py "{trip_report_url}"
+```
+
+**Extract and organize by theme:**
+- **Route:** Landmarks, variations, navigation details, actual times/distances
+- **Crux:** Difficulty assessments, technical requirements, conditions impact
+- **Hazards:** Rockfall, exposure, route-finding challenges, seasonal hazards, approach hazards
+- **Gear:** What people used/needed, seasonal variations
+- **Conditions:** Snow/ice timing, trail conditions, best months
+
+**Error Handling:**
+- If CLI/cloudscrape fails: Note which reports failed, continue with others
+- If report appears to have no substantive content: Note and continue
+- Minimum target: Successfully fetch at least 5-8 reports with useful content
+
 **Phase 3 Execution Summary:**
 
-All Phase 3 steps (3A through 3H) execute in parallel to minimize total time:
+Phase 3 has two execution stages:
+
+**Stage 1 - Parallel Execution (Steps 3A through 3H):**
 - Step 3A: Route descriptions (WebSearch + WebFetch)
 - Step 3B: Ascent statistics (peakbagger-cli)
 - Step 3C: Trip report sources (WebSearch)
@@ -581,7 +564,10 @@ All Phase 3 steps (3A through 3H) execute in parallel to minimize total time:
 - Step 3G: Access and permits (WebSearch)
 - Step 3H: High-quality trip report identification
 
-**Performance Benefit:** Total Phase 3 time = max(time(3A), time(3B), ..., time(3H)) instead of summing all step times sequentially.
+**Stage 2 - Sequential Execution (Step 3I):**
+- Step 3I: Fetch high-quality trip report content (MUST run after 3H completes)
+
+**Performance Benefit:** Stage 1 total time = max(time(3A), time(3B), ..., time(3H)) instead of summing all step times. Stage 2 runs after Stage 1 completes to use identified reports from Step 3H.
 
 ### Phase 4: Route Analysis
 
@@ -595,15 +581,40 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 - **Scramble:** Class 2-4, exposed but non-technical
 - **Hike:** Class 1-2, trail-based, minimal exposure
 
-#### Step 4B: Extract Key Information
+#### Step 4B: Synthesize Route Information from Multiple Sources
 
-From all gathered data, identify:
-- **Difficulty Rating:** YDS class, scramble grade, or general difficulty
-- **Crux:** Hardest/most technical section of route
-- **Hazards:** Rockfall, crevasses, exposure, weather, avalanche danger
+**Goal:** Combine trip reports (Step 3I), route descriptions (Step 3A), and other sources into comprehensive route beta.
+
+**Source Priority:**
+1. Trip reports (Step 3I) - first-hand experiences
+2. Route descriptions (Step 3A) - published beta baseline
+3. PeakBagger/ascent data (Steps 2 & 3B) - basic info, patterns
+
+**Synthesis Pattern for Route, Crux, and Hazards:**
+
+1. **Start with baseline** from route descriptions (standard route name, published difficulty)
+2. **Enrich with trip report details** (landmarks, specific conditions, actual experiences)
+3. **Note conflicts** when trip reports disagree with published info
+4. **Highlight consensus** ("Multiple reports mention...")
+5. **Include specifics** (elevations, locations, quotes)
+
+**Example (Route Description):**
+> "The standard route follows the East Ridge (Class 3). Multiple trip reports mention a well-cairned use trail branching right at 4,800 ft—this is the correct turn. The use trail climbs through talus (described as 'tedious' and 'ankle-rolling'). In early season, this section may be snow-covered, requiring microspikes."
+
+**Apply this pattern to:**
+- **Route:** Use baseline structure, add landmarks/navigation from trip reports, include actual times
+- **Crux:** Describe location/difficulty, add trip report assessments, note conditions-dependent variations
+- **Hazards:** Extract ALL hazards from trip reports (rockfall, exposure, route-finding, seasonal), organize by type, include specific locations and mitigation strategies. Be comprehensive—safety-critical.
+
+**Extract Key Information:**
+
+From all synthesized data, identify:
+- **Difficulty Rating:** YDS class, scramble grade, or general difficulty (validated by trip reports)
+- **Crux:** Hardest/most technical section of route (synthesized above)
+- **Hazards:** All identified hazards (synthesized above)
 - **Notable Gear:** Any unusual or important gear mentioned in trip reports or beta (to be included in relevant sections, not as standalone section)
 - **Trailhead:** Name and approximate location
-- **Distance/Gain:** Round-trip distance and elevation gain
+- **Distance/Gain:** Round-trip distance and elevation gain (compare published vs actual trip report data)
 - **Time Estimates:** Calculate three-tier pacing based on distance and gain:
   - **Fast pace:** Calculate based on 2+ mph and 1000+ ft/hr gain rate
   - **Moderate pace:** Calculate based on 1.5-2 mph and 700-900 ft/hr gain rate
@@ -644,7 +655,7 @@ Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowerca
 
 **Structure and Formatting:**
 
-**CRITICAL:** Read `assets/report-template.md` and follow it exactly for:
+Read `assets/report-template.md` and follow it exactly for:
 - Section structure and headings
 - Content formatting (how to present ascent data, trip report links, etc.)
 - Conditional sections (when to include/exclude sections based on available data)
@@ -654,7 +665,7 @@ The template is the **single source of truth** for report formatting. Phase 3 (D
 
 #### Step 5B: Markdown Formatting Rules
 
-**CRITICAL:** Follow these formatting rules to ensure proper Markdown rendering:
+Follow these formatting rules to ensure proper Markdown rendering:
 
 1. **Blank lines before lists:** ALWAYS add a blank line before starting a bullet or numbered list
    ```markdown
