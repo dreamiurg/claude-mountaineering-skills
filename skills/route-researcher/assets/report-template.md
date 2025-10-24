@@ -34,7 +34,20 @@
 
 **Directions:** [View on Google Maps]({google_maps_link})
 
-### Route
+### Access & Permits
+
+#### Permits & Regulations
+
+{Required permits, fees, regulations}
+
+{If not found:}
+- **Note:** Permit information not confirmed. Check with local forest service or park service.
+
+#### Road Conditions
+
+{Current access notes, seasonal closures}
+
+### Route Description
 
 {Route description synthesized from multiple sources}
 
@@ -233,20 +246,6 @@ IMPORTANT PRIORITY RULES:
 - Limit to top 5-10 total across all sources
 - If no WTA reports were extracted but WTA URL exists, note this as a failure in Information Gaps}
 
-### Recent Reports (Last 1-2 Years)
-
-{These are the most recent reports for current conditions. List top 3-5 most recent reports with actual trip report content, sorted by date descending:}
-
-- **{YYYY-MM-DD}** - [{Source}: {Climber/Author Name}]({report_url}) - 📝 {word_count if PeakBagger}{, 📍 GPX if available}
-- **{YYYY-MM-DD}** - [{Source}: {Climber/Author Name}]({report_url}) - 📝 {word_count if PeakBagger}{, 📍 GPX if available}
-
-{Format notes:
-- Only include reports from last 1-2 years
-- Sort by date (most recent first)
-- Prefix with source: [PeakBagger], [WTA], [Mountaineers]
-- Limit to top 3-5 most recent
-- If overlap with "Most Detailed Reports" section above, that's okay - recent AND detailed reports can appear in both}
-
 ### Browse All Trip Reports
 
 {Always include PeakBagger. Include other platforms only if URLs were found during data gathering (Step 2D)}
@@ -265,19 +264,6 @@ IMPORTANT PRIORITY RULES:
 
 {If very limited trip report data (<5 reports total across all sources):}
 **Note:** Limited trip reports available for this peak. Consider posting your own after your climb!
-
-## Access & Permits
-
-### Permits & Regulations
-
-{Required permits, fees, regulations}
-
-{If not found:}
-- **Note:** Permit information not confirmed. Check with local forest service or park service.
-
-### Road Conditions
-
-{Current access notes, seasonal closures}
 
 ## Information Gaps
 
