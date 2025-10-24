@@ -1,3 +1,10 @@
+## [3.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.0.0...v3.1.0) (2025-10-24)
+
+
+### Features
+
+* upgrade peakbagger-cli to v1.7.0 and restructure skill workflow ([#16](https://github.com/dreamiurg/claude-mountaineering-skills/issues/16)) ([3691723](https://github.com/dreamiurg/claude-mountaineering-skills/commit/3691723bbbf412ddf5d394b28a873d0d4597fcfc))
+
 ## [3.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.1.0...v3.0.0) (2025-10-23)
 
 
