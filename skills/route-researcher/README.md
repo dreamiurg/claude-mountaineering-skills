@@ -201,15 +201,7 @@ This skill generates AI-assisted research documents. All reports include promine
 
 ## Example Report
 
-See generated reports in `route-beta/` directory for examples.
-
-Typical report structure:
-```
-route-beta/
-├── 2025-10-20-mount-baker.md
-├── 2025-10-20-sahale-peak.md
-└── 2025-10-20-forbidden-peak.md
-```
+See [Mount Si route beta](examples/2025-10-23-mount-si.md) for a complete example of the skill's output.
 
 Each report is self-contained with all gathered information, source links, and explicit gaps.
 
