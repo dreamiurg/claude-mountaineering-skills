@@ -1,3 +1,10 @@
+## [3.2.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.1.0...v3.2.0) (2025-10-24)
+
+
+### Features
+
+* expand geographic scope from Pacific Northwest to North America ([#18](https://github.com/dreamiurg/claude-mountaineering-skills/issues/18)) ([ceb0db0](https://github.com/dreamiurg/claude-mountaineering-skills/commit/ceb0db07a9214ed965c458fb5d7717ea0215974c))
+
 ## [3.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.0.0...v3.1.0) (2025-10-24)
 
 
