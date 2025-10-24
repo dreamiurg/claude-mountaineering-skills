@@ -20,9 +20,19 @@ Examples:
 - "I'm planning to climb Sahale Peak next month, can you research the route?"
 - "Generate route beta for Forbidden Peak"
 
+## Progress Checklist
+
+Research Progress:
+- [ ] Phase 1: Peak Identification (peak validated, ID obtained)
+- [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
+- [ ] Phase 3: Data Gathering (route descriptions, trip reports, weather, conditions collected)
+- [ ] Phase 4: Route Analysis (route type, difficulty, hazards identified)
+- [ ] Phase 5: Report Generation (markdown file created)
+- [ ] Phase 6: Completion (user notified, next steps provided)
+
 ## Orchestration Workflow
 
-### Phase 1: Peak Validation
+### Phase 1: Peak Identification
 
 **Goal:** Identify and validate the specific peak to research.
 
@@ -32,7 +42,7 @@ Examples:
 
 2. **Search PeakBagger** using peakbagger-cli:
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak search "{peak_name}" --format json
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak search "{peak_name}" --format json
    ```
    - Parse JSON output to extract peak matches
    - Each result includes: peak_id, name, elevation (feet/meters), location, url
@@ -69,22 +79,16 @@ Examples:
    - Store for use in subsequent peakbagger-cli commands
    - Also store the PeakBagger URL for reference links
 
-### Phase 2: Data Gathering
+### Phase 2: Peak Information Retrieval
 
-**Goal:** Gather comprehensive information from all available sources.
+**Goal:** Get detailed peak information and coordinates needed for location-based data gathering.
 
-**Execution Strategy:**
-1. **Step 2A (Sequential):** Get peak information including coordinates - this is required for location-dependent steps
-2. **Steps 2B-2H (Parallel):** Once coordinates are available, execute ALL remaining steps in parallel to minimize total execution time
-
-**CRITICAL:** After Step 2A completes and coordinates are obtained, immediately launch Steps 2B through 2H in parallel. Do not wait for any step to complete before starting others.
-
-#### 2A. PeakBagger Peak Information (peakbagger-cli) - EXECUTE FIRST
+**CRITICAL:** This phase must complete before Phase 3, as coordinates are required for weather, daylight, and avalanche data.
 
 Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak show {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak show {peak_id} --format json
 ```
 
 This returns structured JSON with:
@@ -103,15 +107,17 @@ This returns structured JSON with:
 - If specific fields missing in JSON: Mark as "Not available" in gaps section
 - Rate limiting: Built into peakbagger-cli (default 2 second delay)
 
-**Once coordinates are obtained from this step, immediately proceed to launch Steps 2B-2H in parallel.**
+**Once coordinates are obtained from this step, immediately proceed to Phase 3.**
 
----
+### Phase 3: Data Gathering
 
-## Steps 2B-2H: Execute in Parallel (After 2A Completes)
+**Goal:** Gather comprehensive route information from all available sources.
 
-The following steps can all run simultaneously once coordinates are available:
+**Execution Strategy:** Execute ALL steps in parallel to minimize total execution time.
 
-#### 2B. Route Description Research (WebSearch + WebFetch) - PARALLEL
+**CRITICAL:** All Phase 3 steps run simultaneously. Do not wait for any step to complete before starting others.
+
+#### Step 3A: Route Description Research (WebSearch + WebFetch)
 
 **Step 1:** Search for route descriptions:
 ```
@@ -189,13 +195,13 @@ WebFetch Prompt: "Extract route information including:
 - If no route descriptions found from any source: Note in gaps and provide general guidance
 - If conflicting information between sources: Note discrepancies in report
 
-#### 2C. Peak Ascent Statistics (peakbagger-cli) - PARALLEL
+#### Step 3B: Peak Ascent Statistics (peakbagger-cli)
 
 Retrieve ascent data and patterns using the peak ID:
 
 **Step 1: Get overall ascent statistics**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak stats {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak stats {peak_id} --format json
 ```
 
 This returns:
@@ -210,19 +216,19 @@ Based on the total count from Step 1, adaptively retrieve ascents:
 
 **For popular peaks (>50 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak ascents {peak_id} --format json --within 1y
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --within 1y
 ```
 Recent data (1 year) is sufficient for active peaks.
 
 **For moderate peaks (10-50 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak ascents {peak_id} --format json --within 5y
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --within 5y
 ```
 Expand to 5 years to get meaningful sample size.
 
 **For rarely-climbed peaks (<10 ascents total):**
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak ascents {peak_id} --format json
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json
 ```
 Get all available ascent data regardless of age.
 
@@ -245,7 +251,7 @@ Get all available ascent data regardless of age.
 - If peakbagger-cli fails: Fall back to WebSearch for trip reports
 - If no ascents found: Note in report and continue with other sources
 
-#### 2D. Trip Report Sources Discovery (WebSearch) - PARALLEL
+#### Step 3C: Trip Report Sources Discovery (WebSearch)
 
 Systematically search for trip report pages across major platforms:
 
@@ -269,9 +275,9 @@ WebSearch queries (run in parallel):
 - If specific high-value trip reports identified, fetch 1-2 for detailed conditions
 - Extract recent dates and conditions mentioned for "Recent Conditions" section
 
-#### 2E. Weather Forecast (Open-Meteo API + NOAA) - PARALLEL
+#### Step 3D: Weather Forecast (Open-Meteo API + NOAA)
 
-**Requires coordinates from Step 2A (latitude, longitude, elevation):**
+**Requires coordinates from Phase 2 (latitude, longitude, elevation):**
 
 Gather weather data from multiple sources in parallel:
 
@@ -351,9 +357,9 @@ Prompt: "Extract general mountain weather patterns for the Cascades region inclu
 - If NWAC not in season or fails: Skip this source
 - **Always provide manual check links** for Mountain-Forecast.com and NOAA even when API data retrieved
 
-#### 2F. Avalanche Forecast (Python Script) - PARALLEL
+#### Step 3E: Avalanche Forecast (Python Script)
 
-**Requires coordinates from Step 2A. Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
+**Requires coordinates from Phase 2. Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
 
 ```bash
 cd skills/route-researcher/tools
@@ -367,9 +373,9 @@ uv run python fetch_avalanche.py --region "North Cascades" --coordinates "{lat},
 - Script fails: Note in gaps with link to NWAC
 - Not applicable (low elevation, summer): Skip this step
 
-#### 2G. Daylight Calculations (Sunrise-Sunset.org API) - PARALLEL
+#### Step 3F: Daylight Calculations (Sunrise-Sunset.org API)
 
-**Requires coordinates from Step 2A (latitude, longitude):**
+**Requires coordinates from Phase 2 (latitude, longitude):**
 
 Use WebFetch to get sunrise/sunset data from Sunrise-Sunset.org API:
 
@@ -395,7 +401,7 @@ Format times in a user-friendly way (e.g., '6:45 AM', '8:30 PM')"
 - If no coordinates available: Skip this step and note in gaps
 - If date is far in future: API should still work, but note that times are calculated
 
-#### 2H. Access and Permits (WebSearch) - PARALLEL
+#### Step 3G: Access and Permits (WebSearch)
 
 ```
 WebSearch queries:
@@ -409,15 +415,15 @@ WebSearch queries:
 - Required permits (if any)
 - Access notes (road conditions, seasonal closures)
 
-#### 2I. High-Quality Trip Report Identification - PARALLEL
+#### Step 3H: High-Quality Trip Report Identification
 
 **CRITICAL: This step is MANDATORY and must be executed even if PeakBagger has some trip reports.**
 
 **Goal:** Identify the most informative trip reports across all sources for detailed route beta.
 
-This step runs in parallel with other data gathering steps and synthesizes information from:
-- PeakBagger ascent data (from Step 2C)
-- Trip report source URLs (from Step 2D)
+This step synthesizes information from:
+- PeakBagger ascent data (from Step 3B)
+- Trip report source URLs (from Step 3C)
 
 **Strategy:** Identify reports by two criteria:
 1. **Most Detailed Reports** - Highest information density (word count >100 words, detail level) regardless of age
@@ -425,9 +431,9 @@ This step runs in parallel with other data gathering steps and synthesizes infor
 
 **Quality Threshold:** Prioritize reports with >100 words. If PeakBagger reports are mostly brief (<100 words), WTA and Mountaineers sources become CRITICAL.
 
-**PeakBagger Trip Reports (uses data from Step 2C):**
+**PeakBagger Trip Reports (uses data from Step 3B):**
 
-From the ascent data already retrieved in Step 2C:
+From the ascent data already retrieved in Step 3B:
 
 1. **Sort by word count** (descending) to find most detailed reports
    - Filter: Only ascents where `trip_report.word_count > 0`
@@ -447,9 +453,9 @@ From the ascent data already retrieved in Step 2C:
    - Take top 3-5 most recent
    - Mark as "Recent Report" category
 
-**WTA Trip Reports (if WTA URL found in Step 2D):**
+**WTA Trip Reports (if WTA URL found in Step 3C):**
 
-**MANDATORY EXECUTION:** If WTA URL was found in Step 2D, you MUST attempt to extract trip reports.
+**MANDATORY EXECUTION:** If WTA URL was found in Step 3C, you MUST attempt to extract trip reports.
 
 **CRITICAL:** WTA loads trip reports via JavaScript/AJAX. You MUST use the AJAX endpoint, not the main page.
 
@@ -476,23 +482,6 @@ The AJAX endpoint returns HTML with trip reports in `<div class="item">` element
 - **Author**: Extract from `<a class="wta-icon-headline" href="https://www.wta.org/@@backpacks/..."><span class="wta-icon-headline__text">{author}</span>`
 - **Photo count**: Look for `<div class="media-indicator">X photos</div>`
 
-**Parsing example structure:**
-```html
-<div class="item">
-  <h3 class="listitem-title">
-    <a href="https://www.wta.org/go-hiking/trip-reports/trip_report-2025-10-14.120817657219">
-      Mount Defiance, Ira Spring Trail - Mason Lake — Oct. 13, 2025
-    </a>
-  </h3>
-  <div class="CreatorInfo">
-    <a class="wta-icon-headline" href="https://www.wta.org/@@backpacks/scrnm-LoganWV">
-      <span class="wta-icon-headline__text">LoganWV</span>
-    </a>
-  </div>
-  <div class="media-indicator">4 photos</div>
-</div>
-```
-
 **Extract from the HTML:**
 - Date, author/title, trip report URL for each report
 - **CRITICAL:** Extract at least 10-15 individual trip report URLs (WTA typically has many reports)
@@ -505,9 +494,9 @@ The AJAX endpoint returns HTML with trip reports in `<div class="item">` element
 - If HTML parsing yields no results: Note as parsing failure in "Information Gaps"
 - Do NOT try WebFetch for the AJAX endpoint - it requires cloudscrape.py
 
-**Mountaineers.org Trip Reports (if Mountaineers URL found in Step 2D):**
+**Mountaineers.org Trip Reports (if Mountaineers URL found in Step 3C):**
 
-**MANDATORY EXECUTION:** If Mountaineers URL was found in Step 2D, you MUST attempt to extract trip reports.
+**MANDATORY EXECUTION:** If Mountaineers URL was found in Step 3C, you MUST attempt to extract trip reports.
 
 **CRITICAL:** Mountaineers.org loads trip reports via JavaScript. You MUST use the `/trip-reports` endpoint, not the main page.
 
@@ -541,36 +530,6 @@ The endpoint returns HTML with trip reports in `<div class="result-item contentt
   - Provides preview of trip report content
 - **Activity Type**: Extract from `<label>Activity Type:</label>` sibling text
   - Example: "Climbing", "Day Hiking & Climbing"
-
-**Example HTML structure:**
-```html
-<div class="result-item contenttype-mtneers-trip_report">
-  <a class="result-left" href="...">
-    <img src="..." />
-  </a>
-  <div class="result-center">
-    <h3 class="result-title">
-      <a href="https://www.mountaineers.org/activities/trip-reports/basic-glacier-climb-sahale-peak-quien-sabe-glacier-8">Basic Glacier Climb - Sahale Peak/Quien Sabe Glacier</a>
-    </h3>
-    <div class="result-date">Sat, Aug  9, 2025 - Sun, Aug 10, 2025</div>
-    <p class="result-summary">Basic Climbing students () 5and Olympia Branch Leaders (4) set out to climb Sahale Glacier...</p>
-  </div>
-  <div class="result-sidebar">
-    <div>
-      <label>By: </label>
-      Nomi Rachel Fuchs Montgomery
-    </div>
-    <div>
-      <label>Activity Type:</label>
-      Climbing
-    </div>
-    <div>
-      <label>Trip Result:</label>
-      Successful
-    </div>
-  </div>
-</div>
-```
 
 **Pagination:** The endpoint shows 20 reports per page by default. Pagination uses query parameter `?b_start:int=20` for page 2, `?b_start:int=40` for page 3, etc. For this initial implementation, extract only the first page (top 20 most recent reports).
 
@@ -607,33 +566,28 @@ The endpoint returns HTML with trip reports in `<div class="result-item contentt
 - **Mountaineers:** Do not attempt extraction - note limitation in gaps, include browse link
 - **AllTrails:** Do not attempt trip report extraction - note limitation in gaps if AllTrails URL was found
 - If no trip reports found on successfully fetched pages: Note in gaps, include browse link
-- If WTA/Mountaineers URLs not found in Step 2D: Skip those sources
-- PeakBagger data already available from Step 2C, no additional fetch needed
+- If WTA/Mountaineers URLs not found in Step 3C: Skip those sources
+- PeakBagger data already available from Step 3B, no additional fetch needed
 
----
+**Phase 3 Execution Summary:**
 
-## Phase 2 Summary: Parallel Execution Strategy
+All Phase 3 steps (3A through 3H) execute in parallel to minimize total time:
+- Step 3A: Route descriptions (WebSearch + WebFetch)
+- Step 3B: Ascent statistics (peakbagger-cli)
+- Step 3C: Trip report sources (WebSearch)
+- Step 3D: Weather forecast (Open-Meteo + NOAA)
+- Step 3E: Avalanche forecast (Python script)
+- Step 3F: Daylight calculations (Sunrise-Sunset API)
+- Step 3G: Access and permits (WebSearch)
+- Step 3H: High-quality trip report identification
 
-**Sequential (blocking):**
-1. Step 2A: Get peak info and coordinates
+**Performance Benefit:** Total Phase 3 time = max(time(3A), time(3B), ..., time(3H)) instead of summing all step times sequentially.
 
-**Parallel (non-blocking - execute simultaneously after 2A):**
-2. Step 2B: Route descriptions (WebSearch + WebFetch)
-3. Step 2C: Ascent statistics (peakbagger-cli)
-4. Step 2D: Trip report sources (WebSearch)
-5. Step 2E: Weather forecast (Open-Meteo + NOAA) - *requires coordinates*
-6. Step 2F: Avalanche forecast (Python script) - *requires coordinates*
-7. Step 2G: Daylight calculations (Sunrise-Sunset API) - *requires coordinates*
-8. Step 2H: Access and permits (WebSearch)
-9. Step 2I: High-quality trip report identification - *uses data from 2C and 2D*
-
-**Performance Benefit:** By executing steps 2B-2I in parallel, total Phase 2 time = time(2A) + max(time(2B), time(2C), ..., time(2I)) instead of summing all step times sequentially.
-
-### Phase 3: Route Analysis and Synthesis
+### Phase 4: Route Analysis
 
 **Goal:** Analyze gathered data to determine route characteristics and synthesize information.
 
-#### 3A. Determine Route Type
+#### Step 4A: Determine Route Type
 
 Based on route descriptions, elevation, and gear mentions, classify as:
 - **Glacier:** Crevasses mentioned, glacier travel, typically >8000ft
@@ -641,7 +595,7 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 - **Scramble:** Class 2-4, exposed but non-technical
 - **Hike:** Class 1-2, trail-based, minimal exposure
 
-#### 3B. Extract Key Information
+#### Step 4B: Extract Key Information
 
 From all gathered data, identify:
 - **Difficulty Rating:** YDS class, scramble grade, or general difficulty
@@ -665,7 +619,7 @@ From all gathered data, identify:
   - Example: 5,469 ft peak with 5,000-8,000 ft freezing levels → Include alert (marginal conditions)
   - Example: 4,000 ft peak with 10,000+ ft freezing levels → Omit alert (well above summit)
 
-#### 3C. Identify Information Gaps
+#### Step 4C: Identify Information Gaps
 
 Explicitly document what data was **not found or unreliable:**
 - Missing trip reports
@@ -674,11 +628,11 @@ Explicitly document what data was **not found or unreliable:**
 - Conflicting information between sources
 - Limited seasonal data
 
-### Phase 4: Report Generation
+### Phase 5: Report Generation
 
 **Goal:** Create comprehensive Markdown document following the template.
 
-#### 4A. Generate Report Content
+#### Step 5A: Generate Report Content
 
 Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowercase-hyphenated}.md`
 
@@ -696,9 +650,9 @@ Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowerca
 - Conditional sections (when to include/exclude sections based on available data)
 - All layout and presentation decisions
 
-The template is the **single source of truth** for report formatting. Phase 2 (Data Gathering) specifies **what data to extract**. This phase (Phase 4) uses the template to determine **how to present that data**.
+The template is the **single source of truth** for report formatting. Phase 3 (Data Gathering) specifies **what data to extract**. This phase (Phase 5) uses the template to determine **how to present that data**.
 
-#### 4B. Markdown Formatting Rules
+#### Step 5B: Markdown Formatting Rules
 
 **CRITICAL:** Follow these formatting rules to ensure proper Markdown rendering:
 
@@ -751,7 +705,7 @@ The template is the **single source of truth** for report formatting. Phase 2 (D
    - **Additional Distance:** 5.6 miles  (missing blank line)
    ```
 
-#### 4C. Write Report File
+#### Step 5C: Write Report File
 
 Use the Write tool to create the file in the current working directory.
 
@@ -761,7 +715,7 @@ Use the Write tool to create the file in the current working directory.
 - Validate Markdown syntax per formatting rules above
 - Check that all lists have blank lines before them
 
-### Phase 5: Completion
+### Phase 6: Completion
 
 **Goal:** Inform user of completion and next steps.
 
@@ -866,42 +820,27 @@ Every generated report must:
 - Continue with available data
 - Don't block report generation
 
-### Design Evolution: peakbagger-cli Integration
+### peakbagger-cli Command Reference (v1.7.0)
 
-**Latest Design (2025-10-23):**
-- Use **peakbagger-cli v1.4.0** (via uvx) for all PeakBagger data retrieval:
-  - `peakbagger peak search`: Peak discovery with structured JSON output (try word order variations)
-  - `peakbagger peak show`: Detailed peak information (elevation, coordinates, routes, etc.)
-  - `peakbagger peak stats`: Ascent statistics and temporal patterns
-  - `peakbagger peak ascents`: Individual ascent listings with trip report links
-- Use **Open-Meteo APIs** for weather and air quality data:
-  - Weather API: temperature, precipitation, freezing level, wind, weather codes
-  - Air Quality API: US AQI forecasting with conditional alerts
-  - Free, no authentication, elevation-aware forecasts
-- Use **two-tier fetching strategy** for ALL websites:
-  - **Try WebFetch first** for speed and efficiency
-  - **Fallback to cloudscrape.py** if WebFetch fails or returns incomplete data
-  - Works for ANY site: AllTrails, WTA, SummitPost, Mountaineers.org, Mountain Project, etc.
-- Use **cloudscrape.py** as universal fallback tool:
-  - Handles Cloudflare-protected sites automatically
-  - Bypasses rate limiting and anti-scraping measures
-  - Returns raw HTML for parsing when WebFetch unavailable
-- Reserve Python scripts for **calculations only** (avalanche)
+All commands use `--format json` for structured output. Run via:
+```bash
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger <command> --format json
+```
 
-**Previous Design (2025-10-20):**
-- Used WebSearch to find PeakBagger peak pages
-- Used WebFetch or cloudscrape.py to extract data from PeakBagger
-- Required HTML parsing of PeakBagger pages
+**Available Commands:**
+- `peak search <query>` - Search for peaks by name
+- `peak show <peak_id>` - Get detailed peak information (coordinates, elevation, routes)
+- `peak stats <peak_id>` - Get ascent statistics and temporal patterns
+  - `--within <period>` - Filter by period (e.g., '1y', '5y')
+  - `--after <YYYY-MM-DD>` / `--before <YYYY-MM-DD>` - Date filters
+- `peak ascents <peak_id>` - List individual ascents with trip report links
+  - `--within <period>` - Filter by period (e.g., '1y', '5y')
+  - `--with-gpx` - Only ascents with GPS tracks
+  - `--with-tr` - Only ascents with trip reports
+  - `--limit <n>` - Max ascents to return (default: 100)
+- `ascent show <ascent_id>` - Get detailed ascent information
 
-**Rationale for peakbagger-cli:**
-- Structured JSON output eliminates HTML parsing complexity
-- Built-in rate limiting and Cloudflare bypass
-- Reliable ascent data and trip report discovery
-- Better maintainability (less brittle than HTML parsing)
-- Native support for filtering ascents by date, GPX, and trip reports
-- Adaptive timeframe selection based on peak popularity
-- **v1.4.0 resource-action pattern:** Clear command structure (`peak search`, `peak show`, `peak stats`, `peak ascents`)
-- **v1.4.0 new feature:** `--dump-html` option for debugging and custom HTML extraction when needed
+**Note:** For comprehensive command options, run `peakbagger --help` or `peakbagger <command> --help`
 
 ### Peak Name Variations
 
@@ -946,79 +885,3 @@ Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead
 
 **Note:** Prefer coordinates when available for more precise location.
 
-## Testing Checklist
-
-When testing this skill, verify:
-- [ ] Peak validation works with single match (peakbagger-cli search)
-- [ ] Peak validation works with multiple matches
-- [ ] Peak validation handles no matches gracefully
-- [ ] peakbagger-cli info extracts peak data correctly (JSON format)
-- [ ] peakbagger-cli peak-ascents retrieves ascent statistics
-- [ ] Adaptive timeframe selection works (1y/5y/all based on popularity)
-- [ ] Ascent trip report links are included in output
-- [ ] Route description synthesis is comprehensive
-- [ ] Trip reports from multiple sources (PeakBagger + CascadeClimbers)
-- [ ] Python scripts execute (when implemented)
-- [ ] Python script failures handled gracefully
-- [ ] Information gaps documented explicitly
-- [ ] Report follows template structure
-- [ ] Report saves to correct location
-- [ ] Filename format is correct
-- [ ] Safety disclaimer is prominent
-- [ ] Completion message is helpful
-
-## Example Invocations
-
-**Example 1: Simple peak name**
-```
-User: "Research Mt Baker"
-
-Skill Actions:
-1. uvx peakbagger search "Mt Baker" --format json
-2. Find: Mount Baker (10,786 ft, peak_id: 2296) - North Cascades, WA
-3. Confirm with user
-4. Gather data from all sources in parallel:
-   - uvx peakbagger info 2296 --format json
-   - uvx peakbagger peak-ascents 2296 --format json (check total count)
-   - uvx peakbagger peak-ascents 2296 --format json --within 1y --list-ascents (popular peak)
-   - Route descriptions via WebSearch/WebFetch
-   - Weather forecasts
-5. Generate report: 2025-10-21-mount-baker.md (in current directory)
-6. Report completion
-```
-
-**Example 2: Ambiguous peak name**
-```
-User: "Research Sahale Peak"
-
-Skill Actions:
-1. uvx peakbagger search "Sahale Peak" --format json
-2. Find: Multiple results:
-   - Sahale Peak (8,680 ft, peak_id: 1798) - North Cascades, WA
-   - Sahale Arm (7,600 ft, peak_id: 1799) - North Cascades, WA
-3. Present options to user with AskUserQuestion
-4. User selects Sahale Peak (peak_id: 1798)
-5. Continue with data gathering using peak_id 1798
-```
-
-**Example 3: Rarely-climbed peak**
-```
-User: "Research Vesper Peak"
-
-Skill Actions:
-1. uvx peakbagger search "Vesper Peak" --format json
-2. Find: Vesper Peak (6,214 ft, peak_id: 1234) - North Cascades, WA
-3. Confirm with user
-4. uvx peakbagger peak-ascents 1234 --format json
-5. Discover: Only 8 total ascents recorded
-6. uvx peakbagger peak-ascents 1234 --format json --list-ascents (get all ascents, no date filter)
-7. Note in report: "Limited ascent data available (8 total ascents recorded)"
-8. Continue with other data sources
-```
-
----
-
-**Skill Version:** --help
-**Last Updated:** 2025-10-23
-**peakbagger-cli Version:** v1.4.0
-**Status:** Ready for execution (with Python scripts pending)
