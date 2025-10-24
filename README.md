@@ -83,11 +83,11 @@ If data sources are unavailable:
 
 This plugin uses [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) for retrieving peak information and trip reports from PeakBagger.com.
 
-**Current Version:** Pinned to `v1.4.0`
+**Current Version:** Pinned to `v1.7.0`
 
 The CLI is run via `uvx` without installation. The version is pinned to prevent breaking changes:
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger peak search ...
+uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak search ...
 ```
 
 **Command Structure (v1.0.0+):** Resource-action pattern:
@@ -95,8 +95,6 @@ uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.4.0 peakbagger
 - `peakbagger peak show` - Get detailed peak information
 - `peakbagger peak stats` - Analyze ascent statistics and patterns
 - `peakbagger peak ascents` - List individual ascents with filtering
-
-**v1.4.0 New Feature:** `--dump-html` option for debugging and custom HTML extraction
 
 **Future:** Once peakbagger-cli is published to PyPI, the plugin will use semantic version constraints (`>=1.0,<2.0`) to automatically receive patch and minor updates while protecting against breaking changes.
 
