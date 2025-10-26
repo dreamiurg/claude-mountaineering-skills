@@ -1,9 +1,9 @@
 ---
-name: route-researcher
-description: Scrape route descriptions from multiple climbing and hiking websites
+name: route-info-gatherer
+description: Gather route descriptions from multiple climbing and hiking websites
 ---
 
-# Route Researcher Agent
+# Route Info Gatherer Agent
 
 **Purpose:** Gather route descriptions, approach details, crux information, and hazards from multiple specialized websites.
 

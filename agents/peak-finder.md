@@ -1,9 +1,9 @@
 ---
-name: peak-validator
+name: peak-finder
 description: Find and validate a peak on PeakBagger, retrieve detailed information including coordinates and elevation
 ---
 
-# Peak Validator Agent
+# Peak Finder Agent
 
 **Purpose:** Search for a peak on PeakBagger, confirm with user, and retrieve detailed peak information.
 

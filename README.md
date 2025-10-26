@@ -80,11 +80,11 @@ Reports are created as Markdown files in your current working directory with com
 - ✅ **Clear data contracts** - JSON schemas define agent interfaces
 
 **Sub-agents:**
-1. **peak-validator** - Find and validate peak on PeakBagger
+1. **peak-finder** - Find and validate peak on PeakBagger
 2. **conditions-gatherer** - Weather, avalanche, air quality, daylight
-3. **route-researcher** - Scrape route descriptions from multiple sites
+3. **route-info-gatherer** - Gather route descriptions from multiple sites
 4. **trip-report-collector** - Gather ascent stats and trip reports
-5. **report-synthesizer** - Synthesize data into markdown report
+5. **report-generator** - Generate markdown report from synthesized data
 
 **Slash commands:**
 - `/beta <peak>` - Full pipeline (all agents, comprehensive report)

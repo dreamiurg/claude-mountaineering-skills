@@ -1,9 +1,9 @@
 ---
-name: report-synthesizer
-description: Synthesize data from all sources and generate comprehensive markdown route beta report
+name: report-generator
+description: Generate comprehensive markdown route beta report by synthesizing data from all sources
 ---
 
-# Report Synthesizer Agent
+# Report Generator Agent
 
 **Purpose:** Analyze gathered data, synthesize route information, and generate markdown report following the template.
 

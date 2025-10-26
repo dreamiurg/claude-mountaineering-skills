@@ -37,7 +37,7 @@ This command uses two sub-agents:
 
 ### Step 1: Peak Validation (30-90 seconds)
 
-Invoke **peak-validator** agent:
+Invoke **peak-finder** agent:
 ```
 Task: Find and validate "{peak_name}" on PeakBagger, retrieve coordinates and elevation data.
 ```
@@ -114,7 +114,7 @@ Summary: Best window Monday-Tuesday before storm arrives Wednesday. Weekend sees
 
 **Option B - Streamlined Report (File):**
 
-Use **report-synthesizer** agent with `template: "conditions-only"`:
+Use **report-generator** agent with `template: "conditions-only"`:
 
 ```
 Task: Generate streamlined conditions report using templates/conditions-only.md
@@ -176,7 +176,7 @@ Simpler than /beta - only 2 sequential agents:
 
 ```
 # Step 1 - Peak validation
-invoke Task with subagent_type="peak-validator", prompt="Find and validate..."
+invoke Task with subagent_type="peak-finder", prompt="Find and validate..."
 
 # Step 2 - Conditions gathering
 invoke Task with subagent_type="conditions-gatherer", prompt="Gather weather..."
@@ -184,7 +184,7 @@ invoke Task with subagent_type="conditions-gatherer", prompt="Gather weather..."
 # Step 3 - Format results
 Either:
 A) Format inline response from conditions_data
-B) invoke Task with subagent_type="report-synthesizer", prompt="Generate conditions-only report..."
+B) invoke Task with subagent_type="report-generator", prompt="Generate conditions-only report..."
 ```
 
 Recommend **Option A (inline)** for speed, **Option B (file)** if user wants to save.

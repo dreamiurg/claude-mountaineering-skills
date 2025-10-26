@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Peak Data",
-  "description": "Output from peak-validator agent",
+  "description": "Output from peak-finder agent",
   "type": "object",
   "required": ["peak_id", "name", "elevation", "coordinates", "location", "peakbagger_url"],
   "properties": {

@@ -35,11 +35,11 @@ This skill now uses **sub-agents** and **slash commands** for a modular, efficie
 
 **Invoked automatically by slash commands:**
 
-1. **peak-validator** - Find and validate peak on PeakBagger
+1. **peak-finder** - Find and validate peak on PeakBagger
 2. **conditions-gatherer** - Fetch weather, avalanche, daylight data
-3. **route-researcher** - Scrape route descriptions from multiple websites
+3. **route-info-gatherer** - Gather route descriptions from multiple websites
 4. **trip-report-collector** - Gather ascent stats and trip reports
-5. **report-synthesizer** - Synthesize data into markdown report
+5. **report-generator** - Generate markdown report from synthesized data
 
 ## Usage
 
@@ -128,11 +128,11 @@ Same as original architecture:
 mountaineering-skills/                    ← Plugin root
 ├── .claude-plugin/                       ← Plugin metadata
 ├── agents/                               ← Sub-agents (at plugin root)
-│   ├── peak-validator.md
+│   ├── peak-finder.md
 │   ├── conditions-gatherer.md
-│   ├── route-researcher.md
+│   ├── route-info-gatherer.md
 │   ├── trip-report-collector.md
-│   └── report-synthesizer.md
+│   └── report-generator.md
 ├── commands/                             ← Slash commands (at plugin root)
 │   ├── beta.md
 │   └── conditions.md
@@ -143,9 +143,9 @@ mountaineering-skills/                    ← Plugin root
     │   ├── full-report.md                ← Report template
     │   └── conditions-only.md            ← Conditions template
     ├── schemas/
-    │   ├── peak-data.json                ← Peak validator output
+    │   ├── peak-data.json                ← Peak finder output
     │   ├── conditions-data.json          ← Conditions gatherer output
-    │   ├── route-data.json               ← Route researcher output
+    │   ├── route-data.json               ← Route info gatherer output
     │   └── trip-reports-data.json        ← Trip report collector output
     ├── tools/
     │   ├── cache.py                      ← NEW: File-based caching

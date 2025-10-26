@@ -30,7 +30,7 @@ This command orchestrates multiple sub-agents in sequence:
 
 ### Step 1: Peak Validation (30-90 seconds)
 
-Invoke **peak-validator** agent:
+Invoke **peak-finder** agent:
 ```
 Task: Find and validate "{peak_name}" on PeakBagger, retrieve coordinates and elevation data.
 ```
@@ -66,9 +66,9 @@ Task: Gather weather forecast, air quality, avalanche conditions, and daylight d
 }
 ```
 
-**Agent 2: route-researcher**
+**Agent 2: route-info-gatherer**
 ```
-Task: Scrape route descriptions from AllTrails, SummitPost, Mountaineers, Mountain Project, and WTA.
+Task: Gather route descriptions from AllTrails, SummitPost, Mountaineers, Mountain Project, and WTA.
 ```
 
 **Input:**
@@ -102,7 +102,7 @@ Task: Collect ascent statistics and fetch 10-15 representative trip reports.
 
 ### Step 3: Report Synthesis (60-120 seconds)
 
-Invoke **report-synthesizer** agent:
+Invoke **report-generator** agent:
 ```
 Task: Synthesize all gathered data and generate markdown route beta report following the template.
 ```
@@ -123,7 +123,7 @@ Task: Synthesize all gathered data and generate markdown route beta report follo
 
 ### Step 4: Completion
 
-Report synthesizer will notify user with:
+Report generator will notify user with:
 - Success message
 - File location
 - Brief summary
@@ -131,7 +131,7 @@ Report synthesizer will notify user with:
 
 ## Error Handling
 
-- **Peak not found:** peak-validator will ask user for alternate name or peak ID
+- **Peak not found:** peak-finder will ask user for alternate name or peak ID
 - **Agent failures:** Continue with available data, document gaps in report
 - **Partial data:** Report will include what was obtained plus "Information Gaps" section
 - **No write permissions:** Report error, suggest alternate location
@@ -157,20 +157,20 @@ Report synthesizer will notify user with:
 
 When invoking sub-agents via Task tool:
 
-1. **peak-validator:** Synchronous, sequential (MUST complete first)
+1. **peak-finder:** Synchronous, sequential (MUST complete first)
 2. **Data gathering trio:** Asynchronous, parallel (use single message with 3 Task calls)
-3. **report-synthesizer:** Synchronous, sequential (needs all inputs)
+3. **report-generator:** Synchronous, sequential (needs all inputs)
 
 Example Task tool usage:
 ```
 # Step 1 - Sequential
-invoke Task with subagent_type="peak-validator", prompt="Find and validate Mt Baker..."
+invoke Task with subagent_type="peak-finder", prompt="Find and validate Mt Baker..."
 
 # Step 2 - Parallel (single message with 3 Task calls)
 invoke Task with subagent_type="conditions-gatherer", prompt="Gather weather..."
-invoke Task with subagent_type="route-researcher", prompt="Scrape routes..."
+invoke Task with subagent_type="route-info-gatherer", prompt="Gather routes..."
 invoke Task with subagent_type="trip-report-collector", prompt="Collect reports..."
 
 # Step 3 - Sequential
-invoke Task with subagent_type="report-synthesizer", prompt="Synthesize data..."
+invoke Task with subagent_type="report-generator", prompt="Synthesize data..."
 ```
