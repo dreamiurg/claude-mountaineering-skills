@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Trip Reports Data",
+  "description": "Output from trip-report-collector agent",
+  "type": "object",
+  "properties": {
+    "ascent_stats": {
+      "type": "object",
+      "properties": {
+        "total_count": {"type": "number"},
+        "timeframe": {"type": "string"},
+        "with_gps": {"type": "number"},
+        "with_trip_reports": {"type": "number"},
+        "monthly_distribution": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        }
+      }
+    },
+    "trip_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {"type": "string", "format": "date"},
+          "source": {"type": "string", "enum": ["peakbagger", "wta", "mountaineers", "alltrails", "summitpost", "cascadeclimbers"]},
+          "author": {"type": "string"},
+          "title": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "word_count": {"type": "number"},
+          "has_gpx": {"type": "boolean"},
+          "content": {"type": "string"},
+          "themes": {
+            "type": "object",
+            "properties": {
+              "route": {"type": "string"},
+              "crux": {"type": "string"},
+              "hazards": {"type": "string"},
+              "gear": {"type": "string"},
+              "conditions": {"type": "string"}
+            }
+          }
+        },
+        "required": ["date", "source", "url"]
+      }
+    },
+    "browse_all_urls": {
+      "type": "object",
+      "properties": {
+        "peakbagger": {"type": "string", "format": "uri"},
+        "wta": {"type": "string", "format": "uri"},
+        "mountaineers": {"type": "string", "format": "uri"},
+        "alltrails": {"type": "string", "format": "uri"},
+        "summitpost": {"type": "string", "format": "uri"},
+        "cascadeclimbers": {"type": "string", "format": "uri"}
+      }
+    },
+    "information_gaps": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "required": ["trip_reports"]
+}

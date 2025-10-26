@@ -7,6 +7,7 @@ import click
 import httpx
 from bs4 import BeautifulSoup
 from rich.console import Console
+from cache import get_avalanche_cache
 
 console = Console()
 
@@ -25,11 +26,23 @@ NWAC_REGIONS = {
 @click.command()
 @click.option('--region', required=True, help='NWAC forecast region')
 @click.option('--coordinates', help='Coordinates as lat,lon (optional)')
-def cli(region: str, coordinates: str = None):
+@click.option('--skip-cache', is_flag=True, help='Skip cache and fetch fresh data')
+def cli(region: str, coordinates: str = None, skip_cache: bool = False):
     """Fetch NWAC avalanche forecast"""
     try:
         # Normalize region name
         region_slug = NWAC_REGIONS.get(region.lower(), region.lower().replace(' ', '-'))
+
+        # Check cache first
+        cache = get_avalanche_cache()
+        cache_key = f"avalanche:{region_slug}"
+
+        if not skip_cache:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                cached_data['cached'] = True
+                click.echo(json.dumps(cached_data, indent=2))
+                return
 
         url = f"https://nwac.us/avalanche-forecast/#{region_slug}"
 
@@ -59,6 +72,9 @@ def cli(region: str, coordinates: str = None):
                     'forecast': 'Unable to fetch forecast',
                     'note': 'Visit NWAC website for current avalanche conditions'
                 }
+
+        # Cache successful results
+        cache.set(cache_key, output)
 
         click.echo(json.dumps(output, indent=2))
 

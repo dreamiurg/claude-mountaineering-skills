@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Conditions Data",
+  "description": "Output from conditions-gatherer agent",
+  "type": "object",
+  "properties": {
+    "weather_forecast": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "summary": {"type": "string"},
+        "daily": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {"type": "string", "format": "date"},
+              "day_of_week": {"type": "string"},
+              "conditions": {"type": "string"},
+              "icon": {"type": "string"},
+              "temp_high_f": {"type": "number"},
+              "temp_low_f": {"type": "number"},
+              "precipitation_mm": {"type": "number"},
+              "precipitation_probability": {"type": "number"},
+              "freezing_level_ft": {"type": "number"},
+              "wind_speed_mph": {"type": "number"},
+              "wind_gusts_mph": {"type": "number"}
+            }
+          }
+        },
+        "manual_check_urls": {
+          "type": "object",
+          "properties": {
+            "mountain_forecast": {"type": "string", "format": "uri"},
+            "open_meteo_weather": {"type": "string", "format": "uri"},
+            "noaa_point_forecast": {"type": "string", "format": "uri"}
+          }
+        }
+      }
+    },
+    "air_quality": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "assessment": {"type": "string", "enum": ["good", "moderate", "unhealthy_sensitive", "unhealthy", "very_unhealthy", "hazardous"]},
+        "aqi_range": {"type": "string"},
+        "alert_days": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {"type": "string", "format": "date"},
+              "aqi": {"type": "number"}
+            }
+          }
+        },
+        "open_meteo_aq_link": {"type": "string", "format": "uri"}
+      }
+    },
+    "avalanche_forecast": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "region": {"type": "string"},
+        "url": {"type": "string", "format": "uri"},
+        "danger_rating": {"type": "string"},
+        "forecast": {"type": "string"},
+        "note": {"type": "string"},
+        "error": {"type": "string"}
+      }
+    },
+    "daylight": {
+      "type": "object",
+      "properties": {
+        "date": {"type": "string", "format": "date"},
+        "sunrise": {"type": "string"},
+        "sunset": {"type": "string"},
+        "daylight_hours": {"type": "number"},
+        "civil_twilight_begin": {"type": "string"},
+        "error": {"type": "string"}
+      }
+    },
+    "information_gaps": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Route Data",
+  "description": "Output from route-researcher agent",
+  "type": "object",
+  "properties": {
+    "route_descriptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "route_name": {"type": "string"},
+          "difficulty": {"type": "string"},
+          "approach": {"type": "string"},
+          "route_description": {"type": "string"},
+          "crux": {"type": "string"},
+          "distance": {"type": "string"},
+          "elevation_gain": {"type": "string"},
+          "estimated_time": {"type": "string"},
+          "hazards": {"type": "string"},
+          "trailhead": {"type": "string"},
+          "permit_info": {"type": "string"}
+        },
+        "required": ["source", "url"]
+      }
+    },
+    "source_urls": {
+      "type": "object",
+      "description": "Key source URLs for reference section",
+      "properties": {
+        "alltrails": {"type": "string", "format": "uri"},
+        "wta": {"type": "string", "format": "uri"},
+        "summitpost": {"type": "string", "format": "uri"},
+        "mountaineers": {"type": "string", "format": "uri"},
+        "mountain_project": {"type": "string", "format": "uri"}
+      }
+    },
+    "information_gaps": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "required": ["route_descriptions"]
+}

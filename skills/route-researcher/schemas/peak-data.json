@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Peak Data",
+  "description": "Output from peak-validator agent",
+  "type": "object",
+  "required": ["peak_id", "name", "elevation", "coordinates", "location", "peakbagger_url"],
+  "properties": {
+    "peak_id": {
+      "type": "string",
+      "description": "PeakBagger peak ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "Official peak name"
+    },
+    "elevation": {
+      "type": "object",
+      "properties": {
+        "feet": {"type": "number"},
+        "meters": {"type": "number"}
+      },
+      "required": ["feet", "meters"]
+    },
+    "prominence": {
+      "type": "object",
+      "properties": {
+        "feet": {"type": "number"},
+        "meters": {"type": "number"}
+      }
+    },
+    "coordinates": {
+      "type": "object",
+      "properties": {
+        "latitude": {"type": "number"},
+        "longitude": {"type": "number"}
+      },
+      "required": ["latitude", "longitude"]
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "county": {"type": "string"},
+        "state": {"type": "string"},
+        "country": {"type": "string"},
+        "range": {"type": "string"}
+      }
+    },
+    "peakbagger_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "distance": {"type": "string"},
+          "elevation_gain": {"type": "string"},
+          "trailhead": {"type": "string"}
+        }
+      }
+    },
+    "google_maps_link": {
+      "type": "string",
+      "format": "uri"
+    },
+    "usgs_topo_link": {
+      "type": "string",
+      "format": "uri"}
+  }
+}

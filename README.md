@@ -36,6 +36,20 @@ You should see `route-researcher` listed.
 
 ## Usage
 
+### Slash Commands (New!)
+
+Fast, explicit workflows with specialized sub-agents:
+
+```bash
+# Full route research (4-8 minutes)
+/beta "Mt Baker"
+
+# Quick conditions check (1-2 minutes)
+/conditions "Forbidden Peak"
+```
+
+### Natural Language (Traditional)
+
 Simply ask Claude to research a mountain peak:
 
 ```bash
@@ -53,6 +67,30 @@ Reports are created as Markdown files in your current working directory with com
 **Example:** See [Mount Si route beta](skills/route-researcher/examples/2025-10-23-mount-si.md) for a sample report.
 
 ## Features
+
+### New: Microservices Architecture
+
+**Version 4.0+** introduces a modular design with specialized sub-agents:
+
+- ✅ **Focused sub-agents** - Each agent has a single responsibility
+- ✅ **Parallel execution** - Data gathering runs concurrently (faster)
+- ✅ **Caching layer** - Weather and avalanche data cached (6hr TTL)
+- ✅ **Slash commands** - `/beta` for full research, `/conditions` for quick checks
+- ✅ **Independent testing** - Each agent can be invoked separately
+- ✅ **Clear data contracts** - JSON schemas define agent interfaces
+
+**Sub-agents:**
+1. **peak-validator** - Find and validate peak on PeakBagger
+2. **conditions-gatherer** - Weather, avalanche, air quality, daylight
+3. **route-researcher** - Scrape route descriptions from multiple sites
+4. **trip-report-collector** - Gather ascent stats and trip reports
+5. **report-synthesizer** - Synthesize data into markdown report
+
+**Slash commands:**
+- `/beta <peak>` - Full pipeline (all agents, comprehensive report)
+- `/conditions <peak>` - Quick check (peak + conditions only, ~2 min)
+
+See [skills/route-researcher/SKILL.md](skills/route-researcher/SKILL.md) for architecture details.
 
 ### Multi-Source Data Gathering
 

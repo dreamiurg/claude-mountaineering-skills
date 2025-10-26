@@ -7,16 +7,30 @@ import click
 import httpx
 from bs4 import BeautifulSoup
 from rich.console import Console
+from cache import get_weather_cache
 
 console = Console()
 
 @click.command()
 @click.option('--peak-name', required=True, help='Peak name for weather lookup')
 @click.option('--coordinates', required=True, help='Coordinates as lat,lon')
-def cli(peak_name: str, coordinates: str):
+@click.option('--skip-cache', is_flag=True, help='Skip cache and fetch fresh data')
+def cli(peak_name: str, coordinates: str, skip_cache: bool = False):
     """Fetch mountain weather forecast"""
     try:
         lat, lon = coordinates.split(',')
+
+        # Check cache first
+        cache = get_weather_cache()
+        cache_key = f"weather:{peak_name}:{lat},{lon}"
+
+        if not skip_cache:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                # Add cache hit indicator
+                cached_data['cached'] = True
+                click.echo(json.dumps(cached_data, indent=2))
+                return
 
         # Try Mountain-Forecast.com
         # Format: mountain-forecast.com/peaks/Peak-Name
@@ -66,6 +80,9 @@ def cli(peak_name: str, coordinates: str):
                     'forecast': ['Peak may not be in Mountain-Forecast database'],
                     'note': f'Try searching Mountain-Forecast.com manually for "{peak_name}" or check alternative weather sources'
                 }
+
+        # Cache successful results
+        cache.set(cache_key, output)
 
         click.echo(json.dumps(output, indent=2))
 

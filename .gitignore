@@ -44,3 +44,7 @@ logs/
 
 # Worktrees
 .worktrees/
+
+# Cache
+skills/route-researcher/tools/.cache/
+.cache/
