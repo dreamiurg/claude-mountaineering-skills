@@ -1,32 +1,15 @@
 # Contributing to Mountaineering Skills
 
-Thank you for your interest in contributing to the Mountaineering Skills plugin for Claude Code! This document provides guidelines and information to help you contribute effectively.
+Thank you for your interest in contributing! This guide will help you get started.
 
-## Table of Contents
+## Quick Links
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [How to Contribute](#how-to-contribute)
-- [Development Workflow](#development-workflow)
-- [Commit Message Guidelines](#commit-message-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Testing Guidelines](#testing-guidelines)
-- [Documentation](#documentation)
+- [Report a bug](https://github.com/dreamiurg/claude-mountaineering-skills/issues/new)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+- [Claude Code Documentation](https://docs.claude.com/claude-code)
+- [Semantic Versioning](https://semver.org/)
 
-## Code of Conduct
-
-This project follows a professional and respectful code of conduct. Please be kind and constructive in all interactions.
-
-## Getting Started
-
-### Prerequisites
-
-- [Claude Code](https://docs.claude.com/claude-code) installed
-- [uv](https://docs.astral.sh/uv/) for Python package management
-- Git configured on your machine
-- Python 3.8+ (for working on Python tools)
-
-### Local Development Setup
+## Local Development Setup
 
 1. **Fork and Clone**
    ```bash
@@ -34,146 +17,66 @@ This project follows a professional and respectful code of conduct. Please be ki
    cd claude-mountaineering-skills
    ```
 
-2. **Symlink Plugin for Local Development**
-
-   Create a symlink from your local clone to Claude's plugin directory:
-
+2. **Symlink to Claude Plugins Directory**
    ```bash
-   # Create the plugins directory if it doesn't exist
    mkdir -p ~/.claude/plugins
+   ln -s $(pwd) ~/.claude/plugins/mountaineering-skills
 
-   # Create symlink (adjust path to your clone location)
-   ln -s /path/to/your/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
-   ```
-
-   For example, if you cloned to `~/src/dreamiurg/claude-mountaineering-skills`:
-   ```bash
-   ln -s ~/src/dreamiurg/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
-   ```
-
-   **Verify the symlink:**
-   ```bash
+   # Verify
    ls -la ~/.claude/plugins/mountaineering-skills
-   # Should show: mountaineering-skills -> /path/to/your/claude-mountaineering-skills
    ```
 
 3. **Restart Claude Code**
-
-   Close and restart Claude Code to load the symlinked plugin. Verify installation:
    ```bash
+   # Close and restart Claude, then verify:
    claude
    > /plugin list
-   # Should show mountaineering-skills in the list
    ```
 
-4. **Set Up Python Tools** (if working on tools)
+4. **Set Up Python Tools** (optional, for tool development)
    ```bash
    cd skills/route-researcher/tools
-   uv venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv venv && source .venv/bin/activate
    uv pip install -e ".[dev]"
    ```
 
-5. **Configure Git Commit Template**
+5. **Configure Commit Template**
    ```bash
    git config commit.template .gitmessage
    ```
-
-**Benefits of Symlink Approach:**
-- Changes are immediately reflected (no reinstall needed)
-- Work directly in your git repository
-- Easy to test changes and create commits
-- No need to manage marketplace forks for development
-
-## How to Contribute
-
-### Reporting Bugs
-
-When reporting bugs, please include:
-
-- **Clear description** of the issue
-- **Steps to reproduce** the problem
-- **Expected behavior** vs actual behavior
-- **Example peak name** that demonstrates the issue
-- **Claude Code version** and operating system
-- **Relevant logs** or error messages
-
-### Suggesting Features
-
-Feature suggestions are welcome! Please:
-
-- Check existing issues to avoid duplicates
-- Clearly describe the use case and benefit
-- Provide examples of how it would work
-- Consider if it fits the project's scope (North American mountain route research)
-
-### Contributing Code
-
-We welcome contributions including:
-
-- Bug fixes
-- New data source integrations
-- Improved error handling
-- Better route analysis logic
-- Documentation improvements
-- Test coverage improvements
-- Python tool enhancements
 
 ## Development Workflow
 
 ### Branch Naming
 
-Use descriptive branch names with prefixes:
-
 - `feat/` - New features
 - `fix/` - Bug fixes
-- `docs/` - Documentation changes
+- `docs/` - Documentation
 - `refactor/` - Code refactoring
-- `test/` - Test improvements
-
-Examples:
-- `feat/add-mountain-project-integration`
-- `fix/coordinate-parsing-southern-hemisphere`
-- `docs/improve-installation-guide`
+- `test/` - Tests
 
 ### Making Changes
 
-1. **Create a Branch**
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
+1. Create a branch: `git checkout -b feat/your-feature`
+2. Make changes (follow existing code style)
+3. Test with multiple peaks and edge cases
+4. Commit using [Conventional Commits](https://www.conventionalcommits.org/)
+5. Push and create PR
 
-2. **Make Your Changes**
-   - Write clear, readable code
-   - Follow existing code style and patterns
-   - Add comments for complex logic
-   - Update documentation as needed
+## Commit Messages
 
-3. **Test Your Changes**
-   - Test the skill with multiple peaks
-   - Verify edge cases (no data, multiple matches, errors)
-   - Run Python tests if applicable: `pytest`
-   - Check that reports generate correctly
+Follow [Conventional Commits](https://www.conventionalcommits.org/). See [.gitmessage](.gitmessage) for examples.
 
-4. **Commit Your Changes**
-   - Follow [Commit Message Guidelines](#commit-message-guidelines)
-   - Make atomic commits (one logical change per commit)
-   - Write clear commit messages
+**Triggers release:**
+- `feat:` - New feature (minor bump)
+- `fix:` - Bug fix (patch bump)
+- `perf:` - Performance improvement (patch bump)
+- `feat!:` or `fix!:` - Breaking change (major bump)
 
-5. **Push and Create PR**
-   ```bash
-   git push -u origin feat/your-feature-name
-   ```
-   - Open a pull request on GitHub
-   - Fill out the PR template completely
-   - Link any related issues
+**No release:**
+- `docs:`, `chore:`, `refactor:`, `test:`, `ci:`, `build:`
 
-## Commit Message Guidelines
-
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated semantic versioning.
-
-### Format
-
+**Format:**
 ```
 <type>: <description>
 
@@ -182,226 +85,64 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) f
 [optional footer]
 ```
 
-### Types
+## Pull Requests
 
-**Types that trigger releases:**
-
-- `feat:` - New feature (MINOR version bump: 1.0.0 → 1.1.0)
-- `fix:` - Bug fix (PATCH version bump: 1.0.0 → 1.0.1)
-- `perf:` - Performance improvement (PATCH version bump)
-
-**Types that don't trigger releases:**
-
-- `docs:` - Documentation changes
-- `chore:` - Maintenance, dependencies, configs
-- `refactor:` - Code restructuring without functionality change
-- `test:` - Test changes
-- `ci:` - CI/CD changes
-- `build:` - Build system changes
-
-**Breaking changes:**
-
-- Add `!` after type: `feat!:` or `fix!:` (MAJOR bump: 1.0.0 → 2.0.0)
-- Or add `BREAKING CHANGE:` in footer
-
-### Examples
-
-```bash
-# Feature addition (triggers release)
-feat: add Mountain Project integration for climbing routes
-
-# Bug fix (triggers release)
-fix: correct coordinate parsing for southern hemisphere peaks
-
-# Breaking change (triggers major release)
-feat!: restructure skill to use new data source priority system
-
-BREAKING CHANGE: configuration format changed, see migration guide
-
-# Documentation (no release)
-docs: update installation instructions with troubleshooting steps
-
-# Maintenance (no release)
-chore: update peakbagger-cli dependency to v1.8.0
-```
-
-### Commit Message Tips
-
-- Use imperative mood ("add" not "added" or "adds")
-- Begin subject line with lowercase (after the colon)
-- No period at the end of subject line
-- Limit subject line to 50 characters
-- Wrap body at 72 characters
-- Explain *what* and *why*, not *how*
-
-See [.gitmessage](.gitmessage) for the full template with examples.
-
-## Pull Request Process
-
-### Before Submitting
-
-- [ ] Code follows existing style and patterns
-- [ ] All tests pass (if applicable)
-- [ ] Documentation updated (README, docstrings, comments)
-- [ ] Commit messages follow Conventional Commits format
+**Before submitting:**
+- [ ] Code follows existing patterns
+- [ ] Tests pass (run `pytest` if changing tools)
+- [ ] Documentation updated
 - [ ] PR title follows format: `type: description`
-- [ ] Changes tested with multiple example peaks
+- [ ] Tested with multiple peaks
 
-### PR Title Format
+**PR title must use Conventional Commits format** - GitHub Action validates this.
 
-PR titles must follow the same format as commit messages:
+See [.github/pull_request_template.md](.github/pull_request_template.md) for the PR template.
 
-```
-feat: add weather alert integration
-fix: handle missing trip report data gracefully
-docs: improve contributing guidelines
-```
+## Testing
 
-A GitHub Action validates the PR title format.
+**Manual testing:**
+- Test multiple peak types (popular, obscure, different regions)
+- Test edge cases (no matches, multiple matches, missing data)
+- Verify report quality (all sections, working links, clean formatting)
 
-### Review Process
-
-1. **Automated Checks**: GitHub Actions will run on your PR
-2. **Code Review**: Maintainers will review your changes
-3. **Feedback**: Address any requested changes
-4. **Approval**: Once approved, your PR will be merged
-5. **Release**: Changes in `feat:`, `fix:`, and `perf:` PRs trigger automatic releases
-
-### After Merging
-
-- Semantic-release automatically creates a new version
-- Release notes are generated from commit messages
-- Plugin registry is updated automatically
-
-## Testing Guidelines
-
-### Manual Testing
-
-When testing changes:
-
-1. **Test Multiple Peak Types**
-   - Popular peaks (Mount Si, Mount Rainier)
-   - Obscure peaks with limited data
-   - Peaks in different regions
-   - Peaks with special characters in names
-
-2. **Test Edge Cases**
-   - No matching peaks found
-   - Multiple peaks with same name
-   - Data sources unavailable
-   - Incomplete data
-
-3. **Verify Report Quality**
-   - All sections present
-   - Information gaps documented
-   - Links work correctly
-   - Formatting is clean
-
-### Python Tool Testing
-
-For changes to Python tools in `skills/route-researcher/tools/`:
-
+**Python tools:**
 ```bash
 cd skills/route-researcher/tools
-
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=src --cov-report=term-missing
-
-# Run specific test file
-pytest tests/test_cloudscrape.py -v
-```
-
-### Test Writing Guidelines
-
-- Test both success and failure cases
-- Use descriptive test names
-- Mock external dependencies
-- Test graceful degradation
-- Verify error messages are helpful
-
-## Documentation
-
-### What to Document
-
-When contributing, update documentation for:
-
-- **README.md**: User-facing features and usage
-- **SKILL.md**: Skill behavior and workflow changes
-- **Tool README**: Changes to Python tools
-- **Code Comments**: Complex logic and algorithms
-- **Docstrings**: All functions and classes
-
-### Documentation Style
-
-- Write in clear, concise language
-- Use examples to illustrate concepts
-- Include code snippets where helpful
-- Keep documentation in sync with code
-- Use proper Markdown formatting
-
-### Example Documentation
-
-Good:
-```python
-def calculate_time_estimate(distance_mi: float, elevation_gain_ft: float) -> dict:
-    """Calculate hiking time estimates for three pacing levels.
-
-    Uses Naismith's rule: 3 mph + 30 min per 1000 ft elevation gain.
-    Returns slower of distance-based or elevation-based estimate.
-
-    Args:
-        distance_mi: One-way distance in miles
-        elevation_gain_ft: Total elevation gain in feet
-
-    Returns:
-        Dict with 'fast', 'moderate', 'leisurely' times in hours
-    """
+pytest                                      # Run all tests
+pytest --cov=src --cov-report=term-missing  # With coverage
+pytest tests/test_cloudscrape.py -v         # Specific test
 ```
 
 ## Project Structure
 
-Understanding the project structure helps with contributions:
-
 ```
 claude-mountaineering-skills/
 ├── .claude-plugin/          # Plugin metadata
-│   ├── plugin.json         # Plugin configuration
-│   └── marketplace.json    # Marketplace listing
-├── skills/
-│   └── route-researcher/   # Main skill
-│       ├── SKILL.md        # Skill instructions
-│       ├── examples/       # Example generated reports
-│       └── tools/          # Python utilities
-│           ├── src/        # Tool source code
-│           ├── tests/      # Test suite
-│           └── README.md   # Tool documentation
-├── .github/
-│   ├── workflows/          # CI/CD configuration
-│   └── pull_request_template.md
+├── skills/route-researcher/ # Main skill
+│   ├── SKILL.md            # Skill instructions
+│   ├── examples/           # Example reports
+│   └── tools/              # Python utilities
+├── .github/workflows/      # CI/CD
 ├── .gitmessage             # Commit template
-├── .releaserc.json         # Semantic-release config
-├── CONTRIBUTING.md         # This file
-└── README.md               # Main documentation
+└── README.md               # Main docs
 ```
 
 ## Getting Help
 
-If you need help:
+- [Issues](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
+- [Example Reports](skills/route-researcher/examples/)
+- [Skill Documentation](skills/route-researcher/SKILL.md)
+- [Claude Code Docs](https://docs.claude.com/claude-code)
 
-- Check existing [Issues](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
-- Review [Claude Code documentation](https://docs.claude.com/claude-code)
-- Look at [example reports](skills/route-researcher/examples/)
-- Read the [skill documentation](skills/route-researcher/SKILL.md)
+## What to Contribute
 
-## Recognition
+We welcome:
+- Bug fixes
+- New data source integrations
+- Better error handling
+- Route analysis improvements
+- Documentation improvements
+- Test coverage
+- Python tool enhancements
 
-Contributors are recognized in:
-
-- Git commit history
-- Release notes (via Conventional Commits)
-- Future contributors section (planned)
-
-Thank you for contributing to make mountain route research faster and safer!
+Thank you for contributing!
