@@ -50,7 +50,11 @@ Claude will automatically invoke the route-researcher skill and generate a compr
 
 Reports are created as Markdown files in your current working directory with comprehensive route information, current conditions, trip reports, and safety disclaimers.
 
-**Example:** See [Mount Si route beta](skills/route-researcher/examples/2025-10-23-mount-si.md) for a sample report.
+**Example Reports:**
+
+- [Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md) - Popular 4,167 ft front-range hike with 3,150 ft elevation gain
+- [Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md) - Washington's second-highest peak, 12,280 ft glaciated climb
+- [Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md) - Challenging 5,813 ft scramble with exposed Class 3-4 summit block
 
 ## Features
 
