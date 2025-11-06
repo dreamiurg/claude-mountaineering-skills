@@ -47,17 +47,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ## Development Workflow
 
-### Branch Naming
-
-- `feat/` - New features
-- `fix/` - Bug fixes
-- `docs/` - Documentation
-- `refactor/` - Code refactoring
-- `test/` - Tests
-
-### Making Changes
-
-1. Create a branch: `git checkout -b feat/your-feature`
+1. Create a branch: `git checkout -b your-feature-name`
 2. Make changes (follow existing code style)
 3. Test with multiple peaks and edge cases
 4. Commit using [Conventional Commits](https://www.conventionalcommits.org/)
