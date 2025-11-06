@@ -6,7 +6,7 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://docs.claude.com/claude-code)
 [![Issues](https://img.shields.io/github/issues/dreamiurg/claude-mountaineering-skills)](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
 
-A Claude Code plugin that automates mountain route research for North American peaks. Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources (PeakBagger, SummitPost, WTA, AllTrails, Mountain Project, and more) to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+A Claude Code plugin that automates mountain route research for North American peaks. Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources ([PeakBagger](https://www.peakbagger.com), [SummitPost](https://www.summitpost.org), [WTA](https://www.wta.org), [AllTrails](https://www.alltrails.com), [Mountain Project](https://www.mountainproject.com), and more) to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
 
 ## Example Reports
 
@@ -130,14 +130,14 @@ Reports are created as Markdown files in your current working directory (format:
 
 The skill aggregates information from multiple specialized mountaineering websites:
 
-- **PeakBagger**: Peak information, coordinates, elevation
-- **SummitPost**: Route descriptions, conditions, beta
-- **Washington Trails Association (WTA)**: Trail reports and conditions
-- **AllTrails**: Trail information and reviews
-- **The Mountaineers**: Route guides and resources
-- **Weather**: Mountain-Forecast.com, NOAA/NWS point forecasts
-- **Avalanche**: Regional avalanche centers (NWAC, etc.) when applicable
-- **Trip Reports**: Multiple sources including CascadeClimbers, PeakBagger, Mountain Project
+- **[PeakBagger](https://www.peakbagger.com)**: Peak information, coordinates, elevation
+- **[SummitPost](https://www.summitpost.org)**: Route descriptions, conditions, beta
+- **[Washington Trails Association (WTA)](https://www.wta.org)**: Trail reports and conditions
+- **[AllTrails](https://www.alltrails.com)**: Trail information and reviews
+- **[The Mountaineers](https://www.mountaineers.org)**: Route guides and resources
+- **Weather**: [Mountain-Forecast.com](https://www.mountain-forecast.com), [NOAA/NWS](https://www.weather.gov) point forecasts
+- **Avalanche**: Regional avalanche centers ([NWAC](https://nwac.us), etc.) when applicable
+- **Trip Reports**: Multiple sources including [CascadeClimbers](https://cascadeclimbers.com), [PeakBagger](https://www.peakbagger.com), [Mountain Project](https://www.mountainproject.com)
 
 **Note:** The quality of the generated report depends on the availability of peak information on these sources. If your target peak lacks coverage on these websites, the skill may produce limited output. The skill works best for well-documented peaks in North America.
 
