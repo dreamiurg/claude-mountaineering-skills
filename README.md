@@ -1,12 +1,67 @@
-# Mountaineering Skills for Claude Code
+<h1 align="center">Mountaineering Skills for Claude Code</h1>
 
-[![Latest Release](https://img.shields.io/github/v/release/dreamiurg/claude-mountaineering-skills)](https://github.com/dreamiurg/claude-mountaineering-skills/releases)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://docs.claude.com/claude-code)
-[![Issues](https://img.shields.io/github/issues/dreamiurg/claude-mountaineering-skills)](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
+<p align="center">
+  <a href="https://github.com/dreamiurg/claude-mountaineering-skills/releases">
+    <img src="https://img.shields.io/github/v/release/dreamiurg/claude-mountaineering-skills" alt="Latest Release">
+  </a>
+  <a href="https://conventionalcommits.org">
+    <img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" alt="Conventional Commits">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT">
+  </a>
+  <a href="https://docs.claude.com/claude-code">
+    <img src="https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg" alt="Claude Code Plugin">
+  </a>
+  <a href="https://github.com/dreamiurg/claude-mountaineering-skills/issues">
+    <img src="https://img.shields.io/github/issues/dreamiurg/claude-mountaineering-skills" alt="Issues">
+  </a>
+</p>
 
-A Claude Code plugin that automates mountain route research for North American peaks. Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources ([PeakBagger](https://www.peakbagger.com), [SummitPost](https://www.summitpost.org), [WTA](https://www.wta.org), [AllTrails](https://www.alltrails.com), [Mountain Project](https://www.mountainproject.com), and more) to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+<h4 align="center">Automated mountain route research for North American peaks, built for <a href="https://claude.com/claude-code" target="_blank">Claude Code</a>.</h4>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#example-reports">Example Reports</a> •
+  <a href="#how-it-works">How It Works</a> •
+  <a href="#features">Features</a> •
+  <a href="#recent-updates">Recent Updates</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#support">Support</a>
+</p>
+
+<p align="center">
+  Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+</p>
+
+---
+
+## Quick Start
+
+Start a new Claude Code session in your terminal and run:
+
+```bash
+% claude
+> /plugin marketplace add dreamiurg/claude-mountaineering-skills
+
+> /plugin install mountaineering-skills@mountaineering-skills-marketplace
+```
+
+Restart Claude Code. Then simply ask:
+
+```
+"Research Mount Rainier"
+```
+
+Claude will automatically generate a detailed route beta report in your current directory.
+
+**Key Features:**
+- 🏔️ **Multi-Source Research** - Aggregates data from 10+ mountaineering websites
+- ⚠️ **Safety First** - Explicit disclaimers and information gap tracking
+- 📍 **Current Conditions** - Weather forecasts, avalanche reports, daylight calculations
+- 🌦️ **Comprehensive Reports** - Route descriptions, trip reports, permit information
+
+---
 
 ## Example Reports
 
@@ -141,6 +196,33 @@ The skill aggregates information from multiple specialized mountaineering websit
 
 **Note:** The quality of the generated report depends on the availability of peak information on these sources. If your target peak lacks coverage on these websites, the skill may produce limited output. The skill works best for well-documented peaks in North America.
 
+---
+
+## Recent Updates
+
+**v3.3.0** (Nov 6, 2025)
+- Added example route beta reports for Mount Adams and Wolf Peak
+
+**v3.2.0** (Oct 24, 2025)
+- Expanded geographic scope from Pacific Northwest to North America
+
+**v3.1.0** (Oct 24, 2025)
+- Upgraded peakbagger-cli to v1.7.0 with restructured skill workflow
+
+**v3.0.0** (Oct 23, 2025)
+- Major update with ascent analysis capabilities
+- Temporal pattern analysis and GPX track availability
+- Enhanced trip report discovery
+
+**v2.0.0** (Oct 21, 2025)
+- Integrated peakbagger-cli v1.0.0 with new resource-action command pattern
+- Optimized Phase 2 data gathering with parallel execution (3-4x speedup)
+- Added commit and PR templates with Conventional Commits
+
+See [CHANGELOG.md](CHANGELOG.md) for complete version history.
+
+---
+
 ### Safety-First Approach
 
 - Prominent AI-generated content disclaimers
@@ -187,6 +269,15 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dreamiurg/claude-mountaineering-skills/discussions)
+
+---
 
 ## Disclaimer
 
