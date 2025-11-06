@@ -22,7 +22,6 @@
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> •
-  <a href="#example-reports">Example Reports</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#features">Features</a> •
   <a href="#recent-updates">Recent Updates</a> •
@@ -31,6 +30,14 @@
 </p>
 
 Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+
+**Example Reports:**
+
+- **[Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md)** - Popular 4,167 ft front-range hike with 3,150 ft elevation gain. Great example of a heavily-trafficked trail with abundant trip reports.
+
+- **[Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md)** - Washington's second-highest peak at 12,280 ft. Glaciated volcano climb with 6,700 ft elevation gain, showcasing weather forecasts, freezing level alerts, and avalanche conditions.
+
+- **[Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md)** - Challenging 5,813 ft scramble with exposed Class 3-4 summit block. Demonstrates route analysis for technical terrain with limited trip report data.
 
 ---
 
@@ -60,16 +67,6 @@ Claude will automatically generate a detailed route beta report in your current 
 - 🌦️ **Comprehensive Reports** - Route descriptions, trip reports, permit information
 
 ---
-
-## Example Reports
-
-See what the plugin generates. Each report includes route descriptions, current conditions, weather forecasts, trip reports, and safety information:
-
-- **[Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md)** - Popular 4,167 ft front-range hike with 3,150 ft elevation gain. Great example of a heavily-trafficked trail with abundant trip reports.
-
-- **[Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md)** - Washington's second-highest peak at 12,280 ft. Glaciated volcano climb with 6,700 ft elevation gain, showcasing weather forecasts, freezing level alerts, and avalanche conditions.
-
-- **[Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md)** - Challenging 5,813 ft scramble with exposed Class 3-4 summit block. Demonstrates route analysis for technical terrain with limited trip report data.
 
 ## How It Works
 
