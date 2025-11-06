@@ -182,19 +182,7 @@ Update to the latest version:
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
-
-- Reporting bugs and requesting features
-- Development workflow and branch naming
-- Commit message format (Conventional Commits)
-- Pull request process
-- Testing guidelines
-- Documentation standards
-
-Quick start:
-- Found a bug? [Open an issue](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
-- Want to contribute code? Read [CONTRIBUTING.md](CONTRIBUTING.md) first
-- This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated semantic versioning
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
