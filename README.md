@@ -59,7 +59,9 @@ Each report includes:
 - Access and permit information
 - Explicit documentation of information gaps
 
-See [examples](skills/route-researcher/examples/) for sample outputs.
+**Example Reports:**
+- [Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md) - Washington's second-highest peak, 12,280 ft glaciated climb
+- [Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md) - Challenging 5,813 ft scramble with exposed Class 3-4 summit block
 
 ## Features
 
