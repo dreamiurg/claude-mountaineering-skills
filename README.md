@@ -66,6 +66,16 @@ graph TB
 - **Quality Ranking**: Prioritizes detailed trip reports over brief logs for better route insights
 - **Safety First**: Prominent AI-generated content disclaimers and manual verification links throughout
 
+## Example Reports
+
+See what the plugin generates. Each report includes route descriptions, current conditions, weather forecasts, trip reports, and safety information:
+
+- **[Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md)** - Popular 4,167 ft front-range hike with 3,150 ft elevation gain. Great example of a heavily-trafficked trail with abundant trip reports.
+
+- **[Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md)** - Washington's second-highest peak at 12,280 ft. Glaciated volcano climb with 6,700 ft elevation gain, showcasing weather forecasts, freezing level alerts, and avalanche conditions.
+
+- **[Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md)** - Challenging 5,813 ft scramble with exposed Class 3-4 summit block. Demonstrates route analysis for technical terrain with limited trip report data.
+
 ## Installation
 
 ### Prerequisites
@@ -112,13 +122,7 @@ Claude will automatically invoke the route-researcher skill and generate a compr
 
 ### Generated Output
 
-Reports are created as Markdown files in your current working directory with comprehensive route information, current conditions, trip reports, and safety disclaimers.
-
-**Example Reports:**
-
-- [Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md) - Popular 4,167 ft front-range hike with 3,150 ft elevation gain
-- [Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md) - Washington's second-highest peak, 12,280 ft glaciated climb
-- [Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md) - Challenging 5,813 ft scramble with exposed Class 3-4 summit block
+Reports are created as Markdown files in your current working directory (format: `YYYY-MM-DD-peak-name.md`) with comprehensive route information, current conditions, weather forecasts, trip reports, and safety disclaimers. See [Example Reports](#example-reports) above for what the output looks like.
 
 ## Features
 
