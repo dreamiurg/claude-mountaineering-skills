@@ -30,9 +30,7 @@
   <a href="#support">Support</a>
 </p>
 
-<p align="center">
-  Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
-</p>
+Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
 
 ---
 
