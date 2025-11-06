@@ -235,6 +235,45 @@ This creates a virtual environment and installs all dependencies.
 **Python Version:**
 Python 3.11+ (specified in `.python-version`)
 
+### Manual Installation
+
+If the plugin's automatic installation failed or you don't have `uv` installed:
+
+```bash
+# Navigate to plugin installation directory
+cd ~/.claude/plugins/mountaineering-skills/skills/route-researcher/tools
+
+# Install dependencies with uv
+uv sync
+
+# Or with pip
+pip install -r requirements.txt
+```
+
+The skill will work without these tools, gracefully falling back to available data sources.
+
+### Common Issues
+
+**Hook Installation Failed**
+
+If you see "post-install hook failed":
+
+1. Check if `uv` is installed: `uv --version`
+2. Try manual installation (see above)
+3. The skill will still work, just without some Python tools
+
+**Cloudflare Blocking Requests**
+
+The `cloudscrape.py` tool handles Cloudflare protection, but may occasionally fail:
+
+- Skill automatically falls back to available sources
+- Check "Information Gaps" section in generated reports
+- Use manual verification links provided
+
+**No Route Beta Generated**
+
+Ensure you're in a directory where you have write permissions. Reports are created in your current working directory, not in the plugin installation directory.
+
 ## Development
 
 ### Adding a New Tool

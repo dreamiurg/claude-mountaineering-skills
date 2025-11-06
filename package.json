@@ -1,11 +1,11 @@
 {
   "name": "claude-mountaineering-skills",
   "version": "1.0.0",
-  "description": "Claude Code plugin for Pacific Northwest mountain route research",
+  "description": "Claude Code plugin for North American mountain route research",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/dreamiurg/claude-mountaineering-skills.git"
+    "url": "git@github.com:dreamiurg/claude-mountaineering-skills.git"
   },
   "keywords": ["claude-code", "mountaineering", "climbing"],
   "author": "dreamiurg",

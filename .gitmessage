@@ -1,0 +1,51 @@
+# <type>: <subject>
+# |<----  Using a Maximum Of 50 Characters  ---->|
+
+
+# Explain why this change is being made
+# |<----   Try To Limit Each Line to a Maximum Of 72 Characters   ---->|
+
+
+# Provide links or keys to any relevant tickets, articles or other resources
+# Example: fixes #23
+
+# --- COMMIT END ---
+# Type can be:
+#    feat     (new feature - triggers MINOR version bump)
+#    fix      (bug fix - triggers PATCH version bump)
+#    docs     (changes to documentation)
+#    style    (formatting, missing semi colons, etc; no code change)
+#    refactor (refactoring production code)
+#    perf     (performance improvement - triggers PATCH version bump)
+#    test     (adding missing tests, refactoring tests; no production code change)
+#    chore    (updating grunt tasks etc; no production code change)
+#    ci       (changes to CI configuration files and scripts)
+#    build    (changes to the build system or external dependencies)
+# --------------------
+# Remember to:
+#   - Use the imperative mood in the subject line (e.g., "add" not "added")
+#   - Begin subject line with lowercase (after the colon)
+#   - Do not end the subject line with a period
+#   - Separate subject from body with a blank line
+#   - Use the body to explain what and why vs. how
+#   - Can use multiple lines with "-" for bullet points in body
+# --------------------
+# Breaking changes:
+#   - Add "!" after type (e.g., "feat!:") OR
+#   - Add "BREAKING CHANGE:" in the footer
+#   - Either triggers MAJOR version bump
+# --------------------
+# Examples:
+#
+#   feat: add support for filtering ascents by date range
+#
+#   fix: correct coordinate parsing for southern hemisphere peaks
+#
+#   feat!: restructure skill to use resource-action pattern
+#
+#   BREAKING CHANGE: all commands now require 'peak' resource prefix
+#
+#   docs: update installation instructions with uv requirements
+#
+#   chore: update peakbagger-cli dependency to v1.0.0
+# --------------------
