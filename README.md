@@ -6,11 +6,21 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://docs.claude.com/claude-code)
 [![Issues](https://img.shields.io/github/issues/dreamiurg/claude-mountaineering-skills)](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
 
-A Claude Code plugin that automates mountain route research for North American peaks. Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources (PeakBagger, SummitPost, WTA, AllTrails, Mountain Project, and more) to generate comprehensive Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+A Claude Code plugin that automates mountain route research for North American peaks. Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources (PeakBagger, SummitPost, WTA, AllTrails, Mountain Project, and more) to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+
+## Example Reports
+
+See what the plugin generates. Each report includes route descriptions, current conditions, weather forecasts, trip reports, and safety information:
+
+- **[Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md)** - Popular 4,167 ft front-range hike with 3,150 ft elevation gain. Great example of a heavily-trafficked trail with abundant trip reports.
+
+- **[Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md)** - Washington's second-highest peak at 12,280 ft. Glaciated volcano climb with 6,700 ft elevation gain, showcasing weather forecasts, freezing level alerts, and avalanche conditions.
+
+- **[Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md)** - Challenging 5,813 ft scramble with exposed Class 3-4 summit block. Demonstrates route analysis for technical terrain with limited trip report data.
 
 ## How It Works
 
-The route-researcher skill follows a six-phase workflow to generate comprehensive route beta reports:
+The route-researcher skill follows a six-phase workflow to generate complete route beta reports:
 
 ```mermaid
 graph TB
@@ -44,7 +54,7 @@ graph TB
 
     Generate --> Save[Phase 6: Completion<br/>Save to working directory<br/>YYYY-MM-DD-peak-name.md]
 
-    Save --> End([User receives comprehensive<br/>route beta report])
+    Save --> End([User receives detailed<br/>route beta report])
 
     style Start fill:#e1f5ff
     style End fill:#e1f5ff
@@ -65,16 +75,6 @@ graph TB
 - **Two-Tier Fetching**: Uses WebFetch first, automatically falls back to Cloudflare-bypassing tools when needed
 - **Quality Ranking**: Prioritizes detailed trip reports over brief logs for better route insights
 - **Safety First**: Prominent AI-generated content disclaimers and manual verification links throughout
-
-## Example Reports
-
-See what the plugin generates. Each report includes route descriptions, current conditions, weather forecasts, trip reports, and safety information:
-
-- **[Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md)** - Popular 4,167 ft front-range hike with 3,150 ft elevation gain. Great example of a heavily-trafficked trail with abundant trip reports.
-
-- **[Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md)** - Washington's second-highest peak at 12,280 ft. Glaciated volcano climb with 6,700 ft elevation gain, showcasing weather forecasts, freezing level alerts, and avalanche conditions.
-
-- **[Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md)** - Challenging 5,813 ft scramble with exposed Class 3-4 summit block. Demonstrates route analysis for technical terrain with limited trip report data.
 
 ## Installation
 
@@ -118,11 +118,11 @@ Simply ask Claude to research a mountain peak:
 "I'm planning to climb Sahale Peak, can you research the route?"
 ```
 
-Claude will automatically invoke the route-researcher skill and generate a comprehensive route beta report in your current directory.
+Claude will automatically invoke the route-researcher skill and generate a thorough route beta report in your current directory.
 
 ### Generated Output
 
-Reports are created as Markdown files in your current working directory (format: `YYYY-MM-DD-peak-name.md`) with comprehensive route information, current conditions, weather forecasts, trip reports, and safety disclaimers. See [Example Reports](#example-reports) above for what the output looks like.
+Reports are created as Markdown files in your current working directory (format: `YYYY-MM-DD-peak-name.md`) with complete route information, current conditions, weather forecasts, trip reports, and safety disclaimers. See [Example Reports](#example-reports) above for what the output looks like.
 
 ## Features
 
