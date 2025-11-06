@@ -1,3 +1,10 @@
+## [3.3.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.2.0...v3.3.0) (2025-11-06)
+
+
+### Features
+
+* add example route beta reports for Mount Adams and Wolf Peak ([#19](https://github.com/dreamiurg/claude-mountaineering-skills/issues/19)) ([4a91d06](https://github.com/dreamiurg/claude-mountaineering-skills/commit/4a91d067e27ec4aca1de18427dbf115d279db290))
+
 ## [3.2.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.1.0...v3.2.0) (2025-10-24)
 
 
