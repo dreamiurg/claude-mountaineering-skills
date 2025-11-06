@@ -34,14 +34,39 @@ This project follows a professional and respectful code of conduct. Please be ki
    cd claude-mountaineering-skills
    ```
 
-2. **Install the Plugin Locally**
+2. **Symlink Plugin for Local Development**
+
+   Create a symlink from your local clone to Claude's plugin directory:
+
    ```bash
-   claude
-   > /plugin marketplace add YOUR_USERNAME/claude-mountaineering-skills
-   > /plugin install mountaineering-skills@YOUR_MARKETPLACE_NAME
+   # Create the plugins directory if it doesn't exist
+   mkdir -p ~/.claude/plugins
+
+   # Create symlink (adjust path to your clone location)
+   ln -s /path/to/your/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
    ```
 
-3. **Set Up Python Tools** (if working on tools)
+   For example, if you cloned to `~/src/dreamiurg/claude-mountaineering-skills`:
+   ```bash
+   ln -s ~/src/dreamiurg/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
+   ```
+
+   **Verify the symlink:**
+   ```bash
+   ls -la ~/.claude/plugins/mountaineering-skills
+   # Should show: mountaineering-skills -> /path/to/your/claude-mountaineering-skills
+   ```
+
+3. **Restart Claude Code**
+
+   Close and restart Claude Code to load the symlinked plugin. Verify installation:
+   ```bash
+   claude
+   > /plugin list
+   # Should show mountaineering-skills in the list
+   ```
+
+4. **Set Up Python Tools** (if working on tools)
    ```bash
    cd skills/route-researcher/tools
    uv venv
@@ -49,10 +74,16 @@ This project follows a professional and respectful code of conduct. Please be ki
    uv pip install -e ".[dev]"
    ```
 
-4. **Configure Git Commit Template**
+5. **Configure Git Commit Template**
    ```bash
    git config commit.template .gitmessage
    ```
+
+**Benefits of Symlink Approach:**
+- Changes are immediately reflected (no reinstall needed)
+- Work directly in your git repository
+- Easy to test changes and create commits
+- No need to manage marketplace forks for development
 
 ## How to Contribute
 
