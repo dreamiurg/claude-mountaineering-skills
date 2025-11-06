@@ -20,7 +20,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 2. **Symlink to Claude Plugins Directory**
    ```bash
    mkdir -p ~/.claude/plugins
-   ln -s $(pwd) ~/.claude/plugins/mountaineering-skills
+   ln -s /path/to/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
 
    # Verify
    ls -la ~/.claude/plugins/mountaineering-skills
