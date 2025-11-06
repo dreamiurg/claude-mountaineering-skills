@@ -1,6 +1,70 @@
 # Mountaineering Skills for Claude Code
 
-Claude Code plugin for researching North American mountain peaks and generating comprehensive route beta reports.
+[![Latest Release](https://img.shields.io/github/v/release/dreamiurg/claude-mountaineering-skills)](https://github.com/dreamiurg/claude-mountaineering-skills/releases)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://docs.claude.com/claude-code)
+[![Issues](https://img.shields.io/github/issues/dreamiurg/claude-mountaineering-skills)](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
+
+A Claude Code plugin that automates mountain route research for North American peaks. Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources (PeakBagger, SummitPost, WTA, AllTrails, Mountain Project, and more) to generate comprehensive Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+
+## How It Works
+
+The route-researcher skill follows a six-phase workflow to generate comprehensive route beta reports:
+
+```mermaid
+graph TB
+    Start([User asks Claude to<br/>research a peak]) --> Search[Phase 1: Peak Identification<br/>Search PeakBagger database]
+    Search --> Match{Multiple<br/>matches?}
+    Match -->|Yes| Confirm[Ask user to confirm<br/>correct peak]
+    Match -->|No| Info
+    Confirm --> Info[Phase 2: Peak Information<br/>Fetch elevation, coordinates,<br/>location, prominence]
+
+    Info --> Parallel[Phase 3: Parallel Data Gathering<br/>Execute 8+ tasks simultaneously]
+
+    Parallel --> Routes[Route Descriptions<br/>SummitPost, WTA,<br/>AllTrails, Mountaineers]
+    Parallel --> Weather[Weather Forecasts<br/>Open-Meteo API<br/>7-day forecasts]
+    Parallel --> Avy[Avalanche Conditions<br/>NWAC, regional<br/>avalanche centers]
+    Parallel --> Day[Daylight Calculations<br/>Sunrise, sunset,<br/>alpine start times]
+    Parallel --> Stats[Ascent Statistics<br/>PeakBagger patterns<br/>seasonal analysis]
+    Parallel --> Reports[Trip Reports<br/>Discover & rank by<br/>content quality]
+    Parallel --> Access[Access & Permits<br/>Trailhead info,<br/>regulations, fees]
+
+    Routes --> Analyze
+    Weather --> Analyze
+    Avy --> Analyze
+    Day --> Analyze
+    Stats --> Analyze
+    Reports --> Analyze
+    Access --> Analyze
+
+    Analyze[Phase 4: Route Analysis<br/>Synthesize data, identify hazards,<br/>calculate time estimates,<br/>document information gaps]
+
+    Analyze --> Generate[Phase 5: Report Generation<br/>Create structured Markdown<br/>with safety disclaimers]
+
+    Generate --> Save[Phase 6: Completion<br/>Save to working directory<br/>YYYY-MM-DD-peak-name.md]
+
+    Save --> End([User receives comprehensive<br/>route beta report])
+
+    style Start fill:#e1f5ff
+    style End fill:#e1f5ff
+    style Parallel fill:#fff4e1
+    style Routes fill:#f0f0f0
+    style Weather fill:#f0f0f0
+    style Avy fill:#f0f0f0
+    style Day fill:#f0f0f0
+    style Stats fill:#f0f0f0
+    style Reports fill:#f0f0f0
+    style Access fill:#f0f0f0
+```
+
+**Key Features:**
+
+- **Parallel Execution**: Phase 3 runs multiple data gathering tasks simultaneously for speed
+- **Graceful Degradation**: Continues with available data if sources fail, documents gaps explicitly
+- **Two-Tier Fetching**: Uses WebFetch first, automatically falls back to Cloudflare-bypassing tools when needed
+- **Quality Ranking**: Prioritizes detailed trip reports over brief logs for better route insights
+- **Safety First**: Prominent AI-generated content disclaimers and manual verification links throughout
 
 ## Installation
 
