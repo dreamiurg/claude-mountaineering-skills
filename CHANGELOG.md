@@ -1,3 +1,10 @@
+## [3.5.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.4.0...v3.5.0) (2025-11-07)
+
+
+### Features
+
+* automate CHANGELOG to README synchronization ([#24](https://github.com/dreamiurg/claude-mountaineering-skills/issues/24)) ([5026772](https://github.com/dreamiurg/claude-mountaineering-skills/commit/50267727ccc099669867cd5feb254e1326b1be16))
+
 ## [3.4.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.3.0...v3.4.0) (2025-11-07)
 
 

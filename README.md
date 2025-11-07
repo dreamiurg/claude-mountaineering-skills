@@ -198,6 +198,9 @@ The skill aggregates information from multiple specialized mountaineering websit
 ## Recent Updates
 
 <!-- recent-updates:start -->
+### v3.5.0 (2025-11-07)
+- automate CHANGELOG to README synchronization
+
 ### v3.4.0 (2025-11-07)
 - add automated report review and validation
 
@@ -209,9 +212,6 @@ The skill aggregates information from multiple specialized mountaineering websit
 
 ### v3.1.0 (2025-10-24)
 - upgrade peakbagger-cli to v1.7.0 and restructure skill workflow
-
-### v3.0.0 (2025-10-23)
-- upgrade peakbagger-cli to v1.4.0 with ascent analysis capabilities
 
 [View complete changelog →](./CHANGELOG.md)
 <!-- recent-updates:end -->
