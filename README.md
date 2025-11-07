@@ -62,9 +62,9 @@ Claude will automatically generate a detailed route beta report in your current 
 
 **Key Features:**
 - 🏔️ **Multi-Source Research** - Aggregates data from 10+ mountaineering websites
-- ⚠️ **Safety First** - Explicit disclaimers and information gap tracking
 - 📍 **Current Conditions** - Weather forecasts, avalanche reports, daylight calculations
-- 🌦️ **Comprehensive Reports** - Route descriptions, trip reports, permit information
+- 🌦️ **Detailed Reports** - Route descriptions, trip reports, permit information
+- ⚠️ **Quality Validation** - Automated review checks for consistency and accuracy
 
 ---
 
@@ -100,7 +100,7 @@ graph TB
 
     Analyze[Phase 4: Route Analysis<br/>Synthesize data, identify hazards,<br/>calculate time estimates,<br/>document information gaps]
 
-    Analyze --> Generate[Phase 5: Report Generation<br/>Create structured Markdown<br/>with safety disclaimers]
+    Analyze --> Generate[Phase 5: Report Generation<br/>Create structured Markdown<br/>report file]
 
     Generate --> Review[Phase 6: Report Review<br/>Validate factual accuracy,<br/>fix inconsistencies,<br/>ensure quality]
 
@@ -126,7 +126,7 @@ graph TB
 - **Graceful Degradation**: Continues with available data if sources fail, documents gaps explicitly
 - **Two-Tier Fetching**: Uses WebFetch first, automatically falls back to Cloudflare-bypassing tools when needed
 - **Quality Ranking**: Prioritizes detailed trip reports over brief logs for better route insights
-- **Safety First**: Prominent AI-generated content disclaimers and manual verification links throughout
+- **Automated Validation**: Phase 6 systematically reviews reports for factual accuracy and consistency
 
 ## Installation
 
@@ -174,7 +174,7 @@ Claude will automatically invoke the route-researcher skill and generate a thoro
 
 ### Generated Output
 
-Reports are created as Markdown files in your current working directory (format: `YYYY-MM-DD-peak-name.md`) with complete route information, current conditions, weather forecasts, trip reports, and safety disclaimers. See [Example Reports](#example-reports) above for what the output looks like.
+Reports are created as Markdown files in your current working directory (format: `YYYY-MM-DD-peak-name.md`) with complete route information, current conditions, weather forecasts, and trip reports. See [Example Reports](#example-reports) above for what the output looks like.
 
 ## Features
 
@@ -196,11 +196,6 @@ The skill aggregates information from multiple specialized mountaineering websit
 ---
 
 ## Recent Updates
-
-**v3.4.0** (Nov 6, 2025)
-- Added automated report review and validation (Phase 6)
-- Reports are now systematically checked for factual consistency, mathematical accuracy, formatting issues, and safety content before delivery
-- Fixed sunset time error in Mount Adams example report
 
 **v3.3.0** (Nov 6, 2025)
 - Added example route beta reports for Mount Adams and Wolf Peak
@@ -224,13 +219,6 @@ The skill aggregates information from multiple specialized mountaineering websit
 See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
 ---
-
-### Safety-First Approach
-
-- Prominent AI-generated content disclaimers
-- Explicit information gap documentation
-- Manual verification links for all data sources
-- Clear safety warnings and hazard information
 
 ### Graceful Degradation
 
@@ -280,9 +268,3 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - **Discussions**: [GitHub Discussions](https://github.com/dreamiurg/claude-mountaineering-skills/discussions)
 
 ---
-
-## Disclaimer
-
-This tool generates AI-assisted research and should be used as a starting point only. Always verify critical information from primary sources, check current conditions, and use your own judgment for trip planning and safety decisions.
-
-The mountains are inherently dangerous. You are responsible for your own safety.
