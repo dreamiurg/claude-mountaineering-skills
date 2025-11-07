@@ -1,3 +1,10 @@
+## [3.4.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.3.0...v3.4.0) (2025-11-07)
+
+
+### Features
+
+* add automated report review and validation ([#23](https://github.com/dreamiurg/claude-mountaineering-skills/issues/23)) ([d684a63](https://github.com/dreamiurg/claude-mountaineering-skills/commit/d684a636cc12480733caf2d2e039acf3fdf8bb82))
+
 ## [3.3.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.2.0...v3.3.0) (2025-11-06)
 
 
