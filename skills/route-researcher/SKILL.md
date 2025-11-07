@@ -509,6 +509,28 @@ Every generated report must:
 
 ## Implementation Notes
 
+### Architecture (as of 2025-11-06)
+
+The route-researcher skill uses a distributed agent architecture:
+
+**Agent Types:**
+- **route-researcher-agent** - Reusable agent for extracting data from mountaineering websites (PeakBagger, SummitPost, WTA, Mountaineers, AllTrails)
+- **conditions-researcher-agent** - Gathers location-based environmental data (weather, avalanche, daylight)
+- **report-writer-agent** - Generates markdown reports from aggregated data
+- **report-reviewer-agent** - Validates report quality before presentation
+
+**Benefits:**
+- **Reduced context pollution** - Each agent handles focused tasks with isolated context
+- **Parallel execution** - Phase 3 dispatches 6 agents simultaneously
+- **Easier maintenance** - Individual agents can be updated without touching orchestrator logic
+- **Clear boundaries** - Well-defined inputs, outputs, and responsibilities
+
+**Agent Files:**
+- `skills/route-researcher/agents/route-researcher.md`
+- `skills/route-researcher/agents/conditions-researcher.md`
+- `skills/route-researcher/agents/report-writer.md`
+- `skills/route-researcher/agents/report-reviewer.md`
+
 ### Current Status (as of 2025-10-21)
 
 **Implemented:**
