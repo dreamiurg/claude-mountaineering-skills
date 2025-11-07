@@ -44,3 +44,6 @@ logs/
 
 # Worktrees
 .worktrees/
+
+# Documentation (internal planning)
+docs/
