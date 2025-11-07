@@ -47,3 +47,6 @@ logs/
 
 # Documentation (internal planning)
 docs/
+
+# Claude Code
+.claude/

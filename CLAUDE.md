@@ -1,0 +1,1 @@
+- This project uses CI/CD that is ran on GitHub Actions. When pull requests are merged into the default branch, that CI/CD would create a new release and update a few files. It's vital to always pull the latest default branch before starting working on the new changes.
