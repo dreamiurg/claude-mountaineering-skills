@@ -103,8 +103,7 @@ Prompt: "Extract route information:
 If WebFetch fails, use cloudscrape.py:
 
 ```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{url}"
+uv run python skills/route-researcher/tools/cloudscrape.py "{url}"
 ```
 
 Then parse HTML for route information.
@@ -163,8 +162,7 @@ If WebFetch fails, use cloudscrape.py.
 Use WTA AJAX endpoint:
 
 ```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{wta_url}/@@related_tripreport_listing"
+uv run python skills/route-researcher/tools/cloudscrape.py "{wta_url}/@@related_tripreport_listing"
 ```
 
 Parse HTML to extract: date, author, trip report URL
