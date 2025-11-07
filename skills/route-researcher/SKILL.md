@@ -32,7 +32,8 @@ Research Progress:
   - [ ] Phase 3 Stage 2: Fetch trip report content (Step 3I - 10-15 reports for representative sample)
 - [ ] Phase 4: Route Analysis (synthesize route, crux, hazards from all sources including trip reports)
 - [ ] Phase 5: Report Generation (markdown file created)
-- [ ] Phase 6: Completion (user notified, next steps provided)
+- [ ] Phase 6: Report Review & Validation (check for inconsistencies and errors)
+- [ ] Phase 7: Completion (user notified, next steps provided)
 
 ## Orchestration Workflow
 
@@ -728,7 +729,92 @@ Use the Write tool to create the file in the current working directory.
 - Validate Markdown syntax per formatting rules above
 - Check that all lists have blank lines before them
 
-### Phase 6: Completion
+### Phase 6: Report Review & Validation
+
+**Goal:** Systematically review the generated report for inconsistencies, errors, and quality issues before presenting to the user.
+
+This phase ensures report quality by catching common issues that may occur during automated generation.
+
+#### Step 6A: Read Generated Report
+
+Read the complete report file that was just created in Phase 5.
+
+#### Step 6B: Systematic Quality Checks
+
+Perform the following checks in order:
+
+**1. Factual Consistency:**
+- Verify dates match their stated day-of-week (e.g., "Thu Nov 6, 2025" is actually a Thursday)
+- Verify narrative day-of-week references match the actual date
+- Check coordinates, elevations, and distances are consistent across all mentions
+- Verify weather forecasts align logically (freezing levels match precipitation types)
+- Check difficulty ratings are consistent between sections
+
+**2. Mathematical Accuracy:**
+- Verify elevation gains add up correctly
+- Check time estimates are reasonable given distance and elevation gain
+- Verify pace calculations match stated mph/ft per hour rates
+- Check unit conversions are correct (feet to meters, etc.)
+
+**3. Internal Logic:**
+- Verify hazard warnings align with route descriptions
+- Check recommendations match current conditions (not recommending a route when hazards are extreme)
+- Verify seasonal considerations are consistent with forecast data
+- Check crux descriptions match the overall difficulty rating
+
+**4. Completeness:**
+- Check for placeholder texts that weren't replaced (e.g., {peak_name}, {YYYY-MM-DD})
+- Verify all referenced links are actually provided
+- Check mandatory sections are present (Overview, Route, Current Conditions, Trip Reports, Information Gaps, Data Sources)
+- Verify trip report sections have actual URLs or proper placeholders
+
+**5. Formatting Issues:**
+- Check markdown headers are properly structured
+- Verify lists have proper blank lines before them (per Phase 5B formatting rules)
+- Check tables are properly formatted
+- Verify bold/emphasis markers are used correctly and not overdone
+
+**6. Source Consistency:**
+- Verify quoted or paraphrased details are accurate to sources (if in doubt, re-check)
+- Check conflicting information from different sources is acknowledged
+- Verify URLs are correct and complete
+
+**7. Safety & Responsibility:**
+- Verify critical hazards are properly emphasized
+- Check AI disclaimer is present and prominent
+- Verify users are directed to verify information from primary sources
+- Check limitations are explicitly stated in Information Gaps
+
+#### Step 6C: Fix Issues
+
+For each issue found:
+1. **Document the issue** mentally (what's wrong, where it is, severity)
+2. **Fix the issue** immediately by editing the report file
+3. **Verify the fix** doesn't create new issues
+
+**Priority for fixes:**
+- **Critical:** Safety errors, factual errors, missing disclaimers (MUST fix)
+- **Important:** Completeness, usability, consistency issues (SHOULD fix)
+- **Minor:** Formatting, polish issues (FIX if quick, otherwise acceptable)
+
+**Common issues to watch for:**
+- Day-of-week mismatches (e.g., report dated Thursday but says "today (Wednesday)")
+- Missing blank lines before lists (violates Phase 5B rules)
+- Placeholder text not replaced
+- Inconsistent elevation or distance values
+- Weather data that doesn't make sense (e.g., snow at 12,000 ft freezing level)
+
+#### Step 6D: Save Corrected Report
+
+If any issues were found and fixed:
+1. Use Edit or Write tool to save the corrected report
+2. Verify the file is saved in the correct location
+3. Proceed to Phase 7
+
+If no issues were found:
+1. Proceed directly to Phase 7
+
+### Phase 7: Completion
 
 **Goal:** Inform user of completion and next steps.
 
