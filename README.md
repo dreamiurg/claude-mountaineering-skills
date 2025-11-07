@@ -197,26 +197,24 @@ The skill aggregates information from multiple specialized mountaineering websit
 
 ## Recent Updates
 
-**v3.3.0** (Nov 6, 2025)
-- Added example route beta reports for Mount Adams and Wolf Peak
+<!-- recent-updates:start -->
+### v3.4.0 (2025-11-07)
+- add automated report review and validation
 
-**v3.2.0** (Oct 24, 2025)
-- Expanded geographic scope from Pacific Northwest to North America
+### v3.3.0 (2025-11-06)
+- add example route beta reports for Mount Adams and Wolf Peak
 
-**v3.1.0** (Oct 24, 2025)
-- Upgraded peakbagger-cli to v1.7.0 with restructured skill workflow
+### v3.2.0 (2025-10-24)
+- expand geographic scope from Pacific Northwest to North America
 
-**v3.0.0** (Oct 23, 2025)
-- Major update with ascent analysis capabilities
-- Temporal pattern analysis and GPX track availability
-- Enhanced trip report discovery
+### v3.1.0 (2025-10-24)
+- upgrade peakbagger-cli to v1.7.0 and restructure skill workflow
 
-**v2.0.0** (Oct 21, 2025)
-- Integrated peakbagger-cli v1.0.0 with new resource-action command pattern
-- Optimized Phase 2 data gathering with parallel execution (3-4x speedup)
-- Added commit and PR templates with Conventional Commits
+### v3.0.0 (2025-10-23)
+- upgrade peakbagger-cli to v1.4.0 with ascent analysis capabilities
 
-See [CHANGELOG.md](CHANGELOG.md) for complete version history.
+[View complete changelog →](./CHANGELOG.md)
+<!-- recent-updates:end -->
 
 ---
 
