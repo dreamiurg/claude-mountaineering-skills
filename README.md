@@ -70,7 +70,7 @@ Claude will automatically generate a detailed route beta report in your current 
 
 ## How It Works
 
-The route-researcher skill follows a six-phase workflow to generate complete route beta reports:
+The route-researcher skill follows a seven-phase workflow to generate complete route beta reports:
 
 ```mermaid
 graph TB
@@ -102,7 +102,9 @@ graph TB
 
     Analyze --> Generate[Phase 5: Report Generation<br/>Create structured Markdown<br/>with safety disclaimers]
 
-    Generate --> Save[Phase 6: Completion<br/>Save to working directory<br/>YYYY-MM-DD-peak-name.md]
+    Generate --> Review[Phase 6: Report Review<br/>Validate factual accuracy,<br/>fix inconsistencies,<br/>ensure quality]
+
+    Review --> Save[Phase 7: Completion<br/>Save to working directory<br/>YYYY-MM-DD-peak-name.md]
 
     Save --> End([User receives detailed<br/>route beta report])
 
@@ -194,6 +196,11 @@ The skill aggregates information from multiple specialized mountaineering websit
 ---
 
 ## Recent Updates
+
+**v3.4.0** (Nov 6, 2025)
+- Added automated report review and validation (Phase 6)
+- Reports are now systematically checked for factual consistency, mathematical accuracy, formatting issues, and safety content before delivery
+- Fixed sunset time error in Mount Adams example report
 
 **v3.3.0** (Nov 6, 2025)
 - Added example route beta reports for Mount Adams and Wolf Peak

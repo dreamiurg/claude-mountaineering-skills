@@ -111,7 +111,7 @@ Route-finding can be challenging in whiteout conditions, darkness, or when the b
 
 - **Date:** 2025-11-06
 - **Sunrise:** 6:53 AM PST
-- **Sunset:** 4:45 PM PST (next day)
+- **Sunset:** 4:45 PM PST
 - **Daylight Hours:** 9 hours, 52 minutes
 - **Civil Twilight:** 6:23 AM - 5:15 PM (optimal window for alpine starts and activities)
 
