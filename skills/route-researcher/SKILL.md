@@ -27,9 +27,9 @@ Examples:
 Research Progress:
 - [ ] Phase 1: Peak Identification (peak validated, ID obtained)
 - [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
-- [ ] Phase 3: Data Gathering (route descriptions, trip reports, weather, conditions collected)
-  - [ ] Phase 3 Stage 1: Parallel data gathering (Steps 3A-3H)
-  - [ ] Phase 3 Stage 2: Fetch trip report content (Step 3I - 10-15 reports for representative sample)
+- [ ] Phase 3: Data Gathering (dispatch agents for parallel data collection)
+  - [ ] Phase 3 Stage 1: Dispatch agents (Steps 3A-3C - 6 agents in parallel)
+  - [ ] Phase 3 Stage 2: Inline operations (Steps 3D-3E - access/permits, trip reports)
 - [ ] Phase 4: Route Analysis (synthesize route, crux, hazards from all sources including trip reports)
 - [ ] Phase 5: Report Generation (markdown file created)
 - [ ] Phase 6: Report Review & Validation (check for inconsistencies and errors)
@@ -292,12 +292,12 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 
 #### Step 4B: Synthesize Route Information from Multiple Sources
 
-**Goal:** Combine trip reports (Step 3I), route descriptions (Step 3A), and other sources into comprehensive route beta.
+**Goal:** Combine trip reports (Step 3E), route descriptions (Step 3A agents), and other sources into comprehensive route beta.
 
 **Source Priority:**
-1. Trip reports (Step 3I) - first-hand experiences
-2. Route descriptions (Step 3A) - published beta baseline
-3. PeakBagger/ascent data (Steps 2 & 3B) - basic info, patterns
+1. Trip reports (Step 3E) - first-hand experiences
+2. Route descriptions (Step 3A agents) - published beta baseline
+3. PeakBagger/ascent data (Steps 2 & 3A) - basic info, patterns
 
 **Synthesis Pattern for Route, Crux, and Hazards:**
 
