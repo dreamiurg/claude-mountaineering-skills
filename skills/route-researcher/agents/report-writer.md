@@ -57,6 +57,9 @@ Example: `2025-11-06-mount-baker.md`
 
 Use current date for YYYY-MM-DD. Save in current working directory.
 
+**Output location:** Current working directory (as set by orchestrator).
+Note: Orchestrator should ensure CWD is the user's intended output directory before invoking this agent.
+
 **Step 3: Generate report content**
 
 Follow template structure exactly:
@@ -96,7 +99,7 @@ Return to orchestrator:
 
 **Filename:** [filename]
 
-**Sections Included:** [count]
+**Sections Included:** [count] (Count all sections generated, including conditional ones like Avalanche Forecast)
 
 **Information Gaps Documented:** [count]
 
@@ -105,6 +108,6 @@ Return to orchestrator:
 
 ## Error Handling
 
-- If template not found: Use fallback structure, note in response
+- If template not found: Return FAIL status with error message - template is required
 - If required data missing: Document in Information Gaps section
 - If file write fails: Return FAIL status with error details
