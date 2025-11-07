@@ -350,175 +350,91 @@ Explicitly document what data was **not found or unreliable:**
 
 ### Phase 5: Report Generation
 
-**Goal:** Create comprehensive Markdown document following the template.
+**Goal:** Create comprehensive Markdown document by dispatching report-writer agent.
 
-#### Step 5A: Generate Report Content
+#### Step 5A: Prepare Data Package
 
-Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowercase-hyphenated}.md`
+Organize all gathered and analyzed data into structured format:
 
-**Filename Examples:**
-- `2025-10-20-mount-baker.md`
-- `2025-10-20-sahale-peak.md`
+```python
+data_package = {
+    "peak_metadata": {
+        "peak_name": peak_name,
+        "peak_id": peak_id,
+        "elevation": elevation,
+        "coordinates": (latitude, longitude),
+        "location": location,
+        "peakbagger_url": peakbagger_url
+    },
+    "route_data": {
+        # Aggregated from route-researcher agents
+        "descriptions": [...],
+        "difficulty": [...],
+        "trip_reports": [...],
+        "ascent_stats": {...}
+    },
+    "conditions_data": {
+        # From conditions-researcher agent
+        "weather": [...],
+        "air_quality": {...},
+        "daylight": {...},
+        "avalanche": {...}
+    },
+    "analysis": {
+        # From Phase 4
+        "route_type": route_type,
+        "crux": crux_description,
+        "hazards": hazards_list,
+        "time_estimates": {...},
+        "information_gaps": [...]
+    }
+}
+```
 
-**Location:** Reports are generated in the user's current working directory, not in the plugin installation directory.
+#### Step 5B: Dispatch Report Writer Agent
 
-**Structure and Formatting:**
+```
+Task(
+  subagent_type="general-purpose",
+  prompt=f"""Use the report-writer skill with this data package:
 
-Read `assets/report-template.md` and follow it exactly for:
-- Section structure and headings
-- Content formatting (how to present ascent data, trip report links, etc.)
-- Conditional sections (when to include/exclude sections based on available data)
-- All layout and presentation decisions
+{json.dumps(data_package, indent=2)}
 
-The template is the **single source of truth** for report formatting. Phase 3 (Data Gathering) specifies **what data to extract**. This phase (Phase 5) uses the template to determine **how to present that data**.
+Generate comprehensive markdown route research report following the template.
+Save to current working directory with filename format: YYYY-MM-DD-peak-name.md"""
+)
+```
 
-#### Step 5B: Markdown Formatting Rules
+#### Step 5C: Capture Report File Path
 
-Follow these formatting rules to ensure proper Markdown rendering:
-
-1. **Blank lines before lists:** ALWAYS add a blank line before starting a bullet or numbered list
-   ```markdown
-   ✅ CORRECT:
-   This is a paragraph.
-
-   - First bullet
-   - Second bullet
-
-   ❌ INCORRECT:
-   This is a paragraph.
-   - First bullet  (missing blank line)
-   ```
-
-2. **Blank lines after section headers:** Always have a blank line after ## or ### headers
-
-3. **Consistent list formatting:**
-   - Use `-` for unordered lists (not `*` or `+`)
-   - Indent sub-items with 2 spaces
-   - Keep list items concise (if >2 sentences, consider paragraphs instead)
-
-4. **Break up long text blocks:**
-   - Paragraphs >4 sentences should be split or bulleted
-   - Sequential steps should use numbered lists (1. 2. 3.)
-   - Related items should use bullet lists
-
-5. **Bold formatting:** Use `**text**` for emphasis, not for list item headers without bullets
-
-6. **Hazards and Safety:** Use bullet lists with sub-items:
-   ```markdown
-   **Known Hazards:**
-
-   - **Route-finding:** Orange markers help but can be missed
-   - **Slippery conditions:** Boulders treacherous when wet/icy
-   - **Weather exposure:** Above treeline sections exposed to elements
-   ```
-
-7. **Information that continues after colon:** Must have blank line before list:
-   ```markdown
-   ✅ CORRECT:
-   Winter access adds the following:
-
-   - **Additional Distance:** 5.6 miles
-   - **Additional Elevation:** 1,700 ft
-
-   ❌ INCORRECT:
-   Winter access adds the following:
-   - **Additional Distance:** 5.6 miles  (missing blank line)
-   ```
-
-#### Step 5C: Write Report File
-
-Use the Write tool to create the file in the current working directory.
-
-**Verification:**
-- Use proper filename format (YYYY-MM-DD-peak-name.md)
-- Save file in user's current working directory
-- Validate Markdown syntax per formatting rules above
-- Check that all lists have blank lines before them
+Extract file path from agent response for use in Phase 6.
 
 ### Phase 6: Report Review & Validation
 
-**Goal:** Systematically review the generated report for inconsistencies, errors, and quality issues before presenting to the user.
+**Goal:** Systematically review the generated report for quality issues by dispatching report-reviewer agent.
 
-This phase ensures report quality by catching common issues that may occur during automated generation.
+#### Step 6A: Dispatch Report Reviewer Agent
 
-#### Step 6A: Read Generated Report
+```
+Task(
+  subagent_type="general-purpose",
+  prompt=f"""Use the report-reviewer skill with this input:
 
-Read the complete report file that was just created in Phase 5.
+- report_file_path: "{report_file_path}"
 
-#### Step 6B: Systematic Quality Checks
+Perform systematic quality checks and fix any critical or important issues."""
+)
+```
 
-Perform the following checks in order:
+#### Step 6B: Process Validation Results
 
-**1. Factual Consistency:**
-- Verify dates match their stated day-of-week (e.g., "Thu Nov 6, 2025" is actually a Thursday)
-- Verify narrative day-of-week references match the actual date
-- Check coordinates, elevations, and distances are consistent across all mentions
-- Verify weather forecasts align logically (freezing levels match precipitation types)
-- Check difficulty ratings are consistent between sections
+Review the validation results from the agent:
 
-**2. Mathematical Accuracy:**
-- Verify elevation gains add up correctly
-- Check time estimates are reasonable given distance and elevation gain
-- Verify pace calculations match stated mph/ft per hour rates
-- Check unit conversions are correct (feet to meters, etc.)
+- If status is PASS or PASS_WITH_FIXES: Proceed to Phase 7
+- If status is FAIL: Present issues to user and ask for guidance
+- Capture final corrected report path for Phase 7
 
-**3. Internal Logic:**
-- Verify hazard warnings align with route descriptions
-- Check recommendations match current conditions (not recommending a route when hazards are extreme)
-- Verify seasonal considerations are consistent with forecast data
-- Check crux descriptions match the overall difficulty rating
-
-**4. Completeness:**
-- Check for placeholder texts that weren't replaced (e.g., {peak_name}, {YYYY-MM-DD})
-- Verify all referenced links are actually provided
-- Check mandatory sections are present (Overview, Route, Current Conditions, Trip Reports, Information Gaps, Data Sources)
-- Verify trip report sections have actual URLs or proper placeholders
-
-**5. Formatting Issues:**
-- Check markdown headers are properly structured
-- Verify lists have proper blank lines before them (per Phase 5B formatting rules)
-- Check tables are properly formatted
-- Verify bold/emphasis markers are used correctly and not overdone
-
-**6. Source Consistency:**
-- Verify quoted or paraphrased details are accurate to sources (if in doubt, re-check)
-- Check conflicting information from different sources is acknowledged
-- Verify URLs are correct and complete
-
-**7. Safety & Responsibility:**
-- Verify critical hazards are properly emphasized
-- Check AI disclaimer is present and prominent
-- Verify users are directed to verify information from primary sources
-- Check limitations are explicitly stated in Information Gaps
-
-#### Step 6C: Fix Issues
-
-For each issue found:
-1. **Document the issue** mentally (what's wrong, where it is, severity)
-2. **Fix the issue** immediately by editing the report file
-3. **Verify the fix** doesn't create new issues
-
-**Priority for fixes:**
-- **Critical:** Safety errors, factual errors, missing disclaimers (MUST fix)
-- **Important:** Completeness, usability, consistency issues (SHOULD fix)
-- **Minor:** Formatting, polish issues (FIX if quick, otherwise acceptable)
-
-**Common issues to watch for:**
-- Day-of-week mismatches (e.g., report dated Thursday but says "today (Wednesday)")
-- Missing blank lines before lists (violates Phase 5B rules)
-- Placeholder text not replaced
-- Inconsistent elevation or distance values
-- Weather data that doesn't make sense (e.g., snow at 12,000 ft freezing level)
-
-#### Step 6D: Save Corrected Report
-
-If any issues were found and fixed:
-1. Use Edit or Write tool to save the corrected report
-2. Verify the file is saved in the correct location
-3. Proceed to Phase 7
-
-If no issues were found:
-1. Proceed directly to Phase 7
+**Note:** The report-reviewer agent automatically fixes issues and returns the corrected file path.
 
 ### Phase 7: Completion
 
