@@ -120,6 +120,8 @@ This returns structured JSON with:
 
 **Execution Strategy:** Dispatch multiple specialized agents in parallel to minimize total execution time and reduce context pollution.
 
+**IMPORTANT:** Agents read their own instruction files at runtime to avoid passing large instruction blocks multiple times.
+
 #### Step 3A: Dispatch Route Researcher Agents (Parallel)
 
 Dispatch 5 route-researcher-agent instances in parallel, one per source:
@@ -129,8 +131,11 @@ Dispatch 5 route-researcher-agent instances in parallel, one per source:
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the route-researcher skill with these inputs:
+  prompt="""You are a route-researcher agent.
 
+Read your instructions from: skills/route-researcher/agents/route-researcher.md
+
+Inputs:
 - peak_name: "{peak_name}"
 - peak_id: {peak_id}
 - peak_info: {peak_info}
@@ -146,8 +151,11 @@ Extract ascent statistics and identify trip reports with content."""
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the route-researcher skill with these inputs:
+  prompt="""You are a route-researcher agent.
 
+Read your instructions from: skills/route-researcher/agents/route-researcher.md
+
+Inputs:
 - peak_name: "{peak_name}"
 - peak_info: {peak_info}
 - source: "SummitPost"
@@ -162,8 +170,11 @@ Extract route descriptions, difficulty ratings, and hazards."""
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the route-researcher skill with these inputs:
+  prompt="""You are a route-researcher agent.
 
+Read your instructions from: skills/route-researcher/agents/route-researcher.md
+
+Inputs:
 - peak_name: "{peak_name}"
 - peak_info: {peak_info}
 - source: "WTA"
@@ -178,8 +189,11 @@ Extract route information and trip report listings."""
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the route-researcher skill with these inputs:
+  prompt="""You are a route-researcher agent.
 
+Read your instructions from: skills/route-researcher/agents/route-researcher.md
+
+Inputs:
 - peak_name: "{peak_name}"
 - peak_info: {peak_info}
 - source: "Mountaineers"
@@ -194,8 +208,11 @@ Extract route beta and technical requirements."""
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the route-researcher skill with these inputs:
+  prompt="""You are a route-researcher agent.
 
+Read your instructions from: skills/route-researcher/agents/route-researcher.md
+
+Inputs:
 - peak_name: "{peak_name}"
 - peak_info: {peak_info}
 - source: "AllTrails"
@@ -212,8 +229,11 @@ Dispatch conditions-researcher-agent:
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the conditions-researcher skill with these inputs:
+  prompt="""You are a conditions-researcher agent.
 
+Read your instructions from: skills/route-researcher/agents/conditions-researcher.md
+
+Inputs:
 - coordinates: {latitude}, {longitude}
 - elevation: {elevation_m}
 - peak_name: "{peak_name}"
@@ -396,11 +416,16 @@ data_package = {
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the report-writer skill with this data package:
+  prompt="""You are the report-writer agent.
+
+Read your instructions from: skills/route-researcher/agents/report-writer.md
+Read the template from: skills/route-researcher/assets/report-template.md
+
+Data package:
 
 {json.dumps(data_package, indent=2)}
 
-Generate comprehensive markdown route research report following the template.
+Generate the report following the template structure exactly.
 Save to current working directory with filename format: YYYY-MM-DD-peak-name.md"""
 )
 ```
@@ -418,8 +443,11 @@ Extract file path from agent response for use in Phase 6.
 ```
 Task(
   subagent_type="general-purpose",
-  prompt=f"""Use the report-reviewer skill with this input:
+  prompt="""You are the report-reviewer agent.
 
+Read your instructions from: skills/route-researcher/agents/report-reviewer.md
+
+Input:
 - report_file_path: "{report_file_path}"
 
 Perform systematic quality checks and fix any critical or important issues."""
