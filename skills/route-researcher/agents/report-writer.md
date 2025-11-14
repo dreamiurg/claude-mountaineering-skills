@@ -71,10 +71,9 @@ Follow template structure exactly:
 5. **Crux**: Describe hardest section with specifics
 6. **Known Hazards**: Comprehensive list from all sources
 7. **Current Conditions**: Weather forecast, freezing levels, air quality, daylight
-8. **Ascent Statistics**: Seasonal patterns, recent activity
-9. **Trip Reports**: Links organized by source with dates
-10. **Information Gaps**: Explicitly list missing data
-11. **Data Sources**: Links to all sources used
+8. **Trip Reports**: Links organized by source with dates
+9. **Information Gaps**: Explicitly list missing data
+10. **Data Sources**: Links to all sources used
 
 **Markdown Formatting Rules:**
 
