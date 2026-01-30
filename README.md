@@ -21,6 +21,10 @@
 
 Ask Claude to research any mountain. The route-researcher skill pulls from 10+ mountaineering sources and compiles a detailed Markdown report with current weather, avalanche conditions, daylight windows, trip reports, and route beta. What used to take 3-5 hours of tab-hopping now takes 3-5 minutes.
 
+<p align="center">
+  <img src="skills/route-researcher/assets/demo.gif" alt="Route Researcher Demo" width="800">
+</p>
+
 **See it in action:**
 
 | Peak | Elevation | What it shows |
