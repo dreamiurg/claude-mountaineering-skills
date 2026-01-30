@@ -15,53 +15,43 @@
   <a href="#quick-start">Quick Start</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#features">Features</a> •
-  <a href="#recent-updates">Recent Updates</a> •
   <a href="#installation">Installation</a> •
   <a href="#support">Support</a>
 </p>
 
-Simply ask Claude to research any mountain, and the route-researcher skill aggregates data from 10+ specialized mountaineering sources to generate detailed Markdown route beta reports. Each report includes current weather forecasts, avalanche conditions, daylight calculations, synthesized trip reports, and detailed route information - transforming 3-5 hours of manual research into a 3-5 minute automated workflow with safety-first documentation and explicit information gap tracking.
+Ask Claude to research any mountain. The route-researcher skill pulls from 10+ mountaineering sources and compiles a detailed Markdown report with current weather, avalanche conditions, daylight windows, trip reports, and route beta. What used to take 3-5 hours of tab-hopping now takes 3-5 minutes.
 
-**Example Reports:**
+**See it in action:**
 
-- **[Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md)** - Popular 4,167 ft front-range hike with 3,150 ft elevation gain. Great example of a heavily-trafficked trail with abundant trip reports.
-
-- **[Mount Adams (South Climb)](skills/route-researcher/examples/2025-11-06-mount-adams.md)** - Washington's second-highest peak at 12,280 ft. Glaciated volcano climb with 6,700 ft elevation gain, showcasing weather forecasts, freezing level alerts, and avalanche conditions.
-
-- **[Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md)** - Challenging 5,813 ft scramble with exposed Class 3-4 summit block. Demonstrates route analysis for technical terrain with limited trip report data.
+| Peak | Elevation | What it shows |
+|------|-----------|---------------|
+| [Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md) | 4,167 ft | High-traffic trail with abundant trip reports |
+| [Mount Adams](skills/route-researcher/examples/2025-11-06-mount-adams.md) | 12,280 ft | Glaciated volcano with weather/avy conditions |
+| [Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md) | 5,813 ft | Technical scramble with sparse beta |
 
 ---
 
 ## Quick Start
 
-Start a new Claude Code session in your terminal and run:
-
 ```bash
 % claude
 > /plugin marketplace add dreamiurg/claude-mountaineering-skills
-
 > /plugin install mountaineering-skills@mountaineering-skills-marketplace
 ```
 
-Restart Claude Code. Then simply ask:
+Restart Claude Code, then:
 
 ```
 "Research Mount Rainier"
 ```
 
-Claude will automatically generate a detailed route beta report in your current directory.
-
-**Key Features:**
-- 🏔️ **Multi-Source Research** - Aggregates data from 10+ mountaineering websites
-- 📍 **Current Conditions** - Weather forecasts, avalanche reports, daylight calculations
-- 🌦️ **Detailed Reports** - Route descriptions, trip reports, permit information
-- ⚠️ **Quality Validation** - Automated review checks for consistency and accuracy
+That's it. Claude generates a route beta report in your current directory.
 
 ---
 
 ## How It Works
 
-The route-researcher skill follows a seven-phase workflow to generate complete route beta reports:
+Seven phases, mostly parallelized:
 
 ```mermaid
 graph TB
@@ -111,149 +101,96 @@ graph TB
     style Access fill:#f0f0f0
 ```
 
-**Key Features:**
+The skill runs data-gathering tasks in parallel, ranks trip reports by content quality, and validates the final report for accuracy. If a source fails, it documents the gap and keeps going.
 
-- **Parallel Execution**: Phase 3 runs multiple data gathering tasks simultaneously for speed
-- **Graceful Degradation**: Continues with available data if sources fail, documents gaps explicitly
-- **Two-Tier Fetching**: Uses WebFetch first, automatically falls back to Cloudflare-bypassing tools when needed
-- **Quality Ranking**: Prioritizes detailed trip reports over brief logs for better route insights
-- **Automated Validation**: Phase 6 systematically reviews reports for factual accuracy and consistency
+---
+
+## Features
+
+### Data Sources
+
+The skill aggregates from specialized mountaineering sites:
+
+| Category | Sources |
+|----------|---------|
+| Peak info | [PeakBagger](https://www.peakbagger.com) |
+| Routes | [SummitPost](https://www.summitpost.org), [WTA](https://www.wta.org), [AllTrails](https://www.alltrails.com), [The Mountaineers](https://www.mountaineers.org) |
+| Weather | [Mountain-Forecast.com](https://www.mountain-forecast.com), [NOAA/NWS](https://www.weather.gov) |
+| Avalanche | [NWAC](https://nwac.us), regional centers |
+| Trip reports | [CascadeClimbers](https://cascadeclimbers.com), [PeakBagger](https://www.peakbagger.com), [Mountain Project](https://www.mountainproject.com) |
+
+**Coverage note:** Report quality depends on how well-documented your peak is across these sources. Works best for popular North American peaks.
+
+### Graceful Degradation
+
+Missing data? The skill notes what's unavailable in an "Information Gaps" section and provides manual lookup links. You always get a report, even if some sources are down.
+
+---
 
 ## Installation
 
-### Prerequisites
-
-- [Claude Code](https://docs.claude.com/claude-code) installed
-- [uv](https://docs.astral.sh/uv/) (optional, for Python tools)
-
-### Install Plugin
-
-This repo contains both marketplace and skills. It add it to Claude Code, run the following commands:
+**Prerequisites:** [Claude Code](https://docs.claude.com/claude-code), optionally [uv](https://docs.astral.sh/uv/) for Python tools.
 
 ```bash
 % claude
 > /plugin marketplace add dreamiurg/claude-mountaineering-skills
-  ⎿  Successfully added marketplace: mountaineering-skills-marketplace
-
 > /plugin install mountaineering-skills@mountaineering-skills-marketplace
-  ⎿  ✓ Installed mountaineering-skills. Restart Claude Code to load new plugins.
 ```
 
-The plugin installs Python dependencies automatically if `uv` is available. If not, see [Manual Installation](#manual-installation) below.
+Python dependencies install automatically if `uv` is available.
 
-### Verify Installation
-
-In any Claude Code session:
+**Verify it worked:**
 
 ```bash
 "What skills are available?"
 ```
 
-You should see `route-researcher` listed.
+You should see `route-researcher` in the list.
+
+---
 
 ## Usage
 
-Simply ask Claude to research a mountain peak:
+Just ask naturally:
 
-```bash
+```
 "Research Mt Baker"
 "Get route beta for Forbidden Peak"
-"I'm planning to climb Sahale Peak, can you research the route?"
+"I'm planning to climb Sahale Peak, can you research it?"
 ```
 
-Claude will automatically invoke the route-researcher skill and generate a thorough route beta report in your current directory.
-
-### Generated Output
-
-Reports are created as Markdown files in your current working directory (format: `YYYY-MM-DD-peak-name.md`) with complete route information, current conditions, weather forecasts, and trip reports. See [Example Reports](#example-reports) above for what the output looks like.
-
-## Features
-
-### Multi-Source Data Gathering
-
-The skill aggregates information from multiple specialized mountaineering websites:
-
-- **[PeakBagger](https://www.peakbagger.com)**: Peak information, coordinates, elevation
-- **[SummitPost](https://www.summitpost.org)**: Route descriptions, conditions, beta
-- **[Washington Trails Association (WTA)](https://www.wta.org)**: Trail reports and conditions
-- **[AllTrails](https://www.alltrails.com)**: Trail information and reviews
-- **[The Mountaineers](https://www.mountaineers.org)**: Route guides and resources
-- **Weather**: [Mountain-Forecast.com](https://www.mountain-forecast.com), [NOAA/NWS](https://www.weather.gov) point forecasts
-- **Avalanche**: Regional avalanche centers ([NWAC](https://nwac.us), etc.) when applicable
-- **Trip Reports**: Multiple sources including [CascadeClimbers](https://cascadeclimbers.com), [PeakBagger](https://www.peakbagger.com), [Mountain Project](https://www.mountainproject.com)
-
-**Note:** The quality of the generated report depends on the availability of peak information on these sources. If your target peak lacks coverage on these websites, the skill may produce limited output. The skill works best for well-documented peaks in North America.
+Reports save to your current directory as `YYYY-MM-DD-peak-name.md`.
 
 ---
-
-## Recent Updates
-
-<!-- recent-updates:start -->
-### v3.5.0 (2025-11-07)
-- automate CHANGELOG to README synchronization
-
-### v3.4.0 (2025-11-07)
-- add automated report review and validation
-
-### v3.3.0 (2025-11-06)
-- add example route beta reports for Mount Adams and Wolf Peak
-
-### v3.2.0 (2025-10-24)
-- expand geographic scope from Pacific Northwest to North America
-
-### v3.1.0 (2025-10-24)
-- upgrade peakbagger-cli to v1.7.0 and restructure skill workflow
-
-[View complete changelog →](./CHANGELOG.md)
-<!-- recent-updates:end -->
-
----
-
-### Graceful Degradation
-
-If data sources are unavailable:
-- Skill continues with available sources
-- Notes missing data in "Information Gaps" section
-- Provides manual check links
-- Always generates a report, even with partial data
 
 ## Dependencies
 
-### PeakBagger CLI
+- **[peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli)** (v1.7.0) for peak data and trip reports
+- **Python tools** for weather, avalanche, and daylight calculations (see [tools README](skills/route-researcher/tools/README.md))
 
-Uses [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) to retrieve peak information and trip reports from PeakBagger.com. Version pinned to `v1.7.0` for stability.
-
-### Python Tools
-
-Includes Python utilities for weather forecasts, avalanche conditions, and daylight calculations. See [skills/route-researcher/tools/README.md](skills/route-researcher/tools/README.md) for details.
+---
 
 ## Updates
 
-Check for plugin updates:
-
 ```bash
-/plugin list
+/plugin list              # check current version
+/plugin update mountaineering-skills  # grab latest
 ```
 
-Update to the latest version:
-
-```bash
-/plugin update mountaineering-skills
-```
+---
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/dreamiurg/claude-mountaineering-skills/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/dreamiurg/claude-mountaineering-skills/discussions)
+[Open an issue](https://github.com/dreamiurg/claude-mountaineering-skills/issues) or [start a discussion](https://github.com/dreamiurg/claude-mountaineering-skills/discussions).
 
 ---
+
+## License
+
+[MIT](LICENSE)
