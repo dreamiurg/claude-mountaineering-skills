@@ -118,142 +118,176 @@ This returns structured JSON with:
 
 **Goal:** Gather comprehensive route information from all available sources.
 
-**Execution Strategy:** Dispatch multiple specialized agents in parallel to minimize total execution time and reduce context pollution.
+**Execution Strategy:** Run Python script for deterministic API data + dispatch specialized agents in parallel for web research. This hybrid approach minimizes token usage while maximizing parallelism.
 
-**IMPORTANT:** Agents read their own instruction files at runtime to avoid passing large instruction blocks multiple times.
+#### Step 3A: Fetch Conditions Data (Python Script)
 
-#### Step 3A: Dispatch Route Researcher Agents (Parallel)
+Run the conditions fetcher script to gather all API-based data:
 
-Dispatch 5 route-researcher-agent instances in parallel, one per source:
+```bash
+cd skills/route-researcher/tools
+uv run python fetch_conditions.py \
+  --coordinates "{latitude},{longitude}" \
+  --elevation {elevation_m} \
+  --peak-name "{peak_name}" \
+  --peak-id {peak_id}
+```
 
-**Agent 1: PeakBagger Source**
+This returns JSON with:
+- **weather**: 7-day forecast with temperatures, precipitation, freezing levels
+- **air_quality**: AQI ratings and any concerns
+- **daylight**: Sunrise, sunset, civil twilight
+- **avalanche**: NWAC region and URL for manual check
+- **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
+- **gaps**: Any API failures noted for report
+
+**Run this in parallel with Step 3B** (no dependency between them).
+
+#### Step 3B: Dispatch Researcher Agents (Parallel)
+
+Dispatch 3 Researcher agents in a single message (all Task calls together). Each agent researches assigned sources and fetches trip report content directly.
+
+**Agent 1: PeakBagger + SummitPost**
 
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="""You are a route-researcher agent.
+  prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
-Read your instructions from: skills/route-researcher/agents/route-researcher.md
+## Your Assignment
+Research from these sources: PeakBagger, SummitPost
 
-Inputs:
-- peak_name: "{peak_name}"
-- peak_id: {peak_id}
-- peak_info: {peak_info}
-- source: "PeakBagger"
-- extraction_goals: ["ascent_data", "trip_reports"]
+## PeakBagger Research
+1. Search: "{peak_name} site:peakbagger.com"
+2. Extract route descriptions from peak page
+3. Identify trip reports with content (word_count > 0)
+4. Fetch content for up to 5 recent trip reports using:
+   ```bash
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
+   ```
 
-Extract ascent statistics and identify trip reports with content."""
+## SummitPost Research
+1. Search: "{peak_name} site:summitpost.org"
+2. Use WebFetch to extract: route name, difficulty, approach, description, hazards
+3. If WebFetch fails, use:
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
+   ```
+
+## Trip Report Extraction
+For each report fetched, extract: date, author, route conditions, gear mentioned, hazards.
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "sources": ["PeakBagger", "SummitPost"],
+  "route_info": [
+    {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
+  ],
+  "trip_reports": [
+    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false}
+  ],
+  "gaps": ["what couldn't be fetched and why"]
+}
+```"""
 )
 ```
 
-**Agent 2: SummitPost Source**
+**Agent 2: WTA + Mountaineers**
 
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="""You are a route-researcher agent.
+  prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
-Read your instructions from: skills/route-researcher/agents/route-researcher.md
+## Your Assignment
+Research from these sources: WTA, Mountaineers.org
 
-Inputs:
-- peak_name: "{peak_name}"
-- peak_info: {peak_info}
-- source: "SummitPost"
-- extraction_goals: ["route_descriptions"]
+## WTA Research
+1. Search: "{peak_name} site:wta.org"
+2. Find the hike page and extract: trail name, difficulty, distance, elevation gain, hazards
+3. Get trip reports from AJAX endpoint: {wta_url}/@@related_tripreport_listing
+4. Fetch content for up to 5 recent trip reports using:
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{trip_report_url}"
+   ```
 
-Extract route descriptions, difficulty ratings, and hazards."""
+## Mountaineers Research
+1. Search: "{peak_name} site:mountaineers.org route"
+2. Extract route beta, technical requirements, hazards
+
+## Fallback
+If WebFetch fails for any page, use cloudscrape.py as shown above.
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "sources": ["WTA", "Mountaineers"],
+  "route_info": [
+    {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
+  ],
+  "trip_reports": [
+    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false}
+  ],
+  "gaps": ["what couldn't be fetched and why"]
+}
+```"""
 )
 ```
 
-**Agent 3: WTA Source**
+**Agent 3: AllTrails**
 
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="""You are a route-researcher agent.
+  prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
-Read your instructions from: skills/route-researcher/agents/route-researcher.md
+## Your Assignment
+Research from AllTrails
 
-Inputs:
-- peak_name: "{peak_name}"
-- peak_info: {peak_info}
-- source: "WTA"
-- extraction_goals: ["route_descriptions", "trip_reports"]
+## AllTrails Research
+1. Search: "{peak_name} site:alltrails.com"
+2. Use WebFetch to extract: trail name, difficulty, distance, elevation gain, route type, best season, hazards
+3. If WebFetch fails, use:
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
+   ```
 
-Extract route information and trip report listings."""
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "sources": ["AllTrails"],
+  "route_info": [
+    {"source": "...", "name": "...", "difficulty": "...", "distance_miles": N, "elevation_gain_ft": N, "description": "...", "hazards": [...]}
+  ],
+  "trip_reports": [],
+  "gaps": ["what couldn't be fetched and why"]
+}
+```"""
 )
 ```
 
-**Agent 4: Mountaineers Source**
+**Execute all 3 agents in parallel by including all Task calls in a single response.**
 
-```
-Task(
-  subagent_type="general-purpose",
-  prompt="""You are a route-researcher agent.
+#### Step 3C: Aggregate Results
 
-Read your instructions from: skills/route-researcher/agents/route-researcher.md
+After Python script and all agents return, aggregate into unified data structure:
 
-Inputs:
-- peak_name: "{peak_name}"
-- peak_info: {peak_info}
-- source: "Mountaineers"
-- extraction_goals: ["route_descriptions"]
-
-Extract route beta and technical requirements."""
-)
+```json
+{
+  "conditions": { /* from fetch_conditions.py */ },
+  "route_data": {
+    "sources": [ /* merged from all 3 agents */ ],
+    "trip_reports": [ /* merged from all agents */ ]
+  },
+  "gaps": [ /* merged gaps from all sources */ ]
+}
 ```
 
-**Agent 5: AllTrails Source**
-
-```
-Task(
-  subagent_type="general-purpose",
-  prompt="""You are a route-researcher agent.
-
-Read your instructions from: skills/route-researcher/agents/route-researcher.md
-
-Inputs:
-- peak_name: "{peak_name}"
-- peak_info: {peak_info}
-- source: "AllTrails"
-- extraction_goals: ["route_descriptions"]
-
-Extract trail information and difficulty ratings."""
-)
-```
-
-#### Step 3B: Dispatch Conditions Researcher Agent (Parallel)
-
-Dispatch conditions-researcher-agent:
-
-```
-Task(
-  subagent_type="general-purpose",
-  prompt="""You are a conditions-researcher agent.
-
-Read your instructions from: skills/route-researcher/agents/conditions-researcher.md
-
-Inputs:
-- coordinates: {latitude}, {longitude}
-- elevation: {elevation_m}
-- peak_name: "{peak_name}"
-- date_range: 7
-
-Gather weather forecast, air quality, avalanche conditions, and daylight data."""
-)
-```
-
-**Execute all 6 agents in parallel by including all Task calls in a single response.**
-
-#### Step 3C: Aggregate Agent Results
-
-After all agents return, aggregate their structured data:
-
-- Route descriptions from 5 sources
-- Ascent statistics and trip report listings from PeakBagger
-- Conditions data (weather, air quality, daylight, avalanche)
-
-Store in organized data structure for Phase 4 analysis.
+**Partial Failure Handling:**
+- If any agent fails entirely, proceed with data from successful agents
+- Note failed sources in the gaps array
+- Minimum viable: conditions data + at least one route source
 
 #### Step 3D: Access and Permits (Inline)
 
@@ -266,37 +300,7 @@ WebSearch queries:
 3. "{peak_name} forest service road conditions"
 ```
 
-Extract trailhead names, required permits, access notes.
-
-#### Step 3E: Fetch Trip Report Content (Inline)
-
-Using trip report URLs identified by route-researcher agents, fetch 10-15 report contents:
-
-**For PeakBagger reports:**
-
-```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
-```
-
-**For WTA/Mountaineers reports:**
-
-```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{trip_report_url}"
-```
-
-**Selection strategy:**
-- Recent reports (last 1-2 years)
-- Mix of sources
-- Variety of dates/seasons
-- Include reports with GPX tracks
-
-**Extract and organize by theme:**
-- Route: Landmarks, navigation details, actual times/distances
-- Crux: Difficulty assessments, conditions impact
-- Hazards: Rockfall, exposure, route-finding challenges
-- Gear: What people used/needed
-- Conditions: Snow/ice timing, trail conditions, best months
+Extract trailhead names, required permits, access notes. Add to route_data.
 
 ### Phase 4: Route Analysis
 
