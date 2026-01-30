@@ -29,6 +29,10 @@ Ask Claude to research any mountain. The route-researcher skill pulls from 10+ m
 | [Mount Adams](skills/route-researcher/examples/2025-11-06-mount-adams.md) | 12,280 ft | Glaciated volcano with weather/avy conditions |
 | [Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md) | 5,813 ft | Technical scramble with sparse beta |
 
+- **[Mount Shuksan](skills/route-researcher/examples/2026-01-29-mount-shuksan.md)** - Classic North Cascades alpine climb at 9,129 ft. Glacier route via Sulphide Glacier with crevasse rescue skills required.
+
+- **[Tinkham Peak](skills/route-researcher/examples/2026-01-29-tinkham-peak.md)** - Accessible 5,398 ft scramble near Snoqualmie Pass. Class 2-3 route with scenic lake approach and views of Mount Rainier.
+
 ---
 
 ## Quick Start
