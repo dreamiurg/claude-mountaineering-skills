@@ -1,18 +1,35 @@
-"""Tests for fetch_conditions.py"""
+"""Tests for fetch_conditions.py
+
+These are integration tests that make live API calls.
+Skip by default unless RUN_FETCH_CONDITIONS_TESTS=1 is set.
+"""
 import json
+import os
 import subprocess
+from pathlib import Path
+
+import pytest
+
+# Get absolute path to the tools directory and script
+TOOLS_DIR = Path(__file__).parent
+SCRIPT = TOOLS_DIR / "fetch_conditions.py"
+
+pytestmark = pytest.mark.skipif(
+    os.getenv("RUN_FETCH_CONDITIONS_TESTS") != "1",
+    reason="Requires live network access to external APIs. Set RUN_FETCH_CONDITIONS_TESTS=1 to run.",
+)
 
 
 def test_fetch_conditions_returns_valid_json():
     """Test that fetch_conditions returns valid JSON with expected structure."""
     result = subprocess.run(
-        ["uv", "run", "python", "fetch_conditions.py",
+        ["uv", "run", "python", str(SCRIPT),
          "--coordinates", "47.4502,-121.4135",
          "--elevation", "1353",
          "--peak-name", "Mount Si"],
         capture_output=True,
         text=True,
-        cwd="."
+        cwd=str(TOOLS_DIR)
     )
 
     assert result.returncode == 0, f"Script failed: {result.stderr}"
@@ -34,13 +51,13 @@ def test_fetch_conditions_returns_valid_json():
 def test_fetch_conditions_weather_forecast_structure():
     """Test that weather forecast has expected fields."""
     result = subprocess.run(
-        ["uv", "run", "python", "fetch_conditions.py",
+        ["uv", "run", "python", str(SCRIPT),
          "--coordinates", "47.4502,-121.4135",
          "--elevation", "1353",
          "--peak-name", "Mount Si"],
         capture_output=True,
         text=True,
-        cwd="."
+        cwd=str(TOOLS_DIR)
     )
 
     assert result.returncode == 0
@@ -57,13 +74,13 @@ def test_fetch_conditions_weather_forecast_structure():
 def test_fetch_conditions_handles_invalid_coords_gracefully():
     """Test graceful handling of edge case coordinates."""
     result = subprocess.run(
-        ["uv", "run", "python", "fetch_conditions.py",
+        ["uv", "run", "python", str(SCRIPT),
          "--coordinates", "0,0",
          "--elevation", "0",
          "--peak-name", "Invalid Peak"],
         capture_output=True,
         text=True,
-        cwd="."
+        cwd=str(TOOLS_DIR)
     )
 
     # Should still return valid JSON (graceful degradation)
@@ -75,14 +92,14 @@ def test_fetch_conditions_handles_invalid_coords_gracefully():
 def test_fetch_conditions_with_peak_id():
     """Test that peakbagger data is fetched when peak_id provided."""
     result = subprocess.run(
-        ["uv", "run", "python", "fetch_conditions.py",
+        ["uv", "run", "python", str(SCRIPT),
          "--coordinates", "47.4502,-121.4135",
          "--elevation", "1353",
          "--peak-name", "Mount Si",
          "--peak-id", "2630"],
         capture_output=True,
         text=True,
-        cwd=".",
+        cwd=str(TOOLS_DIR),
         timeout=120  # peakbagger-cli can be slow
     )
 
