@@ -1,3 +1,25 @@
+## [4.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.8.0...v4.0.0) (2026-01-30)
+
+### ⚠ BREAKING CHANGES
+
+* Major release bundling significant architecture improvements and developer experience enhancements.
+
+### Features
+
+* **parallel-agents**: implement parallel agent architecture for route-researcher skill ([#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25))
+* **pre-commit**: add production-ready pre-commit hooks for code quality
+* **docs**: add animated demo GIF and polish README documentation
+* **examples**: consolidate and improve example route beta reports
+
+### Summary
+
+This major version release consolidates the v3.6-v3.8 improvements into a stable release:
+
+- **Parallel Agent Architecture**: Route research now uses multiple specialized agents working concurrently, significantly improving research speed and quality
+- **Pre-commit Hooks**: Automated code quality checks including linting, formatting, and conventional commit enforcement
+- **Documentation Polish**: README improvements with animated demonstration GIF showing the skill in action
+- **Examples Consolidation**: Cleaned up and improved example route beta reports
+
 ## [3.8.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.7.0...v3.8.0) (2026-01-30)
 
 
