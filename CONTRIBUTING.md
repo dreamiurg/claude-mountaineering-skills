@@ -53,8 +53,10 @@ Thank you for your interest in contributing! This guide will help you get starte
 
    **Pre-commit hooks:**
    - Python formatting and linting (ruff)
+   - Python type checking (mypy)
    - Trailing whitespace and EOF fixes
    - YAML/JSON validation
+   - Markdown linting (markdownlint)
    - Large file prevention
    - Secrets detection (gitleaks)
 
