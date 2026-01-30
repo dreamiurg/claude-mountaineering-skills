@@ -7,6 +7,7 @@ Python CLI tools for gathering current conditions data for Pacific Northwest rou
 These tools are invoked by the `route-researcher` skill to fetch real-time data that supplements web-scraped route information. Each tool outputs structured JSON to stdout for easy parsing.
 
 **Design Philosophy:**
+
 - Tools focus on **computation and API calls**, not web scraping
 - All tools handle errors gracefully (exit 0 even on failure)
 - JSON output includes helpful fallback info when data unavailable
@@ -19,11 +20,13 @@ These tools are invoked by the `route-researcher` skill to fetch real-time data 
 Fetches HTML content from Cloudflare-protected websites using cloudscraper.
 
 **Usage:**
+
 ```bash
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798"
 ```
 
 **Parameters:**
+
 - `url` (required): URL to fetch
 - `--timeout` (optional): Request timeout in seconds (default: 30)
 
@@ -31,27 +34,32 @@ uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798"
 Returns the full HTML content to stdout.
 
 **Purpose:**
+
 - Bypasses Cloudflare bot protection on PeakBagger and SummitPost
 - Uses cloudscraper library which solves Cloudflare's JavaScript challenges
 - No browser required - pure HTTP with smart request mimicking
 
 **Behavior:**
+
 - Creates scraper instance with Chrome browser profile
 - Mimics macOS desktop Chrome browser
 - Automatically solves Cloudflare challenges
 - Returns raw HTML for parsing by the skill
 
 **Dependencies:**
+
 - cloudscraper (Cloudflare bypass)
 - click (CLI)
 - rich (console output)
 
 **Use Cases:**
+
 - Fetching PeakBagger peak pages
 - Fetching SummitPost route descriptions
 - Any Cloudflare-protected climbing/hiking resource
 
 **Example:**
+
 ```bash
 # Fetch Mount Pilchuck page from PeakBagger
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798" | grep -i "elevation"
@@ -64,15 +72,18 @@ uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798" | g
 Fetches mountain weather forecasts from Mountain-Forecast.com.
 
 **Usage:**
+
 ```bash
 uv run python fetch_weather.py --peak-name "Mt Baker" --coordinates "48.7767,-121.8144"
 ```
 
 **Parameters:**
+
 - `--peak-name` (required): Peak name for forecast lookup
 - `--coordinates` (required): Lat/lon as "lat,lon"
 
 **Output:**
+
 ```json
 {
   "source": "Mountain-Forecast.com",
@@ -83,17 +94,20 @@ uv run python fetch_weather.py --peak-name "Mt Baker" --coordinates "48.7767,-12
 ```
 
 **Behavior:**
+
 - Attempts to parse Mountain-Forecast.com forecast tables
 - Falls back to URL reference if parsing fails
 - Never hard-fails - always returns useful JSON
 
 **Dependencies:**
+
 - httpx (HTTP client)
 - beautifulsoup4 + lxml (HTML parsing)
 - click (CLI)
 - rich (console output)
 
 **Testing:**
+
 ```bash
 uv run pytest test_fetch_weather.py -v
 ```
@@ -105,15 +119,18 @@ uv run pytest test_fetch_weather.py -v
 Fetches avalanche forecasts from Northwest Avalanche Center (NWAC).
 
 **Usage:**
+
 ```bash
 uv run python fetch_avalanche.py --region "North Cascades"
 ```
 
 **Parameters:**
+
 - `--region` (required): NWAC forecast region name
 - `--coordinates` (optional): Lat/lon for future enhancements
 
 **Supported Regions:**
+
 - North Cascades
 - Mt Baker
 - Snoqualmie Pass
@@ -124,6 +141,7 @@ uv run python fetch_avalanche.py --region "North Cascades"
 - South Cascades
 
 **Output:**
+
 ```json
 {
   "source": "NWAC",
@@ -135,18 +153,21 @@ uv run python fetch_avalanche.py --region "North Cascades"
 ```
 
 **Behavior:**
+
 - Maps common region names to NWAC URL slugs
 - NWAC is a JavaScript-heavy SPA, so parsing is limited
 - Provides URL for manual checking
 - Includes helpful context about NWAC's elevation-based ratings
 
 **Dependencies:**
+
 - httpx (HTTP client)
 - beautifulsoup4 + lxml (HTML parsing, though limited due to JS)
 - click (CLI)
 - rich (console output)
 
 **Testing:**
+
 ```bash
 uv run pytest test_fetch_avalanche.py -v
 ```
@@ -158,15 +179,18 @@ uv run pytest test_fetch_avalanche.py -v
 Calculates sunrise, sunset, and daylight hours for trip planning.
 
 **Usage:**
+
 ```bash
 uv run python calculate_daylight.py --date "2025-10-20" --coordinates "48.7767,-121.8144"
 ```
 
 **Parameters:**
+
 - `--date` (required): Date as YYYY-MM-DD
 - `--coordinates` (required): Lat/lon as "lat,lon"
 
 **Output:**
+
 ```json
 {
   "date": "2025-10-20",
@@ -182,16 +206,19 @@ uv run python calculate_daylight.py --date "2025-10-20" --coordinates "48.7767,-
 ```
 
 **Behavior:**
+
 - Uses astral library for astronomical calculations
 - All times in Pacific timezone (America/Los_Angeles)
 - High precision for trip planning (alpine starts, etc.)
 
 **Dependencies:**
+
 - astral (astronomy/solar calculations)
 - click (CLI)
 - rich (console output)
 
 **Testing:**
+
 ```bash
 uv run pytest test_calculate_daylight.py -v
 ```
@@ -203,17 +230,20 @@ uv run pytest test_calculate_daylight.py -v
 Originally designed for scraping PeakBagger.com. **No longer used by the skill.**
 
 **Why deprecated:**
+
 - Skill now uses WebSearch/WebFetch for PeakBagger data
 - More reliable than custom HTML parsing
 - Reduces maintenance burden
 - Python tools now focus on computation only
 
 **Still in repository for:**
+
 - Reference implementation
 - Possible future use if WebFetch becomes unavailable
 - Test case examples
 
 **Commands** (if using directly):
+
 - `search "peak name"` - Search for peaks
 - `peak-info "url"` - Extract peak details
 - `stats "url"` - Analyze gear from trip reports
@@ -225,6 +255,7 @@ Originally designed for scraping PeakBagger.com. **No longer used by the skill.*
 All tools are managed via `uv` with dependencies in `pyproject.toml`.
 
 **Setup:**
+
 ```bash
 cd skills/route-researcher/tools
 uv sync
@@ -279,6 +310,7 @@ Ensure you're in a directory where you have write permissions. Reports are creat
 ### Adding a New Tool
 
 1. Create `new_tool.py` with Click CLI:
+
 ```python
 #!/usr/bin/env python3
 import json
@@ -303,6 +335,7 @@ if __name__ == '__main__':
 ```
 
 2. Create `test_new_tool.py`:
+
 ```python
 from click.testing import CliRunner
 from new_tool import cli
@@ -330,6 +363,7 @@ All tools follow these principles:
 5. **Log to stderr** - Use rich Console(stderr=True) for warnings
 
 Example error output:
+
 ```json
 {
   "source": "Service Name",
@@ -368,6 +402,7 @@ uv run python fetch_weather.py --peak-name "Mt Baker" --coordinates "48.7767,-12
 ```
 
 The skill:
+
 1. Parses JSON output from stdout
 2. Handles errors gracefully (checks for "error" field)
 3. Includes data in report or notes gap
@@ -376,11 +411,13 @@ The skill:
 ## Performance
 
 **Typical execution times:**
+
 - `calculate_daylight.py`: <0.1s (pure computation)
 - `fetch_weather.py`: 1-3s (HTTP + parsing)
 - `fetch_avalanche.py`: 1-3s (HTTP + parsing)
 
 **Timeouts:**
+
 - Individual tools: 30s
 - Total skill execution: 3-5 minutes target
 
@@ -389,6 +426,7 @@ The skill:
 ### Tool returns error JSON
 
 Check:
+
 1. Network connectivity
 2. Service website availability (Mountain-Forecast, NWAC)
 3. Coordinate format (must be "lat,lon" with comma, no spaces)
@@ -404,11 +442,13 @@ uv sync --reinstall
 ### Tests failing
 
 Check Python version:
+
 ```bash
 python --version  # Should be 3.11+
 ```
 
 Reinstall dependencies:
+
 ```bash
 uv sync
 uv run pytest -v
@@ -417,6 +457,7 @@ uv run pytest -v
 ## Future Enhancements
 
 Potential tool additions:
+
 - `fetch_road_conditions.py` - WSDOT or forest service road status
 - `fetch_permit_info.py` - Recreation.gov availability
 - `aggregate_gps_tracks.py` - Combine tracks from multiple sources

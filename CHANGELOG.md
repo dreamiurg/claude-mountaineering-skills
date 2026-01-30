@@ -7,13 +7,11 @@
 
 ## [3.5.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.5.0...v3.5.1) (2026-01-30)
 
-
 ### Bug Fixes
 
 * correct Claude Code documentation URLs in README ([#48](https://github.com/dreamiurg/claude-mountaineering-skills/issues/48)) ([f08c20a](https://github.com/dreamiurg/claude-mountaineering-skills/commit/f08c20ae06299a9a0113bf798e003e7abc44f851))
 
 ## [3.5.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.4.0...v3.5.0) (2025-11-07)
-
 
 ### Features
 
@@ -21,13 +19,11 @@
 
 ## [3.4.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.3.0...v3.4.0) (2025-11-07)
 
-
 ### Features
 
 * add automated report review and validation ([#23](https://github.com/dreamiurg/claude-mountaineering-skills/issues/23)) ([d684a63](https://github.com/dreamiurg/claude-mountaineering-skills/commit/d684a636cc12480733caf2d2e039acf3fdf8bb82))
 
 ## [3.3.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.2.0...v3.3.0) (2025-11-06)
-
 
 ### Features
 
@@ -35,13 +31,11 @@
 
 ## [3.2.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.1.0...v3.2.0) (2025-10-24)
 
-
 ### Features
 
 * expand geographic scope from Pacific Northwest to North America ([#18](https://github.com/dreamiurg/claude-mountaineering-skills/issues/18)) ([ceb0db0](https://github.com/dreamiurg/claude-mountaineering-skills/commit/ceb0db07a9214ed965c458fb5d7717ea0215974c))
 
 ## [3.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.0.0...v3.1.0) (2025-10-24)
-
 
 ### Features
 
@@ -49,14 +43,13 @@
 
 ## [3.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.1.0...v3.0.0) (2025-10-23)
 
-
 ### ⚠ BREAKING CHANGES
 
 * This major update brings significant new capabilities to the route-researcher skill:
 
-- v1.3.0: New ascent report command for generating peak ascent summaries
-- v1.4.0: --dump-html option for debugging and custom HTML extraction
-- v1.2.1: Improved reliability with table structure parsing fixes
+* v1.3.0: New ascent report command for generating peak ascent summaries
+* v1.4.0: --dump-html option for debugging and custom HTML extraction
+* v1.2.1: Improved reliability with table structure parsing fixes
 
 The skill now leverages the full ascent analysis capabilities including temporal patterns, GPX track availability, and trip report discovery.
 
@@ -70,13 +63,11 @@ Co-authored-by: Claude <noreply@anthropic.com>
 
 ## [2.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.0.1...v2.1.0) (2025-10-21)
 
-
 ### Features
 
 * add WTA and Mountaineers trip report extraction via cloudscrape.py ([#13](https://github.com/dreamiurg/claude-mountaineering-skills/issues/13)) ([3532a22](https://github.com/dreamiurg/claude-mountaineering-skills/commit/3532a221c6dffdbbe4a1ebc747cf52a5a362bbea))
 
 ## [2.0.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v2.0.0...v2.0.1) (2025-10-21)
-
 
 ### Bug Fixes
 
@@ -84,43 +75,42 @@ Co-authored-by: Claude <noreply@anthropic.com>
 
 ## [2.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.2.0...v2.0.0) (2025-10-21)
 
-
 ### ⚠ BREAKING CHANGES
 
 * Update all peakbagger-cli commands to use v1.0.0 with new
 resource-action pattern syntax.
 
 **Command Changes:**
-- `peakbagger search` → `peakbagger peak search`
-- `peakbagger info` → `peakbagger peak show`
-- `peakbagger peak-ascents` → `peakbagger peak stats` (statistics)
-- `peakbagger peak-ascents --list-ascents` → `peakbagger peak ascents` (listings)
+* `peakbagger search` → `peakbagger peak search`
+* `peakbagger info` → `peakbagger peak show`
+* `peakbagger peak-ascents` → `peakbagger peak stats` (statistics)
+* `peakbagger peak-ascents --list-ascents` → `peakbagger peak ascents` (listings)
 
 **New Command Structure:**
 All commands now follow resource-action pattern (e.g., `peak search`, `peak show`)
 with clearer separation of concerns:
-- `peak search`: Find peaks by name
-- `peak show`: Get detailed peak information
-- `peak stats`: Analyze ascent statistics and patterns
-- `peak ascents`: List individual ascents with filtering
+* `peak search`: Find peaks by name
+* `peak show`: Get detailed peak information
+* `peak stats`: Analyze ascent statistics and patterns
+* `peak ascents`: List individual ascents with filtering
 
 **Files Updated:**
-- skills/route-researcher/SKILL.md:
-  - Phase 1: Updated search command
-  - Phase 2A: Updated info → show command
-  - Phase 2C: Split into stats (Step 1) and ascents (Step 2)
-  - Implementation Notes: Document v1.0.0 resource-action pattern
-- README.md:
-  - Updated version pin from v0.6.2 to v1.0.0
-  - Added command structure examples
-  - Updated future PyPI constraint to >=1.0,<2.0
+* skills/route-researcher/SKILL.md:
+  * Phase 1: Updated search command
+  * Phase 2A: Updated info → show command
+  * Phase 2C: Split into stats (Step 1) and ascents (Step 2)
+  * Implementation Notes: Document v1.0.0 resource-action pattern
+* README.md:
+  * Updated version pin from v0.6.2 to v1.0.0
+  * Added command structure examples
+  * Updated future PyPI constraint to >=1.0,<2.0
 
 **Testing:**
 All commands verified working with v1.0.0:
-- ✓ peak search returns JSON results
-- ✓ peak show returns detailed peak info
-- ✓ peak stats returns ascent statistics
-- ✓ peak ascents with --within filter works correctly
+* ✓ peak search returns JSON results
+* ✓ peak show returns detailed peak info
+* ✓ peak stats returns ascent statistics
+* ✓ peak ascents with --within filter works correctly
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -135,24 +125,24 @@ coordinates are available.
 **Key Changes:**
 
 1. **Explicit Execution Strategy:**
-   - Step 2A (Sequential): Get peak info + coordinates (blocking)
-   - Steps 2B-2H (Parallel): Execute ALL simultaneously after 2A completes
+   * Step 2A (Sequential): Get peak info + coordinates (blocking)
+   * Steps 2B-2H (Parallel): Execute ALL simultaneously after 2A completes
 
 2. **Clear Section Marking:**
-   - Added "- EXECUTE FIRST" to Step 2A header
-   - Added "- PARALLEL" to all Steps 2B-2H headers
-   - Added visual separator (---) before parallel section
-   - New section: "Steps 2B-2H: Execute in Parallel (After 2A Completes)"
+   * Added "- EXECUTE FIRST" to Step 2A header
+   * Added "- PARALLEL" to all Steps 2B-2H headers
+   * Added visual separator (---) before parallel section
+   * New section: "Steps 2B-2H: Execute in Parallel (After 2A Completes)"
 
 3. **Updated Language:**
-   - Changed "Only if coordinates available" → "Requires coordinates from Step 2A"
-   - Added explicit instruction: "immediately launch Steps 2B through 2H in parallel"
-   - Emphasized with CRITICAL directive
+   * Changed "Only if coordinates available" → "Requires coordinates from Step 2A"
+   * Added explicit instruction: "immediately launch Steps 2B through 2H in parallel"
+   * Emphasized with CRITICAL directive
 
 4. **Phase 2 Summary:**
-   - Added summary section documenting parallel execution strategy
-   - Listed all steps with dependency notes
-   - Explained performance benefit formula:
+   * Added summary section documenting parallel execution strategy
+   * Listed all steps with dependency notes
+   * Explained performance benefit formula:
      time(Phase 2) = time(2A) + max(time(2B:2H)) vs sequential sum
 
 **Performance Impact:**
@@ -181,30 +171,31 @@ automated semantic versioning.
 **Files Added:**
 
 1. `.gitmessage` - Git commit message template
-   - Structured format with type, subject, body, footer
-   - 10 commit types (feat, fix, docs, style, refactor, perf, test, chore, ci, build)
-   - Version bump guidance (feat/fix/perf trigger releases)
-   - Breaking change syntax (! or BREAKING CHANGE:)
-   - Examples and best practices
+   * Structured format with type, subject, body, footer
+   * 10 commit types (feat, fix, docs, style, refactor, perf, test, chore, ci, build)
+   * Version bump guidance (feat/fix/perf trigger releases)
+   * Breaking change syntax (! or BREAKING CHANGE:)
+   * Examples and best practices
 
 2. `.github/pull_request_template.md` - PR template
-   - Title format validation guidance
-   - Type selection checkboxes
-   - Sections: Summary, Type, Changes, Breaking Changes, Testing, Related Issues
-   - Matches peakbagger-cli PR template structure
+   * Title format validation guidance
+   * Type selection checkboxes
+   * Sections: Summary, Type, Changes, Breaking Changes, Testing, Related Issues
+   * Matches peakbagger-cli PR template structure
 
 **Files Updated:**
 
 3. `README.md` - Expanded Contributing section
-   - Detailed commit message format documentation
-   - Types categorized by release impact
-   - Git commit template setup instructions
-   - PR guidelines and requirements
-   - Link to .gitmessage for examples
+   * Detailed commit message format documentation
+   * Types categorized by release impact
+   * Git commit template setup instructions
+   * PR guidelines and requirements
+   * Link to .gitmessage for examples
 
 **Setup Instructions:**
 
 Contributors can enable the commit template locally:
+
 ```bash
 git config commit.template .gitmessage
 ```
@@ -224,11 +215,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## [1.2.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.1.2...v1.2.0) (2025-10-21)
 
-
 ### Features
 
 * updated report format ([#6](https://github.com/dreamiurg/claude-mountaineering-skills/issues/6)) ([79c591c](https://github.com/dreamiurg/claude-mountaineering-skills/commit/79c591cb5014b5146bd0ab9ffd8e15238f9e7624))
-
 
 ### Bug Fixes
 
@@ -237,13 +226,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## [1.1.2](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.1.1...v1.1.2) (2025-10-21)
 
-
 ### Bug Fixes
 
 * correct plugin.json author and skills path format ([#2](https://github.com/dreamiurg/claude-mountaineering-skills/issues/2)) ([eb5be44](https://github.com/dreamiurg/claude-mountaineering-skills/commit/eb5be44b6849e01e905f9c9bde3387efd965f893))
 
 ## [1.1.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.1.0...v1.1.1) (2025-10-21)
-
 
 ### Bug Fixes
 
@@ -251,18 +238,15 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## [1.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.0.0...v1.1.0) (2025-10-21)
 
-
 ### Features
 
 * extract report template to separate file for consistency ([d8ef768](https://github.com/dreamiurg/claude-mountaineering-skills/commit/d8ef768f04b9d116ad712ac8d1660162830117ed))
 
 ## 1.0.0 (2025-10-21)
 
-
 ### Features
 
 * Claude Code plugin for Pacific Northwest mountain route research ([0f6087d](https://github.com/dreamiurg/claude-mountaineering-skills/commit/0f6087d1f84c302796bb423cfddc8c5ff567edd4))
-
 
 ### Bug Fixes
 
@@ -279,11 +263,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Claude Code plugin distribution infrastructure
-- Self-hosted marketplace configuration
-- Automated releases via semantic-release
-- GitHub Actions workflow for CI/CD
-- Example route-beta reports
-- Comprehensive installation documentation
+* Claude Code plugin distribution infrastructure
+* Self-hosted marketplace configuration
+* Automated releases via semantic-release
+* GitHub Actions workflow for CI/CD
+* Example route-beta reports
+* Comprehensive installation documentation
 
 [Unreleased]: https://github.com/dreamiurg/claude-mountaineering-skills/compare/v1.0.0...HEAD
