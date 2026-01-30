@@ -40,7 +40,22 @@ Thank you for your interest in contributing! This guide will help you get starte
    uv pip install -e ".[dev]"
    ```
 
-5. **Configure Commit Template**
+5. **Set Up Pre-commit Hooks** (recommended)
+   ```bash
+   pip install pre-commit
+   pre-commit install --install-hooks
+   ```
+
+   This installs hooks for:
+   - Python formatting and linting (ruff)
+   - Trailing whitespace and EOF fixes
+   - YAML/JSON validation
+   - Large file prevention
+   - Secrets detection (gitleaks)
+
+   Run on all files: `pre-commit run --all-files`
+
+6. **Configure Commit Template**
    ```bash
    git config commit.template .gitmessage
    ```
