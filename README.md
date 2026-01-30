@@ -1,6 +1,9 @@
 <h1 align="center">Mountaineering Skills for Claude Code</h1>
 
 <p align="center">
+  <a href="https://github.com/hesreallyhim/awesome-claude-code">
+    <img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Claude Code">
+  </a>
   <a href="https://github.com/dreamiurg/claude-mountaineering-skills/releases">
     <img src="https://img.shields.io/github/v/release/dreamiurg/claude-mountaineering-skills" alt="Latest Release">
   </a>
