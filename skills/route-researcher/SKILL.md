@@ -27,12 +27,14 @@ Examples:
 Research Progress:
 - [ ] Phase 1: Peak Identification (peak validated, ID obtained)
 - [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
-- [ ] Phase 3: Data Gathering (route descriptions, trip reports, weather, conditions collected)
-  - [ ] Phase 3 Stage 1: Parallel data gathering (Steps 3A-3H)
-  - [ ] Phase 3 Stage 2: Fetch trip report content (Step 3I - 10-15 reports for representative sample)
-- [ ] Phase 4: Route Analysis (synthesize route, crux, hazards from all sources including trip reports)
-- [ ] Phase 5: Report Generation (markdown file created)
-- [ ] Phase 6: Report Review & Validation (check for inconsistencies and errors)
+- [ ] Phase 3: Data Gathering (parallel execution)
+  - [ ] Phase 3a: Python conditions fetch (weather, air quality, daylight, avalanche, peakbagger)
+  - [ ] Phase 3b: Researcher agents (3 in parallel - web sources + trip reports)
+  - [ ] Phase 3c: Results aggregated
+  - [ ] Phase 3d: Access/permits (inline WebSearch)
+- [ ] Phase 4: Route Analysis (synthesize route, crux, hazards)
+- [ ] Phase 5: Report Generation (Report Writer agent)
+- [ ] Phase 6: Report Review & Validation (Report Reviewer agent)
 - [ ] Phase 7: Completion (user notified, next steps provided)
 
 ## Orchestration Workflow
@@ -118,295 +120,180 @@ This returns structured JSON with:
 
 **Goal:** Gather comprehensive route information from all available sources.
 
-**Execution Strategy:** Execute ALL steps in parallel to minimize total execution time.
+**Execution Strategy:** Run Python script for deterministic API data + dispatch specialized agents in parallel for web research. This hybrid approach minimizes token usage while maximizing parallelism.
 
-All Phase 3 steps run simultaneously. Do not wait for any step to complete before starting others.
+#### Step 3A: Fetch Conditions Data (Python Script)
 
-#### Step 3A: Route Description Research (WebSearch + WebFetch)
-
-**Step 1:** Search for route descriptions:
-```
-WebSearch queries (run in parallel):
-1. "{peak_name} route description climbing"
-2. "{peak_name} summit post route"
-3. "{peak_name} mountain project"
-4. "{peak_name} site:mountaineers.org route"
-5. "{peak_name} site:alltrails.com"
-6. "{peak_name} standard route"
-```
-
-**Step 2:** Fetch top relevant pages:
-
-**Universal Fetching Strategy:**
-
-For ANY website, use this two-tier approach:
-
-1. **Try WebFetch first** with appropriate extraction prompt
-2. **If WebFetch fails or returns incomplete data,** use cloudscrape.py as fallback:
-   ```bash
-   cd skills/route-researcher/tools
-   uv run python cloudscrape.py "{url}"
-   ```
-   Then parse the returned HTML to extract needed information.
-
-**Common sites and their extraction prompts:**
-
-**AllTrails (try WebFetch, fallback to cloudscrape.py):**
-```
-WebFetch Prompt: "Extract route information including:
-- Trail name
-- Route description and key features
-- Difficulty rating
-- Distance and elevation gain
-- Estimated time
-- Route type (loop, out & back, point to point)
-- Best season
-- Known hazards or warnings
-- Current conditions if mentioned in recent reviews"
-```
-
-**Save AllTrails URL for Phase 4:**
-- Overview sources section (primary route information sources)
-- Trip reports "Browse All" section (for reviews)
-
-**SummitPost, Mountaineers.org, PeakBagger (try WebFetch, fallback to cloudscrape.py):**
-```
-WebFetch Prompt: "Extract route information including:
-- Route name and difficulty rating
-- Approach details and trailhead
-- Route description and key sections
-- Technical difficulty (YDS class, scramble grade, etc.)
-- Crux description
-- Distance and elevation gain
-- Estimated time
-- Known hazards and conditions"
-```
-
-**Mountain Project, WTA (try WebFetch, fallback to cloudscrape.py):**
-```
-WebFetch Prompt: "Extract route information including:
-- Approach details
-- Route description and key sections
-- Technical difficulty (YDS class, scramble grade, etc.)
-- Crux description
-- Distance and elevation gain
-- Estimated time
-- Known hazards"
-```
-
-**Error Handling:**
-- If WebFetch fails or returns incomplete data: Automatically retry with cloudscrape.py
-- If cloudscrape.py also fails: Note in "Information Gaps" section with URL for manual checking
-- If no route descriptions found from any source: Note in gaps and provide general guidance
-- If conflicting information between sources: Note discrepancies in report
-
-#### Step 3B: Peak Ascent Statistics (peakbagger-cli)
-
-Retrieve ascent data and patterns using the peak ID:
-
-**Step 1: Get overall ascent statistics**
-```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak stats {peak_id} --format json
-```
-
-This returns:
-- Total ascent count (all-time)
-- Seasonal distribution (by month)
-- Count of ascents with GPX tracks
-- Count of ascents with trip reports
-
-**Step 2: Get detailed ascent list based on activity level**
-
-Based on the total count from Step 1, adaptively retrieve ascents:
-
-**For popular peaks (>50 ascents total):**
-```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --within 1y
-```
-Recent data (1 year) is sufficient for active peaks.
-
-**For moderate peaks (10-50 ascents total):**
-```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --within 5y
-```
-Expand to 5 years to get meaningful sample size.
-
-**For rarely-climbed peaks (<10 ascents total):**
-```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json
-```
-Get all available ascent data regardless of age.
-
-**Additional filters (apply as needed):**
-- `--with-gpx`: Focus on ascents with GPS tracks (useful for route finding)
-- `--with-tr`: Focus on ascents with trip reports (useful for conditions)
-
-**Extract and save for Phase 4 (Report Generation):**
-- Total ascent statistics (total count, temporal breakdown, monthly distribution)
-- **All ascents from JSON with the following data:**
-  - Date (`date` field)
-  - Climber name (`climber.name` field)
-  - Trip report word count (`trip_report.word_count` field)
-  - GPX availability (`has_gpx` field)
-  - Ascent URL (`url` field)
-- Seasonal patterns (monthly distribution data)
-- Timeframe used for the query (1y, 5y, or all)
-
-**Error Handling:**
-- If peakbagger-cli fails: Fall back to WebSearch for trip reports
-- If no ascents found: Note in report and continue with other sources
-
-#### Step 3C: Trip Report Sources Discovery (WebSearch)
-
-Systematically search for trip report pages across major platforms:
-
-```
-WebSearch queries (run in parallel):
-1. "{peak_name} site:wta.org" - WTA hike page with trip reports
-2. "{peak_name} site:alltrails.com" - AllTrails page with reviews
-3. "{peak_name} site:summitpost.org" - SummitPost route page
-4. "{peak_name} site:mountaineers.org" - Mountaineers route information
-5. "{peak_name} trip report site:cascadeclimbers.com" - Forum discussions
-```
-
-**Extract and save URLs for Phase 4 (Report Generation):**
-- WTA trip reports URL (if found)
-- AllTrails trail page URL (if found)
-- SummitPost route/trip reports URL (if found)
-- Mountaineers.org route page URL (if found)
-- CascadeClimbers forum search URL or relevant thread URLs (if found)
-
-**Optional WebFetch for conditions data:**
-- If specific high-value trip reports identified, fetch 1-2 for detailed conditions
-- Extract recent dates and conditions mentioned for "Recent Conditions" section
-
-#### Step 3D: Weather Forecast (Open-Meteo API + NOAA)
-
-**Requires coordinates from Phase 2 (latitude, longitude, elevation):**
-
-Gather weather data from multiple sources in parallel:
-
-**Source 1: Open-Meteo Weather API (Primary)**
-
-Use WebFetch to get detailed mountain weather forecast:
-```
-URL: https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&elevation={peak_elevation_m}&hourly=temperature_2m,precipitation,freezing_level_height,snow_depth,wind_speed_10m,wind_gusts_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=auto&forecast_days=7
-
-Prompt: "Parse the JSON response and extract:
-- Daily weather summary for 6-7 days (date, conditions based on weather_code, temps, precip probability)
-- Freezing level height in feet for each day (convert from meters)
-- Snow depth if applicable
-- Wind speeds and gusts
-- Organize by calendar date with day-of-week
-- **IMPORTANT:** The timezone parameter is set to 'auto', so dates are in local time. Calculate day-of-week from the actual date strings in the JSON response (YYYY-MM-DD format). Today's date in local time is {current_date}.
-- Map weather_code to descriptive conditions (0=clear, 1-3=partly cloudy, 45-48=fog, 51-67=rain, 71-77=snow, 80-82=showers, 95-99=thunderstorms)"
-```
-
-**Weather Code to Icon/Description mapping:**
-- 0: ☀️ Clear
-- 1-3: ⛅ Partly cloudy
-- 45-48: 🌫️ Fog
-- 51-67: 🌧️ Rain
-- 71-77: ❄️ Snow
-- 80-82: 🌧️ Showers
-- 95-99: ⛈️ Thunderstorms
-
-**Source 2: Open-Meteo Air Quality API**
-
-Use WebFetch to get air quality forecast:
-```
-URL: https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat}&longitude={lon}&hourly=pm2_5,pm10,us_aqi&timezone=auto&forecast_days=7
-
-Prompt: "Parse the JSON and determine air quality for the forecast period:
-- Check US AQI values: 0-50 (good), 51-100 (moderate), 101-150 (unhealthy for sensitive), 151-200 (unhealthy), 201-300 (very unhealthy), 301+ (hazardous)
-- Check PM2.5 and PM10 levels
-- Identify any days with AQI >100 (concerning for outdoor activities)
-- Return overall assessment and any days to be cautious"
-```
-
-**Source 3: NOAA/NWS Point Forecast (Supplemental)**
-
-Use WebFetch for detailed text forecast and warnings:
-```
-URL: https://forecast.weather.gov/MapClick.php?textField1={lat}&textField2={lon}
-Prompt: "Extract:
-- Detailed text forecasts for context
-- Any weather warnings or alerts
-- Hazardous weather outlook"
-```
-
-**Source 4: NWAC Mountain Weather (if applicable)**
-
-If in avalanche season (roughly Nov-Apr), check NWAC mountain weather:
-```
-WebFetch: https://nwac.us/mountain-weather-forecast/
-Prompt: "Extract general mountain weather patterns for the Cascades region including synoptic pattern and multi-day trend"
-```
-
-**Data to extract and save for Phase 4:**
-- 6-7 day forecast with conditions, temps, precipitation, wind
-- **Freezing level height for each day** (from Open-Meteo)
-- Snow depth changes (from Open-Meteo)
-- **Air quality assessment** (good/moderate/poor, note any concerning days)
-- Weather warnings or alerts (from NOAA)
-- Mountain-Forecast.com URL for manual checking (find via WebSearch, don't scrape)
-- **Open-Meteo Weather Link:** Construct from coordinates and elevation:
-  `https://open-meteo.com/en/docs#latitude={lat}&longitude={lon}&elevation={peak_elevation_m}&hourly=&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`
-- **Open-Meteo Air Quality Link:** Construct from coordinates:
-  `https://open-meteo.com/en/docs/air-quality-api#latitude={lat}&longitude={lon}&hourly=&daily=&timezone=auto`
-
-**Error Handling:**
-- If Open-Meteo API fails: Fall back to NOAA only, note reduced data quality in gaps
-- If Air Quality API fails: Note in gaps, continue without AQ data
-- If NOAA WebFetch fails: Continue with Open-Meteo data only
-- If NWAC not in season or fails: Skip this source
-- **Always provide manual check links** for Mountain-Forecast.com and NOAA even when API data retrieved
-
-#### Step 3E: Avalanche Forecast (Python Script)
-
-**Requires coordinates from Phase 2. Only for peaks with glaciers or avalanche terrain (elevation >6000ft in winter months):**
+Run the conditions fetcher script to gather all API-based data:
 
 ```bash
 cd skills/route-researcher/tools
-uv run python fetch_avalanche.py --region "North Cascades" --coordinates "{lat},{lon}"
+uv run python fetch_conditions.py \
+  --coordinates "{latitude},{longitude}" \
+  --elevation {elevation_m} \
+  --peak-name "{peak_name}" \
+  --peak-id {peak_id}
 ```
 
-**Expected Output:** JSON with NWAC avalanche forecast
+This returns JSON with:
+- **weather**: 7-day forecast with temperatures, precipitation, freezing levels
+- **air_quality**: AQI ratings and any concerns
+- **daylight**: Sunrise, sunset, civil twilight
+- **avalanche**: NWAC region and URL for manual check
+- **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
+- **gaps**: Any API failures noted for report
 
-**Error Handling:**
-- Script not yet implemented: Note "Avalanche script pending - check NWAC.us manually"
-- Script fails: Note in gaps with link to NWAC
-- Not applicable (low elevation, summer): Skip this step
+**Run this in parallel with Step 3B** (no dependency between them).
 
-#### Step 3F: Daylight Calculations (Sunrise-Sunset.org API)
+#### Step 3B: Dispatch Researcher Agents (Parallel)
 
-**Requires coordinates from Phase 2 (latitude, longitude):**
+Dispatch 3 Researcher agents in a single message (all Task calls together). Each agent researches assigned sources and fetches trip report content directly.
 
-Use WebFetch to get sunrise/sunset data from Sunrise-Sunset.org API:
+**Agent 1: PeakBagger + SummitPost**
 
 ```
-URL: https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={YYYY-MM-DD}&formatted=0
-Prompt: "Extract the following data from the JSON response:
-- Sunrise time (convert from UTC to local time if needed)
-- Sunset time (convert from UTC to local time if needed)
-- Day length (convert seconds to hours and minutes)
-- Civil twilight begin/end (useful for alpine starts)
-- Solar noon
-Format times in a user-friendly way (e.g., '6:45 AM', '8:30 PM')"
+Task(
+  subagent_type="general-purpose",
+  prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
+
+## Your Assignment
+Research from these sources: PeakBagger, SummitPost
+
+## PeakBagger Research
+1. Search: "{peak_name} site:peakbagger.com"
+2. Extract route descriptions from peak page
+3. Identify trip reports with content (word_count > 0)
+4. Fetch content for up to 5 recent trip reports using:
+   ```bash
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
+   ```
+
+## SummitPost Research
+1. Search: "{peak_name} site:summitpost.org"
+2. Use WebFetch to extract: route name, difficulty, approach, description, hazards
+3. If WebFetch fails, use:
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
+   ```
+
+## Trip Report Extraction
+For each report fetched, extract: date, author, route conditions, gear mentioned, hazards.
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "sources": ["PeakBagger", "SummitPost"],
+  "route_info": [
+    {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
+  ],
+  "trip_reports": [
+    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false}
+  ],
+  "gaps": ["what couldn't be fetched and why"]
+}
+```"""
+)
 ```
 
-**Data to extract and save for Phase 4:**
-- Sunrise time (local)
-- Sunset time (local)
-- Day length in hours and minutes
-- Civil twilight begin (useful for alpine starts)
+**Agent 2: WTA + Mountaineers**
 
-**Error Handling:**
-- If API call fails: Note in gaps section with link to timeanddate.com or sunrise-sunset.org
-- If no coordinates available: Skip this step and note in gaps
-- If date is far in future: API should still work, but note that times are calculated
+```
+Task(
+  subagent_type="general-purpose",
+  prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
-#### Step 3G: Access and Permits (WebSearch)
+## Your Assignment
+Research from these sources: WTA, Mountaineers.org
+
+## WTA Research
+1. Search: "{peak_name} site:wta.org"
+2. Find the hike page and extract: trail name, difficulty, distance, elevation gain, hazards
+3. Get trip reports from AJAX endpoint: {wta_url}/@@related_tripreport_listing
+4. Fetch content for up to 5 recent trip reports using:
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{trip_report_url}"
+   ```
+
+## Mountaineers Research
+1. Search: "{peak_name} site:mountaineers.org route"
+2. Extract route beta, technical requirements, hazards
+
+## Fallback
+If WebFetch fails for any page, use cloudscrape.py as shown above.
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "sources": ["WTA", "Mountaineers"],
+  "route_info": [
+    {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
+  ],
+  "trip_reports": [
+    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false}
+  ],
+  "gaps": ["what couldn't be fetched and why"]
+}
+```"""
+)
+```
+
+**Agent 3: AllTrails**
+
+```
+Task(
+  subagent_type="general-purpose",
+  prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
+
+## Your Assignment
+Research from AllTrails
+
+## AllTrails Research
+1. Search: "{peak_name} site:alltrails.com"
+2. Use WebFetch to extract: trail name, difficulty, distance, elevation gain, route type, best season, hazards
+3. If WebFetch fails, use:
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
+   ```
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "sources": ["AllTrails"],
+  "route_info": [
+    {"source": "...", "name": "...", "difficulty": "...", "distance_miles": N, "elevation_gain_ft": N, "description": "...", "hazards": [...]}
+  ],
+  "trip_reports": [],
+  "gaps": ["what couldn't be fetched and why"]
+}
+```"""
+)
+```
+
+**Execute all 3 agents in parallel by including all Task calls in a single response.**
+
+#### Step 3C: Aggregate Results
+
+After Python script and all agents return, aggregate into unified data structure:
+
+```json
+{
+  "conditions": { /* from fetch_conditions.py */ },
+  "route_data": {
+    "sources": [ /* merged from all 3 agents */ ],
+    "trip_reports": [ /* merged from all agents */ ]
+  },
+  "gaps": [ /* merged gaps from all sources */ ]
+}
+```
+
+**Partial Failure Handling:**
+- If any agent fails entirely, proceed with data from successful agents
+- Note failed sources in the gaps array
+- Minimum viable: conditions data + at least one route source
+
+#### Step 3D: Access and Permits (Inline)
+
+Run WebSearch for access information:
 
 ```
 WebSearch queries:
@@ -415,162 +302,7 @@ WebSearch queries:
 3. "{peak_name} forest service road conditions"
 ```
 
-**Extract:**
-- Trailhead names and locations
-- Required permits (if any)
-- Access notes (road conditions, seasonal closures)
-
-#### Step 3H: Trip Report Identification
-
-**Goal:** Identify trip reports across all sources for comprehensive route beta coverage.
-
-This step synthesizes information from:
-- PeakBagger ascent data (from Step 3B)
-- Trip report source URLs (from Step 3C)
-
-**Selection Strategy:**
-
-Gather a representative sample of reports covering different perspectives:
-- **Recency:** Recent reports (last 1-2 years) for current conditions
-- **Variety:** Mix of sources (PeakBagger, WTA, Mountaineers) for diverse experiences
-- **Temporal spread:** Include older reports if they provide unique insights
-- **Sample size:** Aim for 10-15 reports total to capture range of conditions and perspectives
-
-**Note:** Report length/word count is NOT a quality indicator. A concise 50-word report with specific route beta is more valuable than a 500-word narrative about the drive. Focus on reports that have substantive content regardless of length.
-
-**PeakBagger Trip Reports (uses data from Step 3B):**
-
-From the ascent data already retrieved in Step 3B:
-
-1. **Identify reports with trip report content:**
-   - Filter: Only ascents where `trip_report.word_count > 0`
-   - Sort by date (most recent first) to identify recent reports
-   - Also identify reports from various time periods (not just recent)
-
-2. **Extract for each report:**
-   - Date (`date` field)
-   - Climber name (`climber.name` field)
-   - Word count (`trip_report.word_count` field)
-   - Ascent URL (`url` field)
-
-3. **Select diverse sample:**
-   - Take 5-10 recent reports (last 1-2 years)
-   - Include 2-5 older reports if they provide unique insights
-   - Include reports with GPX tracks when available (useful for users to download and verify route)
-   - Mix of seasons if available
-
-**WTA Trip Reports (if WTA URL found in Step 3C):**
-
-If WTA URL was found, extract trip reports using the AJAX endpoint:
-
-```bash
-# Construct endpoint: {wta_url}/@@related_tripreport_listing
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{wta_url}/@@related_tripreport_listing"
-```
-
-Parse HTML to extract for each report: date, author, trip report URL. Target 10-15 individual URLs, prioritize recent but include variety of dates.
-
-**Error Handling:**
-- If extraction yields <5 reports: Note in "Information Gaps"
-- If cloudscrape.py fails: Note with WTA browse link
-
-**Mountaineers.org Trip Reports (if Mountaineers URL found in Step 3C):**
-
-If Mountaineers URL was found, extract trip reports from the trip-reports endpoint:
-
-```bash
-# Construct endpoint: {mountaineers_url}/trip-reports
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{mountaineers_url}/trip-reports"
-```
-
-Parse HTML to extract for each report: date, title, author, trip report URL. Select top 3-5 most recent reports.
-
-**Error Handling:**
-- If cloudscrape.py fails: Note in "Information Gaps"
-- If no trip reports found: Note in "Information Gaps"
-
-**Extract and save for Phase 4 (Report Generation):**
-
-**High-Quality PeakBagger Reports:**
-- List of top 5-10 reports by word count (regardless of date)
-- Each with: date, climber name, word count, URL
-
-**Recent PeakBagger Reports:**
-- List of top 3-5 most recent reports with trip reports
-- Each with: date, climber name, word count, URL
-
-**WTA Reports:**
-- List of top 3-5 reports (recent or detailed)
-- Each with: date, author/title, URL
-
-**Mountaineers Reports:**
-- List of top 3-5 reports (recent or detailed)
-- Each with: date, title, URL
-
-**Error Handling:**
-- **WTA:** If cloudscrape.py fails for AJAX endpoint: Note in gaps, include WTA browse link only
-- **WTA:** If HTML parsing yields <5 reports: Note as parsing failure in gaps
-- **Mountaineers:** Do not attempt extraction - note limitation in gaps, include browse link
-- **AllTrails:** Do not attempt trip report extraction - note limitation in gaps if AllTrails URL was found
-- If no trip reports found on successfully fetched pages: Note in gaps, include browse link
-- If WTA/Mountaineers URLs not found in Step 3C: Skip those sources
-- PeakBagger data already available from Step 3B, no additional fetch needed
-
-#### Step 3I: Fetch Trip Report Content
-
-**Goal:** Fetch 10-15 trip reports to get representative sample of conditions and experiences (runs after Step 3H identifies candidates).
-
-**Selection from Step 3H results:**
-- Recent reports (last 1-2 years) for current conditions
-- Mix of sources (PeakBagger, WTA, Mountaineers)
-- Variety of dates/seasons to capture different conditions
-- Include some reports with GPX tracks when available (provides users with downloadable route data for verification)
-
-**Fetching:**
-
-**PeakBagger:** Use CLI to fetch full trip report content:
-```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
-```
-
-**WTA/Mountaineers:** Use cloudscrape.py to fetch individual trip report pages:
-```bash
-cd skills/route-researcher/tools
-uv run python cloudscrape.py "{trip_report_url}"
-```
-
-**Extract and organize by theme:**
-- **Route:** Landmarks, variations, navigation details, actual times/distances
-- **Crux:** Difficulty assessments, technical requirements, conditions impact
-- **Hazards:** Rockfall, exposure, route-finding challenges, seasonal hazards, approach hazards
-- **Gear:** What people used/needed, seasonal variations
-- **Conditions:** Snow/ice timing, trail conditions, best months
-
-**Error Handling:**
-- If CLI/cloudscrape fails: Note which reports failed, continue with others
-- If report appears to have no substantive content: Note and continue
-- Minimum target: Successfully fetch at least 5-8 reports with useful content
-
-**Phase 3 Execution Summary:**
-
-Phase 3 has two execution stages:
-
-**Stage 1 - Parallel Execution (Steps 3A through 3H):**
-- Step 3A: Route descriptions (WebSearch + WebFetch)
-- Step 3B: Ascent statistics (peakbagger-cli)
-- Step 3C: Trip report sources (WebSearch)
-- Step 3D: Weather forecast (Open-Meteo + NOAA)
-- Step 3E: Avalanche forecast (Python script)
-- Step 3F: Daylight calculations (Sunrise-Sunset API)
-- Step 3G: Access and permits (WebSearch)
-- Step 3H: High-quality trip report identification
-
-**Stage 2 - Sequential Execution (Step 3I):**
-- Step 3I: Fetch high-quality trip report content (MUST run after 3H completes)
-
-**Performance Benefit:** Stage 1 total time = max(time(3A), time(3B), ..., time(3H)) instead of summing all step times. Stage 2 runs after Stage 1 completes to use identified reports from Step 3H.
+Extract trailhead names, required permits, access notes. Add to route_data.
 
 ### Phase 4: Route Analysis
 
@@ -586,12 +318,12 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 
 #### Step 4B: Synthesize Route Information from Multiple Sources
 
-**Goal:** Combine trip reports (Step 3I), route descriptions (Step 3A), and other sources into comprehensive route beta.
+**Goal:** Combine trip reports and route descriptions from Step 3B researcher agents, plus conditions data from Step 3A, into comprehensive route beta.
 
 **Source Priority:**
-1. Trip reports (Step 3I) - first-hand experiences
-2. Route descriptions (Step 3A) - published beta baseline
-3. PeakBagger/ascent data (Steps 2 & 3B) - basic info, patterns
+1. Trip reports (Step 3B agents) - first-hand experiences
+2. Route descriptions (Step 3B agents) - published beta baseline
+3. PeakBagger/ascent data (Step 3A Python script) - basic info, patterns
 
 **Synthesis Pattern for Route, Crux, and Hazards:**
 
@@ -644,175 +376,175 @@ Explicitly document what data was **not found or unreliable:**
 
 ### Phase 5: Report Generation
 
-**Goal:** Create comprehensive Markdown document following the template.
+**Goal:** Create comprehensive Markdown document by dispatching Report Writer agent.
 
-#### Step 5A: Generate Report Content
+#### Step 5A: Prepare Data Package
 
-Create report in the current working directory: `{YYYY-MM-DD}-{peak-name-lowercase-hyphenated}.md`
+Organize all gathered and analyzed data into structured JSON:
 
-**Filename Examples:**
-- `2025-10-20-mount-baker.md`
-- `2025-10-20-sahale-peak.md`
+```json
+{
+  "peak": {
+    "name": "{peak_name}",
+    "id": {peak_id},
+    "elevation_ft": {elevation},
+    "coordinates": [{latitude}, {longitude}],
+    "location": "{location}",
+    "peakbagger_url": "{url}"
+  },
+  "conditions": {
+    // From fetch_conditions.py output
+    "weather": {...},
+    "air_quality": {...},
+    "daylight": {...},
+    "avalanche": {...}
+  },
+  "route_data": {
+    // Merged from all Researcher agents
+    "sources": [...],
+    "trip_reports": [...]
+  },
+  "analysis": {
+    // From Phase 4
+    "route_type": "{hike|scramble|technical|glacier}",
+    "difficulty": "{rating}",
+    "crux": "{description}",
+    "hazards": [...],
+    "time_estimates": {...},
+    "access": {...}
+  },
+  "gaps": [...]
+}
+```
 
-**Location:** Reports are generated in the user's current working directory, not in the plugin installation directory.
+#### Step 5B: Dispatch Report Writer Agent
 
-**Structure and Formatting:**
+```
+Task(
+  subagent_type="general-purpose",
+  prompt="""You are a Report Writer generating a mountaineering route report.
 
-Read `assets/report-template.md` and follow it exactly for:
-- Section structure and headings
-- Content formatting (how to present ascent data, trip report links, etc.)
-- Conditional sections (when to include/exclude sections based on available data)
-- All layout and presentation decisions
+## Instructions
 
-The template is the **single source of truth** for report formatting. Phase 3 (Data Gathering) specifies **what data to extract**. This phase (Phase 5) uses the template to determine **how to present that data**.
+1. **Read the report template:**
+   Use the Read tool to read: {repo_root}/skills/route-researcher/assets/report-template.md
 
-#### Step 5B: Markdown Formatting Rules
+2. **Generate report following template structure exactly:**
+   - Header with peak name, elevation, location, date
+   - AI disclaimer (prominent safety warning)
+   - Overview: route type, difficulty, distance/gain, time estimates
+   - Route Description: synthesized from sources, include landmarks
+   - Crux: describe hardest section with specifics
+   - Known Hazards: comprehensive list
+   - Current Conditions: weather forecast, freezing levels, air quality, daylight
+   - Trip Reports: links organized by source with dates
+   - Information Gaps: explicitly list missing data
+   - Data Sources: links to all sources used
 
-Follow these formatting rules to ensure proper Markdown rendering:
+3. **Markdown Formatting Rules:**
+   - ALWAYS add blank line before lists
+   - ALWAYS add blank line after section headers
+   - Use `-` for bullets (not `*` or `+`)
+   - Use `**text**` for bold emphasis
+   - Break paragraphs >4 sentences
 
-1. **Blank lines before lists:** ALWAYS add a blank line before starting a bullet or numbered list
-   ```markdown
-   ✅ CORRECT:
-   This is a paragraph.
+4. **Save the report:**
+   Use the Write tool to save to: {output_dir}/{date}-{peak-name-slug}.md
 
-   - First bullet
-   - Second bullet
+## Data Package
 
-   ❌ INCORRECT:
-   This is a paragraph.
-   - First bullet  (missing blank line)
-   ```
+{data_package_json}
 
-2. **Blank lines after section headers:** Always have a blank line after ## or ### headers
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "status": "SUCCESS",
+  "file_path": "/absolute/path/to/report.md",
+  "filename": "YYYY-MM-DD-peak-name.md",
+  "sections_generated": N
+}
+```"""
+)
+```
 
-3. **Consistent list formatting:**
-   - Use `-` for unordered lists (not `*` or `+`)
-   - Indent sub-items with 2 spaces
-   - Keep list items concise (if >2 sentences, consider paragraphs instead)
+#### Step 5C: Capture Report File Path
 
-4. **Break up long text blocks:**
-   - Paragraphs >4 sentences should be split or bulleted
-   - Sequential steps should use numbered lists (1. 2. 3.)
-   - Related items should use bullet lists
-
-5. **Bold formatting:** Use `**text**` for emphasis, not for list item headers without bullets
-
-6. **Hazards and Safety:** Use bullet lists with sub-items:
-   ```markdown
-   **Known Hazards:**
-
-   - **Route-finding:** Orange markers help but can be missed
-   - **Slippery conditions:** Boulders treacherous when wet/icy
-   - **Weather exposure:** Above treeline sections exposed to elements
-   ```
-
-7. **Information that continues after colon:** Must have blank line before list:
-   ```markdown
-   ✅ CORRECT:
-   Winter access adds the following:
-
-   - **Additional Distance:** 5.6 miles
-   - **Additional Elevation:** 1,700 ft
-
-   ❌ INCORRECT:
-   Winter access adds the following:
-   - **Additional Distance:** 5.6 miles  (missing blank line)
-   ```
-
-#### Step 5C: Write Report File
-
-Use the Write tool to create the file in the current working directory.
-
-**Verification:**
-- Use proper filename format (YYYY-MM-DD-peak-name.md)
-- Save file in user's current working directory
-- Validate Markdown syntax per formatting rules above
-- Check that all lists have blank lines before them
+Extract `file_path` from agent's JSON response for use in Phase 6.
 
 ### Phase 6: Report Review & Validation
 
-**Goal:** Systematically review the generated report for inconsistencies, errors, and quality issues before presenting to the user.
+**Goal:** Validate report quality by dispatching Report Reviewer agent.
 
-This phase ensures report quality by catching common issues that may occur during automated generation.
+#### Step 6A: Dispatch Report Reviewer Agent
 
-#### Step 6A: Read Generated Report
+```
+Task(
+  subagent_type="general-purpose",
+  prompt="""You are a Report Reviewer validating a mountaineering route report.
 
-Read the complete report file that was just created in Phase 5.
+## Instructions
 
-#### Step 6B: Systematic Quality Checks
+1. **Read the report:**
+   Use the Read tool to read: {report_file_path}
 
-Perform the following checks in order:
+2. **Perform systematic quality checks:**
 
-**1. Factual Consistency:**
-- Verify dates match their stated day-of-week (e.g., "Thu Nov 6, 2025" is actually a Thursday)
-- Verify narrative day-of-week references match the actual date
-- Check coordinates, elevations, and distances are consistent across all mentions
-- Verify weather forecasts align logically (freezing levels match precipitation types)
-- Check difficulty ratings are consistent between sections
+   **Factual Consistency:**
+   - Dates match their stated day-of-week (e.g., "Thu Nov 6, 2025" is actually Thursday)
+   - Coordinates, elevations, distances consistent across all mentions
+   - Weather forecasts align logically (freezing levels match precipitation types)
 
-**2. Mathematical Accuracy:**
-- Verify elevation gains add up correctly
-- Check time estimates are reasonable given distance and elevation gain
-- Verify pace calculations match stated mph/ft per hour rates
-- Check unit conversions are correct (feet to meters, etc.)
+   **Mathematical Accuracy:**
+   - Elevation gains add up correctly
+   - Time estimates reasonable given distance and elevation gain
+   - Unit conversions correct (feet to meters, etc.)
 
-**3. Internal Logic:**
-- Verify hazard warnings align with route descriptions
-- Check recommendations match current conditions (not recommending a route when hazards are extreme)
-- Verify seasonal considerations are consistent with forecast data
-- Check crux descriptions match the overall difficulty rating
+   **Internal Logic:**
+   - Hazard warnings align with route descriptions
+   - Recommendations match current conditions
+   - Crux descriptions match overall difficulty rating
 
-**4. Completeness:**
-- Check for placeholder texts that weren't replaced (e.g., {peak_name}, {YYYY-MM-DD})
-- Verify all referenced links are actually provided
-- Check mandatory sections are present (Overview, Route, Current Conditions, Trip Reports, Information Gaps, Data Sources)
-- Verify trip report sections have actual URLs or proper placeholders
+   **Completeness:**
+   - No placeholder texts like {{peak_name}} or {{YYYY-MM-DD}}
+   - All referenced links actually provided
+   - Mandatory sections present: Overview, Route, Current Conditions, Trip Reports, Information Gaps, Data Sources
 
-**5. Formatting Issues:**
-- Check markdown headers are properly structured
-- Verify lists have proper blank lines before them (per Phase 5B formatting rules)
-- Check tables are properly formatted
-- Verify bold/emphasis markers are used correctly and not overdone
+   **Formatting:**
+   - Markdown headers properly structured
+   - Lists have blank lines before them
+   - Tables properly formatted
 
-**6. Source Consistency:**
-- Verify quoted or paraphrased details are accurate to sources (if in doubt, re-check)
-- Check conflicting information from different sources is acknowledged
-- Verify URLs are correct and complete
+   **Safety & Responsibility:**
+   - AI disclaimer present and prominent
+   - Critical hazards properly emphasized
+   - Users directed to verify information from primary sources
 
-**7. Safety & Responsibility:**
-- Verify critical hazards are properly emphasized
-- Check AI disclaimer is present and prominent
-- Verify users are directed to verify information from primary sources
-- Check limitations are explicitly stated in Information Gaps
+3. **Fix issues:**
+   - **Critical** (safety errors, factual errors, missing disclaimers): MUST fix using Edit tool
+   - **Important** (completeness, consistency): SHOULD fix
+   - **Minor** (formatting, polish): FIX if quick
 
-#### Step 6C: Fix Issues
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "status": "PASS" | "PASS_WITH_FIXES" | "FAIL",
+  "issues_found": N,
+  "fixes_applied": ["description of fix 1", "description of fix 2"],
+  "remaining_issues": ["issues that couldn't be fixed"],
+  "report_path": "/absolute/path/to/report.md"
+}
+```"""
+)
+```
 
-For each issue found:
-1. **Document the issue** mentally (what's wrong, where it is, severity)
-2. **Fix the issue** immediately by editing the report file
-3. **Verify the fix** doesn't create new issues
+#### Step 6B: Process Validation Results
 
-**Priority for fixes:**
-- **Critical:** Safety errors, factual errors, missing disclaimers (MUST fix)
-- **Important:** Completeness, usability, consistency issues (SHOULD fix)
-- **Minor:** Formatting, polish issues (FIX if quick, otherwise acceptable)
+Handle the reviewer agent's response:
 
-**Common issues to watch for:**
-- Day-of-week mismatches (e.g., report dated Thursday but says "today (Wednesday)")
-- Missing blank lines before lists (violates Phase 5B rules)
-- Placeholder text not replaced
-- Inconsistent elevation or distance values
-- Weather data that doesn't make sense (e.g., snow at 12,000 ft freezing level)
+- **PASS or PASS_WITH_FIXES:** Proceed to Phase 7 with the `report_path`
+- **FAIL:** Present `remaining_issues` to user and ask for guidance
 
-#### Step 6D: Save Corrected Report
-
-If any issues were found and fixed:
-1. Use Edit or Write tool to save the corrected report
-2. Verify the file is saved in the correct location
-3. Proceed to Phase 7
-
-If no issues were found:
-1. Proceed directly to Phase 7
+The Report Reviewer automatically fixes issues and returns the corrected file path.
 
 ### Phase 7: Completion
 
@@ -886,6 +618,24 @@ Every generated report must:
 7. ✅ **Emphasize verification** - this is research, not gospel
 
 ## Implementation Notes
+
+### Architecture (as of 2026-01-29)
+
+The route-researcher skill uses a hybrid architecture combining Python scripts and LLM agents:
+
+**Components:**
+- **Python script** (`tools/fetch_conditions.py`) - Deterministic API calls for weather, air quality, daylight, avalanche, and PeakBagger data
+- **Researcher agents** (3 total) - Web research for route info and trip reports from PeakBagger+SummitPost, WTA+Mountaineers, and AllTrails
+- **Report Writer agent** - Generates markdown reports from aggregated data
+- **Report Reviewer agent** - Validates report quality before presentation
+
+**Benefits:**
+- **Reduced token usage** - Python handles deterministic API calls with zero LLM tokens
+- **Parallel execution** - Phase 3 runs Python script + 3 researcher agents simultaneously
+- **Inline prompts** - Agent instructions embedded in SKILL.md for reliability
+- **Clear contracts** - JSON schemas define agent inputs and outputs
+
+See `docs/architecture.md` for detailed execution flow and data contracts.
 
 ### Current Status (as of 2025-10-21)
 
