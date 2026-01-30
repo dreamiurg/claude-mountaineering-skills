@@ -3,11 +3,11 @@
 
 Output ../skills/route-researcher/assets/demo.gif
 
-# Terminal settings - sized for GitHub column readability
+# Terminal settings - wide enough to fit Claude Code welcome screen
 Set Shell bash
-Set FontSize 18
-Set Width 720
-Set Height 520
+Set FontSize 16
+Set Width 1200
+Set Height 600
 Set Theme "Catppuccin Mocha"
 Set Padding 20
 Set Framerate 30

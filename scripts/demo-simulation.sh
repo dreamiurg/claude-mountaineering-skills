@@ -43,7 +43,7 @@ echo -e "│                                                    │ ${ORANGE}Rec
 echo -e "│                       ${ORANGE}▐▛███▜▌${RESET}                      │ No recent activity                             │"
 echo -e "│                      ${ORANGE}▝▜█████▛▘${RESET}                     │                                                │"
 echo -e "│                        ${ORANGE}▘▘ ▝▝${RESET}                       │                                                │"
-echo -e "│    ${ORANGE}Sonnet 4${RESET} · Claude Pro · user@example.com       │                                                │"
+echo -e "│    ${ORANGE}Opus 4.5${RESET} · Claude Pro · user@example.com       │                                                │"
 echo -e "│                                                    │                                                │"
 echo -e "│              ~/projects/mountaineering             │                                                │"
 echo -e "╰─────────────────────────────────────────────────────────────────────────────────────────────────────╯"
