@@ -12,12 +12,14 @@ Research mountain peaks across North America and generate comprehensive route be
 ## When to Use This Skill
 
 Use this skill when the user requests:
+
 - Research on a specific mountain peak
 - Route beta or climbing information
 - Trip planning information for peaks
 - Current conditions for mountaineering objectives
 
 Examples:
+
 - "Research Mt Baker"
 - "I'm planning to climb Sahale Peak next month, can you research the route?"
 - "Generate route beta for Forbidden Peak"
@@ -25,6 +27,7 @@ Examples:
 ## Progress Checklist
 
 Research Progress:
+
 - [ ] Phase 1: Peak Identification (peak validated, ID obtained)
 - [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
 - [ ] Phase 3: Data Gathering (parallel execution)
@@ -48,9 +51,11 @@ Research Progress:
    - Common patterns: "Mt Baker", "Mount Rainier", "Sahale Peak", etc.
 
 2. **Search PeakBagger** using peakbagger-cli:
+
    ```bash
    uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak search "{peak_name}" --format json
    ```
+
    - Parse JSON output to extract peak matches
    - Each result includes: peak_id, name, elevation (feet/meters), location, url
 
@@ -99,6 +104,7 @@ uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger
 ```
 
 This returns structured JSON with:
+
 - Peak name and alternate names
 - Elevation (feet and meters)
 - Prominence (feet and meters)
@@ -110,6 +116,7 @@ This returns structured JSON with:
 - Standard route description (if available in routes data)
 
 **Error Handling:**
+
 - If peakbagger-cli fails: Fall back to WebSearch/WebFetch and note in "Information Gaps"
 - If specific fields missing in JSON: Mark as "Not available" in gaps section
 - Rate limiting: Built into peakbagger-cli (default 2 second delay)
@@ -136,6 +143,7 @@ uv run python fetch_conditions.py \
 ```
 
 This returns JSON with:
+
 - **weather**: 7-day forecast with temperatures, precipitation, freezing levels
 - **air_quality**: AQI ratings and any concerns
 - **daylight**: Sunrise, sunset, civil twilight
@@ -169,17 +177,21 @@ Research from these sources: PeakBagger, SummitPost
    ```
 
 ## SummitPost Research
+
 1. Search: "{peak_name} site:summitpost.org"
 2. Use WebFetch to extract: route name, difficulty, approach, description, hazards
 3. If WebFetch fails, use:
+
    ```bash
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
    ```
 
 ## Trip Report Extraction
+
 For each report fetched, extract: date, author, route conditions, gear mentioned, hazards.
 
 ## Output Format (return EXACTLY this JSON)
+
 ```json
 {
   "sources": ["PeakBagger", "SummitPost"],
@@ -215,13 +227,16 @@ Research from these sources: WTA, Mountaineers.org
    ```
 
 ## Mountaineers Research
+
 1. Search: "{peak_name} site:mountaineers.org route"
 2. Extract route beta, technical requirements, hazards
 
 ## Fallback
+
 If WebFetch fails for any page, use cloudscrape.py as shown above.
 
 ## Output Format (return EXACTLY this JSON)
+
 ```json
 {
   "sources": ["WTA", "Mountaineers"],
@@ -256,6 +271,7 @@ Research from AllTrails
    ```
 
 ## Output Format (return EXACTLY this JSON)
+
 ```json
 {
   "sources": ["AllTrails"],
@@ -287,6 +303,7 @@ After Python script and all agents return, aggregate into unified data structure
 ```
 
 **Partial Failure Handling:**
+
 - If any agent fails entirely, proceed with data from successful agents
 - Note failed sources in the gaps array
 - Minimum viable: conditions data + at least one route source
@@ -311,6 +328,7 @@ Extract trailhead names, required permits, access notes. Add to route_data.
 #### Step 4A: Determine Route Type
 
 Based on route descriptions, elevation, and gear mentions, classify as:
+
 - **Glacier:** Crevasses mentioned, glacier travel, typically >8000ft
 - **Rock:** Technical climbing, YDS ratings (5.x), protection mentioned
 - **Scramble:** Class 2-4, exposed but non-technical
@@ -321,6 +339,7 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 **Goal:** Combine trip reports and route descriptions from Step 3B researcher agents, plus conditions data from Step 3A, into comprehensive route beta.
 
 **Source Priority:**
+
 1. Trip reports (Step 3B agents) - first-hand experiences
 2. Route descriptions (Step 3B agents) - published beta baseline
 3. PeakBagger/ascent data (Step 3A Python script) - basic info, patterns
@@ -337,6 +356,7 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 > "The standard route follows the East Ridge (Class 3). Multiple trip reports mention a well-cairned use trail branching right at 4,800 ft—this is the correct turn. The use trail climbs through talus (described as 'tedious' and 'ankle-rolling'). In early season, this section may be snow-covered, requiring microspikes."
 
 **Apply this pattern to:**
+
 - **Route:** Use baseline structure, add landmarks/navigation from trip reports, include actual times
 - **Crux:** Describe location/difficulty, add trip report assessments, note conditions-dependent variations
 - **Hazards:** Extract ALL hazards from trip reports (rockfall, exposure, route-finding, seasonal), organize by type, include specific locations and mitigation strategies. Be comprehensive—safety-critical.
@@ -344,6 +364,7 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 **Extract Key Information:**
 
 From all synthesized data, identify:
+
 - **Difficulty Rating:** YDS class, scramble grade, or general difficulty (validated by trip reports)
 - **Crux:** Hardest/most technical section of route (synthesized above)
 - **Hazards:** All identified hazards (synthesized above)
@@ -368,6 +389,7 @@ From all synthesized data, identify:
 #### Step 4C: Identify Information Gaps
 
 Explicitly document what data was **not found or unreliable:**
+
 - Missing trip reports
 - No GPS tracks available
 - Script failures (weather, avalanche, daylight)
@@ -551,6 +573,7 @@ The Report Reviewer automatically fixes issues and returns the corrected file pa
 **Goal:** Inform user of completion and next steps.
 
 Report to user:
+
 1. **Success message:** "Route research complete for {Peak Name}"
 2. **File location:** Full absolute path to generated report
 3. **Summary:** Brief 2-3 sentence overview:
@@ -563,6 +586,7 @@ Report to user:
    - Check current conditions before attempting route
 
 **Example completion message:**
+
 ```
 Route research complete for Mount Baker!
 
@@ -578,21 +602,25 @@ Next steps: Review the report and verify current conditions before your climb. R
 Throughout execution, follow these error handling guidelines:
 
 ### Script Failures
+
 - **Don't block:** If a Python script fails, note in "Information Gaps" and continue
 - **Provide alternatives:** Include manual check links (Mountain-Forecast.com, NWAC.us)
 - **One retry:** Retry once on network timeouts, then continue
 
 ### Missing Data
+
 - **Be explicit:** Always document what wasn't found
 - **Be helpful:** Provide links for manual checking
 - **Don't guess:** Never fabricate data to fill gaps
 
 ### Search Failures
+
 - **Try variations:** If peak not found, try alternate names (Mt vs Mount)
 - **Ask user:** If still not found, ask user for clarification or direct URL
 - **Provide guidance:** Suggest how to search PeakBagger manually
 
 ### WebFetch/WebSearch Issues
+
 - **Universal fallback pattern:** Always try WebFetch first, then cloudscrape.py if it fails
 - **Automatic retry:** If WebFetch fails or returns incomplete data, immediately retry with cloudscrape.py
 - **Graceful degradation:** Missing one source shouldn't stop entire research
@@ -609,6 +637,7 @@ Throughout execution, follow these error handling guidelines:
 ## Quality Principles
 
 Every generated report must:
+
 1. ✅ **Include safety disclaimer** prominently at top
 2. ✅ **Document all information gaps** explicitly
 3. ✅ **Cite sources** with links
@@ -624,12 +653,14 @@ Every generated report must:
 The route-researcher skill uses a hybrid architecture combining Python scripts and LLM agents:
 
 **Components:**
+
 - **Python script** (`tools/fetch_conditions.py`) - Deterministic API calls for weather, air quality, daylight, avalanche, and PeakBagger data
 - **Researcher agents** (3 total) - Web research for route info and trip reports from PeakBagger+SummitPost, WTA+Mountaineers, and AllTrails
 - **Report Writer agent** - Generates markdown reports from aggregated data
 - **Report Reviewer agent** - Validates report quality before presentation
 
 **Benefits:**
+
 - **Reduced token usage** - Python handles deterministic API calls with zero LLM tokens
 - **Parallel execution** - Phase 3 runs Python script + 3 researcher agents simultaneously
 - **Inline prompts** - Agent instructions embedded in SKILL.md for reliability
@@ -640,6 +671,7 @@ See `docs/architecture.md` for detailed execution flow and data contracts.
 ### Current Status (as of 2025-10-21)
 
 **Implemented:**
+
 - **peakbagger-cli** integration for peak search, info, and ascent data
 - Python tools directory structure
 - Report generation in user's current working directory
@@ -658,12 +690,14 @@ See `docs/architecture.md` for detailed execution flow and data contracts.
 - **WTA AJAX endpoint** for trip report extraction (`{wta_url}/@@related_tripreport_listing`)
 
 **Pending Implementation:**
+
 - `fetch_avalanche.py` - NWAC avalanche data (currently using WebSearch/WebFetch as fallback)
 - **Browser automation** for Mountaineers.org and AllTrails trip report extraction (requires Playwright/Chrome)
   - Current: Both sites load content via JavaScript, cloudscrape.py cannot extract
   - Future: Add browser automation as 3rd-tier fallback
 
 **When Python scripts are not yet implemented:**
+
 - Note in "Information Gaps" section
 - Provide manual check links
 - Continue with available data
@@ -672,11 +706,13 @@ See `docs/architecture.md` for detailed execution flow and data contracts.
 ### peakbagger-cli Command Reference (v1.7.0)
 
 All commands use `--format json` for structured output. Run via:
+
 ```bash
 uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger <command> --format json
 ```
 
 **Available Commands:**
+
 - `peak search <query>` - Search for peaks by name
 - `peak show <peak_id>` - Get detailed peak information (coordinates, elevation, routes)
 - `peak stats <peak_id>` - Get ascent statistics and temporal patterns
@@ -694,6 +730,7 @@ uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger
 ### Peak Name Variations
 
 Common variations to try if initial search fails:
+
 - **Word order reversal:** "Mountain Pratt" → "Pratt Mountain", "Peak Sahale" → "Sahale Peak"
 - **Title expansion:** "Mt" → "Mount", "St" → "Saint"
 - **Add location:** "Baker, WA" or "Baker, North Cascades"
@@ -705,15 +742,19 @@ Common variations to try if initial search fails:
 #### Summit Coordinates Links
 
 **Google Maps (for summit coordinates):**
+
 ```
 https://www.google.com/maps/search/?api=1&query={latitude},{longitude}
 ```
+
 Example: `https://www.google.com/maps/search/?api=1&query=48.7768,-121.8144`
 
 **USGS TopoView (for summit coordinates):**
+
 ```
 https://ngmdb.usgs.gov/topoview/viewer/#{{latitude}}/{longitude}/15
 ```
+
 Example: `https://ngmdb.usgs.gov/topoview/viewer/#17/48.7768/-121.8144`
 
 **Note:** Use decimal degree format for coordinates. TopoView uses zoom level in URL (15-17 works well for peaks).
@@ -721,15 +762,19 @@ Example: `https://ngmdb.usgs.gov/topoview/viewer/#17/48.7768/-121.8144`
 #### Trailhead Google Maps Links
 
 **If coordinates available** (e.g., from Mountaineers.org place information):
+
 ```
 https://www.google.com/maps/search/?api=1&query={latitude},{longitude}
 ```
+
 Example: `https://www.google.com/maps/search/?api=1&query=48.5123,-121.0456`
 
 **If only trailhead name available:**
+
 ```
 https://www.google.com/maps/search/?api=1&query={trailhead_name}+{state}
 ```
+
 Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead+WA`
 
 **Note:** Prefer coordinates when available for more precise location.

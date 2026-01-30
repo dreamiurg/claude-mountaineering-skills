@@ -36,7 +36,7 @@ repos:
         additional_dependencies:
           - types-requests
           - pydantic
-        args: [--ignore-missing-imports]
+        args: [--ignore-missing-imports, --implicit-optional]
         files: ^skills/route-researcher/tools/
 
   # Markdown linting

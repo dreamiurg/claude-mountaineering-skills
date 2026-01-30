@@ -12,12 +12,14 @@ Thank you for your interest in contributing! This guide will help you get starte
 ## Local Development Setup
 
 1. **Fork and Clone**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/claude-mountaineering-skills.git
    cd claude-mountaineering-skills
    ```
 
 2. **Symlink to Claude Plugins Directory**
+
    ```bash
    mkdir -p ~/.claude/plugins
    ln -s /path/to/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
@@ -27,6 +29,7 @@ Thank you for your interest in contributing! This guide will help you get starte
    ```
 
 3. **Restart Claude Code**
+
    ```bash
    # Close and restart Claude, then verify:
    claude
@@ -34,6 +37,7 @@ Thank you for your interest in contributing! This guide will help you get starte
    ```
 
 4. **Set Up Python Tools** (optional, for tool development)
+
    ```bash
    cd skills/route-researcher/tools
    uv venv && source .venv/bin/activate
@@ -41,6 +45,7 @@ Thank you for your interest in contributing! This guide will help you get starte
    ```
 
 5. **Set Up Pre-commit Hooks** (recommended)
+
    ```bash
    pip install pre-commit
    pre-commit install --install-hooks --hook-type pre-push
@@ -59,6 +64,7 @@ Thank you for your interest in contributing! This guide will help you get starte
    Run on all files: `pre-commit run --all-files`
 
 6. **Configure Commit Template**
+
    ```bash
    git config commit.template .gitmessage
    ```
@@ -76,15 +82,18 @@ Thank you for your interest in contributing! This guide will help you get starte
 Follow [Conventional Commits](https://www.conventionalcommits.org/). See [.gitmessage](.gitmessage) for examples.
 
 **Triggers release:**
+
 - `feat:` - New feature (minor bump)
 - `fix:` - Bug fix (patch bump)
 - `perf:` - Performance improvement (patch bump)
 - `feat!:` or `fix!:` - Breaking change (major bump)
 
 **No release:**
+
 - `docs:`, `chore:`, `refactor:`, `test:`, `ci:`, `build:`
 
 **Format:**
+
 ```
 <type>: <description>
 
@@ -96,6 +105,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/). See [.gitme
 ## Pull Requests
 
 **Before submitting:**
+
 - [ ] Code follows existing patterns
 - [ ] Tests pass (run `pytest` if changing tools)
 - [ ] Documentation updated
@@ -109,11 +119,13 @@ See [.github/pull_request_template.md](.github/pull_request_template.md) for the
 ## Testing
 
 **Manual testing:**
+
 - Test multiple peak types (popular, obscure, different regions)
 - Test edge cases (no matches, multiple matches, missing data)
 - Verify report quality (all sections, working links, clean formatting)
 
 **Python tools:**
+
 ```bash
 cd skills/route-researcher/tools
 pytest                                      # Run all tests
@@ -145,6 +157,7 @@ claude-mountaineering-skills/
 ## What to Contribute
 
 We welcome:
+
 - Bug fixes
 - New data source integrations
 - Better error handling

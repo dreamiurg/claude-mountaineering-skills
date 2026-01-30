@@ -6,7 +6,6 @@ import sys
 
 import click
 import httpx
-from bs4 import BeautifulSoup
 from rich.console import Console
 
 console = Console()
@@ -40,8 +39,6 @@ def cli(region: str, coordinates: str = None):
             response = client.get("https://nwac.us/avalanche-forecast/")
 
             if response.status_code == 200:
-                soup = BeautifulSoup(response.text, "lxml")
-
                 # NWAC has a complex single-page app structure
                 # Parsing detailed danger levels would be fragile
                 # Provide helpful fallback with URL
