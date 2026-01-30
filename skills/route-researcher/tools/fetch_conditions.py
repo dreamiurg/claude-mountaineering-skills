@@ -98,6 +98,7 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
 
             return {
                 "forecast": forecast,
+                "timezone": data.get("timezone"),
                 "source_url": f"https://open-meteo.com/en/docs#latitude={lat}&longitude={lon}",
             }
     except Exception as e:
@@ -155,8 +156,15 @@ def fetch_air_quality(lat: float, lon: float, days: int = 7) -> dict[str, Any]:
         return {"rating": "unknown", "error": str(e)}
 
 
-def fetch_daylight(lat: float, lon: float, date_str: str) -> dict[str, Any]:
-    """Calculate daylight using astral library."""
+def fetch_daylight(lat: float, lon: float, date_str: str, tz_name: str | None = None) -> dict[str, Any]:
+    """Calculate daylight using astral library.
+
+    Args:
+        lat: Latitude
+        lon: Longitude
+        date_str: Date as YYYY-MM-DD
+        tz_name: IANA timezone name (e.g., "America/Los_Angeles"). Defaults to UTC if not provided.
+    """
     try:
         from astral import LocationInfo
         from astral.sun import sun
@@ -165,8 +173,11 @@ def fetch_daylight(lat: float, lon: float, date_str: str) -> dict[str, Any]:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         location = LocationInfo(latitude=lat, longitude=lon)
 
-        # Use Pacific timezone for PNW peaks
-        tz = zoneinfo.ZoneInfo("America/Los_Angeles")
+        # Use provided timezone or fall back to UTC
+        try:
+            tz = zoneinfo.ZoneInfo(tz_name) if tz_name else zoneinfo.ZoneInfo("UTC")
+        except Exception:
+            tz = zoneinfo.ZoneInfo("UTC")
         s = sun(location.observer, date=date_obj, tzinfo=tz)
 
         sunrise = s["sunrise"]
@@ -186,7 +197,7 @@ def fetch_daylight(lat: float, lon: float, date_str: str) -> dict[str, Any]:
         return {"error": str(e)}
 
 
-def fetch_avalanche(peak_name: str, lat: float, lon: float) -> dict[str, Any]:
+def fetch_avalanche(_peak_name: str, lat: float, lon: float) -> dict[str, Any]:
     """Get avalanche forecast info (returns URL for manual check).
 
     NWAC regions are roughly determined by coordinates.
@@ -286,7 +297,9 @@ def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int = None,
     if "error" in air_quality:
         gaps.append({"source": "Open-Meteo Air Quality", "reason": air_quality["error"]})
 
-    daylight = fetch_daylight(lat, lon, date_str)
+    # Pass timezone from weather API to daylight calculation
+    tz_name = weather.get("timezone")
+    daylight = fetch_daylight(lat, lon, date_str, tz_name)
     if "error" in daylight:
         gaps.append({"source": "Daylight calculation", "reason": daylight["error"]})
 
