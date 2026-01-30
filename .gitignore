@@ -47,3 +47,9 @@ logs/
 
 # Documentation (internal planning)
 docs/
+
+# Gas Town (added by gt)
+.runtime/
+.claude/
+.beads/
+.logs/
