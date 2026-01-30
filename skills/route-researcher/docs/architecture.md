@@ -14,14 +14,14 @@ This approach minimizes token usage while maximizing parallelism and reliability
 ### Python Scripts (`tools/`)
 
 | Script | Purpose | Output |
-|--------|---------|--------|
+| :----- | :------ | :----- |
 | `fetch_conditions.py` | Unified conditions fetcher | JSON with weather, air quality, daylight, avalanche, peakbagger data |
 | `cloudscrape.py` | Fallback web fetcher for blocked sites | HTML content |
 
 ### Agent Types (3 total)
 
 | Agent | Role | Count | When |
-|-------|------|-------|------|
+| :---- | :--- | :---- | :--- |
 | **Researcher** | Gather data from web sources, fetch trip reports | 3 parallel | Phase 3 |
 | **Report Writer** | Generate markdown report from data package | 1 | Phase 5 |
 | **Report Reviewer** | Validate report quality, fix issues | 1 | Phase 6 |
@@ -38,7 +38,7 @@ The orchestrator handles:
 
 ## Execution Flow
 
-```
+```text
 User Request
     │
     ▼
@@ -115,7 +115,7 @@ All agents return JSON matching explicit schemas defined in SKILL.md.
 ## Error Handling
 
 | Layer | Failure | Response |
-|-------|---------|----------|
+| :---- | :------ | :------- |
 | Python API call | Timeout/down | Return partial data + gaps array |
 | Researcher agent | Entire agent fails | Proceed with other agents' data |
 | Researcher agent | Single source fails | Return partial data + gaps |
