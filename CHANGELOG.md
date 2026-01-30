@@ -1,3 +1,10 @@
+## [4.0.2](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v4.0.1...v4.0.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* add version footer to SKILL.md for semantic-release ([#62](https://github.com/dreamiurg/claude-mountaineering-skills/issues/62)) ([1e5bab1](https://github.com/dreamiurg/claude-mountaineering-skills/commit/1e5bab13f64faa5791972032c8a32b1e8bca79d1))
+
 ## [4.0.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v4.0.0...v4.0.1) (2026-01-30)
 
 ### Features

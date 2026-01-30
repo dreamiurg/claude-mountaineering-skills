@@ -781,4 +781,4 @@ Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead
 
 ---
 
-**Skill Version:** 4.0.1 | **Last Updated:** 2026-01-30
+**Skill Version:** --help | **Last Updated:** 2026-01-30
