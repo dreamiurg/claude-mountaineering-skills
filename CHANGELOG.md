@@ -1,3 +1,10 @@
+## [3.7.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.6.0...v3.7.0) (2026-01-30)
+
+
+### Features
+
+* add production-ready pre-commit hooks ([#50](https://github.com/dreamiurg/claude-mountaineering-skills/issues/50)) ([685ff40](https://github.com/dreamiurg/claude-mountaineering-skills/commit/685ff40a033840c543911b11205086700f9fb07b))
+
 ## [3.6.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.5.1...v3.6.0) (2026-01-30)
 
 
