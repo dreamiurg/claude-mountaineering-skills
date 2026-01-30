@@ -668,7 +668,7 @@ The route-researcher skill uses a hybrid architecture combining Python scripts a
 
 See `docs/architecture.md` for detailed execution flow and data contracts.
 
-### Current Status (as of 2025-10-21)
+### Current Status (as of 2026-01-30)
 
 **Implemented:**
 
@@ -778,3 +778,7 @@ https://www.google.com/maps/search/?api=1&query={trailhead_name}+{state}
 Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead+WA`
 
 **Note:** Prefer coordinates when available for more precise location.
+
+---
+
+**Skill Version:** 4.0.1 | **Last Updated:** 2026-01-30
