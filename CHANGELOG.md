@@ -1,3 +1,10 @@
+## [3.8.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.8.0...v3.8.1) (2026-01-30)
+
+
+### Bug Fixes
+
+* sync plugin version to 4.0.0 and add E2E test results ([#57](https://github.com/dreamiurg/claude-mountaineering-skills/issues/57)) ([1ac0405](https://github.com/dreamiurg/claude-mountaineering-skills/commit/1ac04053603ac8e096b53492acc40be0d82bc4b7))
+
 ## [4.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.8.0...v4.0.0) (2026-01-30)
 
 ### ⚠ BREAKING CHANGES
