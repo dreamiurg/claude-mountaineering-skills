@@ -28,22 +28,19 @@ Ask Claude to research any mountain. The route-researcher skill pulls from 10+ m
 | [Mount Si](skills/route-researcher/examples/2025-10-23-mount-si.md) | 4,167 ft | High-traffic trail with abundant trip reports |
 | [Mount Adams](skills/route-researcher/examples/2025-11-06-mount-adams.md) | 12,280 ft | Glaciated volcano with weather/avy conditions |
 | [Wolf Peak](skills/route-researcher/examples/2025-11-06-wolf-peak.md) | 5,813 ft | Technical scramble with sparse beta |
-
-- **[Mount Shuksan](skills/route-researcher/examples/2026-01-29-mount-shuksan.md)** - Classic North Cascades alpine climb at 9,129 ft. Glacier route via Sulphide Glacier with crevasse rescue skills required.
-
-- **[Tinkham Peak](skills/route-researcher/examples/2026-01-29-tinkham-peak.md)** - Accessible 5,398 ft scramble near Snoqualmie Pass. Class 2-3 route with scenic lake approach and views of Mount Rainier.
+| [Mount Shuksan](skills/route-researcher/examples/2026-01-29-mount-shuksan.md) | 9,129 ft | Glacier climb requiring crevasse rescue skills |
+| [Tinkham Peak](skills/route-researcher/examples/2026-01-29-tinkham-peak.md) | 5,398 ft | Accessible Class 2-3 scramble near Snoqualmie Pass |
 
 ---
 
 ## Quick Start
 
-```bash
-% claude
-> /plugin marketplace add dreamiurg/claude-mountaineering-skills
-> /plugin install mountaineering-skills@mountaineering-skills-marketplace
+```
+/plugin marketplace add dreamiurg/claude-mountaineering-skills
+/plugin install mountaineering-skills@mountaineering-skills-marketplace
 ```
 
-Restart Claude Code, then:
+Restart Claude Code, then ask:
 
 ```
 "Research Mount Rainier"
@@ -55,7 +52,7 @@ That's it. Claude generates a route beta report in your current directory.
 
 ## How It Works
 
-Seven phases, mostly parallelized:
+The skill follows seven phases, mostly parallelized:
 
 ```mermaid
 graph TB
@@ -135,17 +132,16 @@ Missing data? The skill notes what's unavailable in an "Information Gaps" sectio
 
 **Prerequisites:** [Claude Code](https://docs.claude.com/claude-code), optionally [uv](https://docs.astral.sh/uv/) for Python tools.
 
-```bash
-% claude
-> /plugin marketplace add dreamiurg/claude-mountaineering-skills
-> /plugin install mountaineering-skills@mountaineering-skills-marketplace
+```
+/plugin marketplace add dreamiurg/claude-mountaineering-skills
+/plugin install mountaineering-skills@mountaineering-skills-marketplace
 ```
 
 Python dependencies install automatically if `uv` is available.
 
 **Verify it worked:**
 
-```bash
+```
 "What skills are available?"
 ```
 
@@ -169,23 +165,23 @@ Reports save to your current directory as `YYYY-MM-DD-peak-name.md`.
 
 ## Dependencies
 
-- **[peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli)** (v1.7.0) for peak data and trip reports
-- **Python tools** for weather, avalanche, and daylight calculations (see [tools README](skills/route-researcher/tools/README.md))
+- [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) v1.7.0 - peak data and trip reports
+- [Python tools](skills/route-researcher/tools/README.md) - weather, avalanche, and daylight calculations
 
 ---
 
 ## Updates
 
-```bash
-/plugin list              # check current version
-/plugin update mountaineering-skills  # grab latest
+```
+/plugin list                          # check current version
+/plugin update mountaineering-skills  # update to latest
 ```
 
 ---
 
 ## Contributing
 
-PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
