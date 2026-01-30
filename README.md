@@ -4,20 +4,8 @@
   <a href="https://github.com/hesreallyhim/awesome-claude-code">
     <img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Claude Code">
   </a>
-  <a href="https://github.com/dreamiurg/claude-mountaineering-skills/releases">
-    <img src="https://img.shields.io/github/v/release/dreamiurg/claude-mountaineering-skills" alt="Latest Release">
-  </a>
-  <a href="https://conventionalcommits.org">
-    <img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" alt="Conventional Commits">
-  </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT">
-  </a>
   <a href="https://docs.claude.com/claude-code">
     <img src="https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg" alt="Claude Code Plugin">
-  </a>
-  <a href="https://github.com/dreamiurg/claude-mountaineering-skills/issues">
-    <img src="https://img.shields.io/github/issues/dreamiurg/claude-mountaineering-skills" alt="Issues">
   </a>
 </p>
 
