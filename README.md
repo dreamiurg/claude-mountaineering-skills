@@ -52,57 +52,44 @@ That's it. Claude generates a route beta report in your current directory.
 
 ## How It Works
 
-The skill follows seven phases, mostly parallelized:
+The skill uses a hybrid architecture: Python scripts for deterministic API calls, LLM agents for tasks requiring judgment.
 
 ```mermaid
 graph TB
-    Start([User asks Claude to<br/>research a peak]) --> Search[Phase 1: Peak Identification<br/>Search PeakBagger database]
-    Search --> Match{Multiple<br/>matches?}
-    Match -->|Yes| Confirm[Ask user to confirm<br/>correct peak]
-    Match -->|No| Info
-    Confirm --> Info[Phase 2: Peak Information<br/>Fetch elevation, coordinates,<br/>location, prominence]
+    Start([User asks Claude to<br/>research a peak]) --> Search[Phase 1-2: Peak Identification<br/>Search PeakBagger, fetch details]
 
-    Info --> Parallel[Phase 3: Parallel Data Gathering<br/>Execute 8+ tasks simultaneously]
+    Search --> Parallel[Phase 3: Parallel Data Gathering]
 
-    Parallel --> Routes[Route Descriptions<br/>SummitPost, WTA,<br/>AllTrails, Mountaineers]
-    Parallel --> Weather[Weather Forecasts<br/>Open-Meteo API<br/>7-day forecasts]
-    Parallel --> Avy[Avalanche Conditions<br/>NWAC, regional<br/>avalanche centers]
-    Parallel --> Day[Daylight Calculations<br/>Sunrise, sunset,<br/>alpine start times]
-    Parallel --> Stats[Ascent Statistics<br/>PeakBagger patterns<br/>seasonal analysis]
-    Parallel --> Reports[Trip Reports<br/>Discover & rank by<br/>content quality]
-    Parallel --> Access[Access & Permits<br/>Trailhead info,<br/>regulations, fees]
+    Parallel --> Python[Python Script<br/>Weather, daylight,<br/>avalanche, air quality]
+    Parallel --> Agent1[Researcher Agent 1<br/>PeakBagger + SummitPost]
+    Parallel --> Agent2[Researcher Agent 2<br/>WTA + Mountaineers]
+    Parallel --> Agent3[Researcher Agent 3<br/>AllTrails]
 
-    Routes --> Analyze
-    Weather --> Analyze
-    Avy --> Analyze
-    Day --> Analyze
-    Stats --> Analyze
-    Reports --> Analyze
-    Access --> Analyze
+    Python --> Analyze
+    Agent1 --> Analyze
+    Agent2 --> Analyze
+    Agent3 --> Analyze
 
-    Analyze[Phase 4: Route Analysis<br/>Synthesize data, identify hazards,<br/>calculate time estimates,<br/>document information gaps]
+    Analyze[Phase 4: Route Analysis<br/>Synthesize data, identify hazards]
 
-    Analyze --> Generate[Phase 5: Report Generation<br/>Create structured Markdown<br/>report file]
+    Analyze --> Writer[Phase 5: Report Writer Agent<br/>Generate markdown report]
 
-    Generate --> Review[Phase 6: Report Review<br/>Validate factual accuracy,<br/>fix inconsistencies,<br/>ensure quality]
+    Writer --> Reviewer[Phase 6: Report Reviewer Agent<br/>Validate accuracy, fix issues]
 
-    Review --> Save[Phase 7: Completion<br/>Save to working directory<br/>YYYY-MM-DD-peak-name.md]
-
-    Save --> End([User receives detailed<br/>route beta report])
+    Reviewer --> End([Phase 7: User receives<br/>route beta report])
 
     style Start fill:#e1f5ff
     style End fill:#e1f5ff
     style Parallel fill:#fff4e1
-    style Routes fill:#f0f0f0
-    style Weather fill:#f0f0f0
-    style Avy fill:#f0f0f0
-    style Day fill:#f0f0f0
-    style Stats fill:#f0f0f0
-    style Reports fill:#f0f0f0
-    style Access fill:#f0f0f0
+    style Python fill:#e8f5e9
+    style Agent1 fill:#f0f0f0
+    style Agent2 fill:#f0f0f0
+    style Agent3 fill:#f0f0f0
+    style Writer fill:#fff3e0
+    style Reviewer fill:#fff3e0
 ```
 
-The skill runs data-gathering tasks in parallel, ranks trip reports by content quality, and validates the final report for accuracy. If a source fails, it documents the gap and keeps going.
+Three researcher agents gather data in parallel while a Python script fetches conditions. Dedicated agents write and review the final report. If a source fails, the skill documents the gap and continues.
 
 ---
 
@@ -116,9 +103,9 @@ The skill aggregates from specialized mountaineering sites:
 |----------|---------|
 | Peak info | [PeakBagger](https://www.peakbagger.com) |
 | Routes | [SummitPost](https://www.summitpost.org), [WTA](https://www.wta.org), [AllTrails](https://www.alltrails.com), [The Mountaineers](https://www.mountaineers.org) |
-| Weather | [Mountain-Forecast.com](https://www.mountain-forecast.com), [NOAA/NWS](https://www.weather.gov) |
+| Weather | [Open-Meteo](https://open-meteo.com), [NOAA/NWS](https://www.weather.gov) |
 | Avalanche | [NWAC](https://nwac.us), regional centers |
-| Trip reports | [CascadeClimbers](https://cascadeclimbers.com), [PeakBagger](https://www.peakbagger.com), [Mountain Project](https://www.mountainproject.com) |
+| Trip reports | [PeakBagger](https://www.peakbagger.com), [WTA](https://www.wta.org), [The Mountaineers](https://www.mountaineers.org) |
 
 **Coverage note:** Report quality depends on how well-documented your peak is across these sources. Works best for popular North American peaks.
 
