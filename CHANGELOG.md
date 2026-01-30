@@ -1,3 +1,10 @@
+## [3.8.2](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.8.1...v3.8.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* update demo GIF with correct model name and wider terminal ([#58](https://github.com/dreamiurg/claude-mountaineering-skills/issues/58)) ([dac9cd7](https://github.com/dreamiurg/claude-mountaineering-skills/commit/dac9cd726f48588a35fcfa39b06d09f55114d8ec))
+
 ## [3.8.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.8.0...v3.8.1) (2026-01-30)
 
 
