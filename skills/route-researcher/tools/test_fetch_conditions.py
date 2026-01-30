@@ -1,7 +1,7 @@
 """Tests for fetch_conditions.py
 
 These are integration tests that make live API calls.
-Skip by default unless RUN_FETCH_CONDITIONS_TESTS=1 is set.
+Skip by default unless RUN_INTEGRATION_TESTS=1 is set.
 """
 import json
 import os
@@ -15,8 +15,8 @@ TOOLS_DIR = Path(__file__).parent
 SCRIPT = TOOLS_DIR / "fetch_conditions.py"
 
 pytestmark = pytest.mark.skipif(
-    os.getenv("RUN_FETCH_CONDITIONS_TESTS") != "1",
-    reason="Requires live network access to external APIs. Set RUN_FETCH_CONDITIONS_TESTS=1 to run.",
+    os.getenv("RUN_INTEGRATION_TESTS") != "1",
+    reason="Requires live network access to external APIs. Set RUN_INTEGRATION_TESTS=1 to run.",
 )
 
 
