@@ -43,15 +43,18 @@ Thank you for your interest in contributing! This guide will help you get starte
 5. **Set Up Pre-commit Hooks** (recommended)
    ```bash
    pip install pre-commit
-   pre-commit install --install-hooks
+   pre-commit install --install-hooks --hook-type pre-push
    ```
 
-   This installs hooks for:
+   **Pre-commit hooks:**
    - Python formatting and linting (ruff)
    - Trailing whitespace and EOF fixes
    - YAML/JSON validation
    - Large file prevention
    - Secrets detection (gitleaks)
+
+   **Pre-push hooks:**
+   - Runs pytest on Python tools
 
    Run on all files: `pre-commit run --all-files`
 

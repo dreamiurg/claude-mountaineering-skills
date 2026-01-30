@@ -1,5 +1,5 @@
 # Pre-commit configuration
-# Install: pip install pre-commit && pre-commit install --install-hooks
+# Install: pip install pre-commit && pre-commit install --install-hooks --hook-type pre-push
 # Run all: pre-commit run --all-files
 
 repos:
@@ -52,6 +52,17 @@ repos:
     hooks:
       - id: gitleaks
 
-# Pre-push hooks - run tests
+  # Pre-push: Run pytest
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: bash -c 'cd skills/route-researcher/tools && python -m pytest -q'
+        language: system
+        types: [python]
+        stages: [pre-push]
+        pass_filenames: false
+
+# CI configuration
 ci:
-  skip: [mypy]  # Skip mypy in CI (handled separately)
+  skip: [mypy, pytest]  # Skip in CI (handled by CI pipelines)
