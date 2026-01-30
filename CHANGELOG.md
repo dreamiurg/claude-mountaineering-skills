@@ -1,3 +1,10 @@
+## [3.6.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.5.1...v3.6.0) (2026-01-30)
+
+
+### Features
+
+* parallel agent architecture for route-researcher ([#49](https://github.com/dreamiurg/claude-mountaineering-skills/issues/49)) ([b5db7cd](https://github.com/dreamiurg/claude-mountaineering-skills/commit/b5db7cdafcf9b0aa257e6e5e84c05438d9112de2)), closes [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25) [#25](https://github.com/dreamiurg/claude-mountaineering-skills/issues/25)
+
 ## [3.5.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.5.0...v3.5.1) (2026-01-30)
 
 
