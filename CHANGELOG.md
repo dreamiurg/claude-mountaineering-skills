@@ -1,3 +1,19 @@
+## [4.0.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v4.0.0...v4.0.1) (2026-01-30)
+
+### Features
+
+* **e2e-validation**: comprehensive multi-peak end-to-end testing ([#60](https://github.com/dreamiurg/claude-mountaineering-skills/issues/60))
+
+### Summary
+
+This patch release includes comprehensive end-to-end validation of the parallel agent architecture:
+
+- **Mount Hood**: Full route research with winter conditions analysis
+- **Grand Teton**: Technical route beta with seasonal recommendations
+- **Mount Whitney**: Complete mountaineering report with permit information
+
+All tests validated the parallel agent workflow: PeakBagger data collection, weather/avalanche conditions, trip reports aggregation, and final report synthesis.
+
 ## [3.8.2](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.8.1...v3.8.2) (2026-01-30)
 
 
