@@ -1,3 +1,10 @@
+## [3.8.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.7.0...v3.8.0) (2026-01-30)
+
+
+### Features
+
+* add animated demo GIF to README ([#52](https://github.com/dreamiurg/claude-mountaineering-skills/issues/52)) ([405685f](https://github.com/dreamiurg/claude-mountaineering-skills/commit/405685f07d275585a5659353c674c0cdf27ba39c))
+
 ## [3.7.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.6.0...v3.7.0) (2026-01-30)
 
 ### Features
