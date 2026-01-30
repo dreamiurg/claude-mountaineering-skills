@@ -1,13 +1,13 @@
 # VHS Demo Recording for Claude Mountaineering Skills
 # Run: cd scripts && vhs demo.tape
 
-Output ../docs/demo.gif
+Output ../skills/route-researcher/assets/demo.gif
 
-# Terminal settings - wider to fit Claude Code UI
+# Terminal settings - sized for GitHub column readability
 Set Shell bash
-Set FontSize 14
-Set Width 1000
-Set Height 700
+Set FontSize 18
+Set Width 720
+Set Height 520
 Set Theme "Catppuccin Mocha"
 Set Padding 20
 Set Framerate 30
