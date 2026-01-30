@@ -4,7 +4,7 @@
   <a href="https://github.com/hesreallyhim/awesome-claude-code">
     <img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Claude Code">
   </a>
-  <a href="https://docs.claude.com/claude-code">
+  <a href="https://docs.anthropic.com/en/docs/claude-code/overview">
     <img src="https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg" alt="Claude Code Plugin">
   </a>
 </p>
@@ -130,7 +130,7 @@ Missing data? The skill notes what's unavailable in an "Information Gaps" sectio
 
 ## Installation
 
-**Prerequisites:** [Claude Code](https://docs.claude.com/claude-code), optionally [uv](https://docs.astral.sh/uv/) for Python tools.
+**Prerequisites:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview), optionally [uv](https://docs.astral.sh/uv/) for Python tools.
 
 ```
 /plugin marketplace add dreamiurg/claude-mountaineering-skills
