@@ -27,12 +27,14 @@ Examples:
 Research Progress:
 - [ ] Phase 1: Peak Identification (peak validated, ID obtained)
 - [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
-- [ ] Phase 3: Data Gathering (dispatch agents for parallel data collection)
-  - [ ] Phase 3 Stage 1: Dispatch agents (Steps 3A-3C - 6 agents in parallel)
-  - [ ] Phase 3 Stage 2: Inline operations (Steps 3D-3E - access/permits, trip reports)
-- [ ] Phase 4: Route Analysis (synthesize route, crux, hazards from all sources including trip reports)
-- [ ] Phase 5: Report Generation (markdown file created)
-- [ ] Phase 6: Report Review & Validation (check for inconsistencies and errors)
+- [ ] Phase 3: Data Gathering (parallel execution)
+  - [ ] Phase 3a: Python conditions fetch (weather, air quality, daylight, avalanche, peakbagger)
+  - [ ] Phase 3b: Researcher agents (3 in parallel - web sources + trip reports)
+  - [ ] Phase 3c: Results aggregated
+  - [ ] Phase 3d: Access/permits (inline WebSearch)
+- [ ] Phase 4: Route Analysis (synthesize route, crux, hazards)
+- [ ] Phase 5: Report Generation (Report Writer agent)
+- [ ] Phase 6: Report Review & Validation (Report Reviewer agent)
 - [ ] Phase 7: Completion (user notified, next steps provided)
 
 ## Orchestration Workflow
