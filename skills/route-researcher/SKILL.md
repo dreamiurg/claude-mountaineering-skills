@@ -733,4 +733,3 @@ https://www.google.com/maps/search/?api=1&query={trailhead_name}+{state}
 Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead+WA`
 
 **Note:** Prefer coordinates when available for more precise location.
-

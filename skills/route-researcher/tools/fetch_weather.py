@@ -3,6 +3,7 @@
 
 import json
 import sys
+
 import click
 import httpx
 from bs4 import BeautifulSoup
@@ -10,24 +11,25 @@ from rich.console import Console
 
 console = Console()
 
+
 @click.command()
-@click.option('--peak-name', required=True, help='Peak name for weather lookup')
-@click.option('--coordinates', required=True, help='Coordinates as lat,lon')
+@click.option("--peak-name", required=True, help="Peak name for weather lookup")
+@click.option("--coordinates", required=True, help="Coordinates as lat,lon")
 def cli(peak_name: str, coordinates: str):
     """Fetch mountain weather forecast"""
     try:
-        lat, lon = coordinates.split(',')
+        lat, lon = coordinates.split(",")
 
         # Try Mountain-Forecast.com
         # Format: mountain-forecast.com/peaks/Peak-Name
-        peak_slug = peak_name.lower().replace(' ', '-').replace('.', '').replace('mt', 'mount')
+        peak_slug = peak_name.lower().replace(" ", "-").replace(".", "").replace("mt", "mount")
         url = f"https://www.mountain-forecast.com/peaks/{peak_slug}"
 
         with httpx.Client(timeout=30.0, follow_redirects=True) as client:
             response = client.get(url)
 
             if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'lxml')
+                soup = BeautifulSoup(response.text, "lxml")
 
                 # Try to extract forecast data
                 # Mountain-Forecast has complex HTML, so we'll provide a helpful fallback
@@ -35,7 +37,7 @@ def cli(peak_name: str, coordinates: str):
 
                 # Look for forecast table or summary text
                 # The site uses JavaScript-heavy rendering, so parsing may be limited
-                forecast_headers = soup.select('.forecast__table-days-name')
+                forecast_headers = soup.select(".forecast__table-days-name")
                 if forecast_headers:
                     for header in forecast_headers[:5]:  # Next 5 days
                         day_text = header.get_text(strip=True)
@@ -45,26 +47,26 @@ def cli(peak_name: str, coordinates: str):
                 # If we got some data, great; otherwise provide helpful fallback
                 if forecast_summary:
                     output = {
-                        'source': 'Mountain-Forecast.com',
-                        'url': url,
-                        'forecast': forecast_summary,
-                        'note': 'Visit URL for detailed multi-day forecast with temperatures, wind, and precipitation'
+                        "source": "Mountain-Forecast.com",
+                        "url": url,
+                        "forecast": forecast_summary,
+                        "note": "Visit URL for detailed multi-day forecast with temperatures, wind, and precipitation",
                     }
                 else:
                     # Fallback - still success but direct user to URL
                     output = {
-                        'source': 'Mountain-Forecast.com',
-                        'url': url,
-                        'forecast': ['Detailed forecast available at URL'],
-                        'note': 'Mountain-Forecast provides comprehensive forecasts at summit, mid-mountain, and base elevations. Visit the URL for full details.'
+                        "source": "Mountain-Forecast.com",
+                        "url": url,
+                        "forecast": ["Detailed forecast available at URL"],
+                        "note": "Mountain-Forecast provides comprehensive forecasts at summit, mid-mountain, and base elevations. Visit the URL for full details.",
                     }
             else:
                 # Peak not found or error - provide fallback
                 output = {
-                    'source': 'Mountain-Forecast.com',
-                    'url': url,
-                    'forecast': ['Peak may not be in Mountain-Forecast database'],
-                    'note': f'Try searching Mountain-Forecast.com manually for "{peak_name}" or check alternative weather sources'
+                    "source": "Mountain-Forecast.com",
+                    "url": url,
+                    "forecast": ["Peak may not be in Mountain-Forecast database"],
+                    "note": f'Try searching Mountain-Forecast.com manually for "{peak_name}" or check alternative weather sources',
                 }
 
         click.echo(json.dumps(output, indent=2))
@@ -75,14 +77,15 @@ def cli(peak_name: str, coordinates: str):
         error_console.print(f"[yellow]Warning: Error fetching weather: {e}[/yellow]")
         # Provide helpful fallback even on error
         output = {
-            'source': 'Mountain-Forecast.com',
-            'url': f'https://www.mountain-forecast.com/peaks/{peak_name.lower().replace(" ", "-")}',
-            'forecast': [],
-            'error': str(e),
-            'note': 'Weather fetch failed. Check Mountain-Forecast.com or NOAA point forecast manually.'
+            "source": "Mountain-Forecast.com",
+            "url": f"https://www.mountain-forecast.com/peaks/{peak_name.lower().replace(' ', '-')}",
+            "forecast": [],
+            "error": str(e),
+            "note": "Weather fetch failed. Check Mountain-Forecast.com or NOAA point forecast manually.",
         }
         click.echo(json.dumps(output, indent=2))
         sys.exit(0)  # Don't fail hard on weather errors - graceful degradation
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cli()

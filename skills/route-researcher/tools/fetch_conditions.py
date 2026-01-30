@@ -85,16 +85,24 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
                 temp_min_c = daily.get("temperature_2m_min", [None])[i]
                 wind_max_kmh = daily.get("wind_speed_10m_max", [None])[i]
 
-                forecast.append({
-                    "date": date_str,
-                    "day": date_obj.strftime("%a"),
-                    "conditions": f"{icon} {conditions}",
-                    "temp_high_f": int(temp_max_c * 9/5 + 32) if temp_max_c is not None else None,
-                    "temp_low_f": int(temp_min_c * 9/5 + 32) if temp_min_c is not None else None,
-                    "precip_prob": daily.get("precipitation_probability_max", [None])[i],
-                    "wind_max_mph": int(wind_max_kmh * 0.621371) if wind_max_kmh is not None else None,
-                    "freezing_level_ft": avg_freezing_ft,
-                })
+                forecast.append(
+                    {
+                        "date": date_str,
+                        "day": date_obj.strftime("%a"),
+                        "conditions": f"{icon} {conditions}",
+                        "temp_high_f": int(temp_max_c * 9 / 5 + 32)
+                        if temp_max_c is not None
+                        else None,
+                        "temp_low_f": int(temp_min_c * 9 / 5 + 32)
+                        if temp_min_c is not None
+                        else None,
+                        "precip_prob": daily.get("precipitation_probability_max", [None])[i],
+                        "wind_max_mph": int(wind_max_kmh * 0.621371)
+                        if wind_max_kmh is not None
+                        else None,
+                        "freezing_level_ft": avg_freezing_ft,
+                    }
+                )
 
             return {
                 "forecast": forecast,
@@ -141,7 +149,9 @@ def fetch_air_quality(lat: float, lon: float, days: int = 7) -> dict[str, Any]:
 
                 concerns = []
                 if max_aqi > 100:
-                    concerns.append(f"AQI peaks at {int(max_aqi)} - may affect sensitive individuals")
+                    concerns.append(
+                        f"AQI peaks at {int(max_aqi)} - may affect sensitive individuals"
+                    )
 
                 return {
                     "aqi_avg": int(avg_aqi),
@@ -156,7 +166,9 @@ def fetch_air_quality(lat: float, lon: float, days: int = 7) -> dict[str, Any]:
         return {"rating": "unknown", "error": str(e)}
 
 
-def fetch_daylight(lat: float, lon: float, date_str: str, tz_name: str | None = None) -> dict[str, Any]:
+def fetch_daylight(
+    lat: float, lon: float, date_str: str, tz_name: str | None = None
+) -> dict[str, Any]:
     """Calculate daylight using astral library.
 
     Args:
@@ -166,9 +178,10 @@ def fetch_daylight(lat: float, lon: float, date_str: str, tz_name: str | None = 
         tz_name: IANA timezone name (e.g., "America/Los_Angeles"). Defaults to UTC if not provided.
     """
     try:
+        import zoneinfo
+
         from astral import LocationInfo
         from astral.sun import sun
-        import zoneinfo
 
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         location = LocationInfo(latitude=lat, longitude=lon)
@@ -227,8 +240,17 @@ def run_peakbagger_stats(peak_id: int) -> dict[str, Any]:
     """Run peakbagger-cli to get ascent statistics."""
     try:
         result = subprocess.run(
-            ["uvx", "--from", "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
-             "peakbagger", "peak", "stats", str(peak_id), "--format", "json"],
+            [
+                "uvx",
+                "--from",
+                "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
+                "peakbagger",
+                "peak",
+                "stats",
+                str(peak_id),
+                "--format",
+                "json",
+            ],
             capture_output=True,
             text=True,
             timeout=60,
@@ -249,8 +271,19 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
     """Run peakbagger-cli to get recent ascents."""
     try:
         result = subprocess.run(
-            ["uvx", "--from", "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
-             "peakbagger", "peak", "ascents", str(peak_id), "--format", "json", "--within", within],
+            [
+                "uvx",
+                "--from",
+                "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
+                "peakbagger",
+                "peak",
+                "ascents",
+                str(peak_id),
+                "--format",
+                "json",
+                "--within",
+                within,
+            ],
             capture_output=True,
             text=True,
             timeout=60,
