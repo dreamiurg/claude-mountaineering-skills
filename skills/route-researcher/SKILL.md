@@ -374,44 +374,44 @@ Explicitly document what data was **not found or unreliable:**
 
 ### Phase 5: Report Generation
 
-**Goal:** Create comprehensive Markdown document by dispatching report-writer agent.
+**Goal:** Create comprehensive Markdown document by dispatching Report Writer agent.
 
 #### Step 5A: Prepare Data Package
 
-Organize all gathered and analyzed data into structured format:
+Organize all gathered and analyzed data into structured JSON:
 
-```python
-data_package = {
-    "peak_metadata": {
-        "peak_name": peak_name,
-        "peak_id": peak_id,
-        "elevation": elevation,
-        "coordinates": (latitude, longitude),
-        "location": location,
-        "peakbagger_url": peakbagger_url
-    },
-    "route_data": {
-        # Aggregated from route-researcher agents
-        "descriptions": [...],
-        "difficulty": [...],
-        "trip_reports": [...],
-        "ascent_stats": {...}
-    },
-    "conditions_data": {
-        # From conditions-researcher agent
-        "weather": [...],
-        "air_quality": {...},
-        "daylight": {...},
-        "avalanche": {...}
-    },
-    "analysis": {
-        # From Phase 4
-        "route_type": route_type,
-        "crux": crux_description,
-        "hazards": hazards_list,
-        "time_estimates": {...},
-        "information_gaps": [...]
-    }
+```json
+{
+  "peak": {
+    "name": "{peak_name}",
+    "id": {peak_id},
+    "elevation_ft": {elevation},
+    "coordinates": [{latitude}, {longitude}],
+    "location": "{location}",
+    "peakbagger_url": "{url}"
+  },
+  "conditions": {
+    // From fetch_conditions.py output
+    "weather": {...},
+    "air_quality": {...},
+    "daylight": {...},
+    "avalanche": {...}
+  },
+  "route_data": {
+    // Merged from all Researcher agents
+    "sources": [...],
+    "trip_reports": [...]
+  },
+  "analysis": {
+    // From Phase 4
+    "route_type": "{hike|scramble|technical|glacier}",
+    "difficulty": "{rating}",
+    "crux": "{description}",
+    "hazards": [...],
+    "time_estimates": {...},
+    "access": {...}
+  },
+  "gaps": [...]
 }
 ```
 
@@ -420,53 +420,129 @@ data_package = {
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="""You are the report-writer agent.
+  prompt="""You are a Report Writer generating a mountaineering route report.
 
-Read your instructions from: skills/route-researcher/agents/report-writer.md
-Read the template from: skills/route-researcher/assets/report-template.md
+## Instructions
 
-Data package:
+1. **Read the report template:**
+   Use the Read tool to read: {repo_root}/skills/route-researcher/assets/report-template.md
 
-{json.dumps(data_package, indent=2)}
+2. **Generate report following template structure exactly:**
+   - Header with peak name, elevation, location, date
+   - AI disclaimer (prominent safety warning)
+   - Overview: route type, difficulty, distance/gain, time estimates
+   - Route Description: synthesized from sources, include landmarks
+   - Crux: describe hardest section with specifics
+   - Known Hazards: comprehensive list
+   - Current Conditions: weather forecast, freezing levels, air quality, daylight
+   - Trip Reports: links organized by source with dates
+   - Information Gaps: explicitly list missing data
+   - Data Sources: links to all sources used
 
-Generate the report following the template structure exactly.
-Save to current working directory with filename format: YYYY-MM-DD-peak-name.md"""
+3. **Markdown Formatting Rules:**
+   - ALWAYS add blank line before lists
+   - ALWAYS add blank line after section headers
+   - Use `-` for bullets (not `*` or `+`)
+   - Use `**text**` for bold emphasis
+   - Break paragraphs >4 sentences
+
+4. **Save the report:**
+   Use the Write tool to save to: {output_dir}/{date}-{peak-name-slug}.md
+
+## Data Package
+
+{data_package_json}
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "status": "SUCCESS",
+  "file_path": "/absolute/path/to/report.md",
+  "filename": "YYYY-MM-DD-peak-name.md",
+  "sections_generated": N
+}
+```"""
 )
 ```
 
 #### Step 5C: Capture Report File Path
 
-Extract file path from agent response for use in Phase 6.
+Extract `file_path` from agent's JSON response for use in Phase 6.
 
 ### Phase 6: Report Review & Validation
 
-**Goal:** Systematically review the generated report for quality issues by dispatching report-reviewer agent.
+**Goal:** Validate report quality by dispatching Report Reviewer agent.
 
 #### Step 6A: Dispatch Report Reviewer Agent
 
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="""You are the report-reviewer agent.
+  prompt="""You are a Report Reviewer validating a mountaineering route report.
 
-Read your instructions from: skills/route-researcher/agents/report-reviewer.md
+## Instructions
 
-Input:
-- report_file_path: "{report_file_path}"
+1. **Read the report:**
+   Use the Read tool to read: {report_file_path}
 
-Perform systematic quality checks and fix any critical or important issues."""
+2. **Perform systematic quality checks:**
+
+   **Factual Consistency:**
+   - Dates match their stated day-of-week (e.g., "Thu Nov 6, 2025" is actually Thursday)
+   - Coordinates, elevations, distances consistent across all mentions
+   - Weather forecasts align logically (freezing levels match precipitation types)
+
+   **Mathematical Accuracy:**
+   - Elevation gains add up correctly
+   - Time estimates reasonable given distance and elevation gain
+   - Unit conversions correct (feet to meters, etc.)
+
+   **Internal Logic:**
+   - Hazard warnings align with route descriptions
+   - Recommendations match current conditions
+   - Crux descriptions match overall difficulty rating
+
+   **Completeness:**
+   - No placeholder texts like {{peak_name}} or {{YYYY-MM-DD}}
+   - All referenced links actually provided
+   - Mandatory sections present: Overview, Route, Current Conditions, Trip Reports, Information Gaps, Data Sources
+
+   **Formatting:**
+   - Markdown headers properly structured
+   - Lists have blank lines before them
+   - Tables properly formatted
+
+   **Safety & Responsibility:**
+   - AI disclaimer present and prominent
+   - Critical hazards properly emphasized
+   - Users directed to verify information from primary sources
+
+3. **Fix issues:**
+   - **Critical** (safety errors, factual errors, missing disclaimers): MUST fix using Edit tool
+   - **Important** (completeness, consistency): SHOULD fix
+   - **Minor** (formatting, polish): FIX if quick
+
+## Output Format (return EXACTLY this JSON)
+```json
+{
+  "status": "PASS" | "PASS_WITH_FIXES" | "FAIL",
+  "issues_found": N,
+  "fixes_applied": ["description of fix 1", "description of fix 2"],
+  "remaining_issues": ["issues that couldn't be fixed"],
+  "report_path": "/absolute/path/to/report.md"
+}
+```"""
 )
 ```
 
 #### Step 6B: Process Validation Results
 
-Review the validation results from the agent:
+Handle the reviewer agent's response:
 
-- If status is PASS or PASS_WITH_FIXES: Proceed to Phase 7
-- If status is FAIL: Present issues to user and ask for guidance
-- Capture final corrected report path for Phase 7
+- **PASS or PASS_WITH_FIXES:** Proceed to Phase 7 with the `report_path`
+- **FAIL:** Present `remaining_issues` to user and ask for guidance
 
-**Note:** The report-reviewer agent automatically fixes issues and returns the corrected file path.
+The Report Reviewer automatically fixes issues and returns the corrected file path.
 
 ### Phase 7: Completion
 
