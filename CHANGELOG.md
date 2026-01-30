@@ -1,3 +1,10 @@
+## [3.5.1](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.5.0...v3.5.1) (2026-01-30)
+
+
+### Bug Fixes
+
+* correct Claude Code documentation URLs in README ([#48](https://github.com/dreamiurg/claude-mountaineering-skills/issues/48)) ([f08c20a](https://github.com/dreamiurg/claude-mountaineering-skills/commit/f08c20ae06299a9a0113bf798e003e7abc44f851))
+
 ## [3.5.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v3.4.0...v3.5.0) (2025-11-07)
 
 
