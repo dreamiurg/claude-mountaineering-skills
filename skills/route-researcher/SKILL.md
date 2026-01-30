@@ -318,12 +318,12 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 
 #### Step 4B: Synthesize Route Information from Multiple Sources
 
-**Goal:** Combine trip reports (Step 3E), route descriptions (Step 3A agents), and other sources into comprehensive route beta.
+**Goal:** Combine trip reports and route descriptions from Step 3B researcher agents, plus conditions data from Step 3A, into comprehensive route beta.
 
 **Source Priority:**
-1. Trip reports (Step 3E) - first-hand experiences
-2. Route descriptions (Step 3A agents) - published beta baseline
-3. PeakBagger/ascent data (Steps 2 & 3A) - basic info, patterns
+1. Trip reports (Step 3B agents) - first-hand experiences
+2. Route descriptions (Step 3B agents) - published beta baseline
+3. PeakBagger/ascent data (Step 3A Python script) - basic info, patterns
 
 **Synthesis Pattern for Route, Crux, and Hazards:**
 
@@ -619,27 +619,23 @@ Every generated report must:
 
 ## Implementation Notes
 
-### Architecture (as of 2025-11-06)
+### Architecture (as of 2026-01-29)
 
-The route-researcher skill uses a distributed agent architecture:
+The route-researcher skill uses a hybrid architecture combining Python scripts and LLM agents:
 
-**Agent Types:**
-- **route-researcher-agent** - Reusable agent for extracting data from mountaineering websites (PeakBagger, SummitPost, WTA, Mountaineers, AllTrails)
-- **conditions-researcher-agent** - Gathers location-based environmental data (weather, avalanche, daylight)
-- **report-writer-agent** - Generates markdown reports from aggregated data
-- **report-reviewer-agent** - Validates report quality before presentation
+**Components:**
+- **Python script** (`tools/fetch_conditions.py`) - Deterministic API calls for weather, air quality, daylight, avalanche, and PeakBagger data
+- **Researcher agents** (3 total) - Web research for route info and trip reports from PeakBagger+SummitPost, WTA+Mountaineers, and AllTrails
+- **Report Writer agent** - Generates markdown reports from aggregated data
+- **Report Reviewer agent** - Validates report quality before presentation
 
 **Benefits:**
-- **Reduced context pollution** - Each agent handles focused tasks with isolated context
-- **Parallel execution** - Phase 3 dispatches 6 agents simultaneously
-- **Easier maintenance** - Individual agents can be updated without touching orchestrator logic
-- **Clear boundaries** - Well-defined inputs, outputs, and responsibilities
+- **Reduced token usage** - Python handles deterministic API calls with zero LLM tokens
+- **Parallel execution** - Phase 3 runs Python script + 3 researcher agents simultaneously
+- **Inline prompts** - Agent instructions embedded in SKILL.md for reliability
+- **Clear contracts** - JSON schemas define agent inputs and outputs
 
-**Agent Files:**
-- `skills/route-researcher/agents/route-researcher.md`
-- `skills/route-researcher/agents/conditions-researcher.md`
-- `skills/route-researcher/agents/report-writer.md`
-- `skills/route-researcher/agents/report-reviewer.md`
+See `docs/architecture.md` for detailed execution flow and data contracts.
 
 ### Current Status (as of 2025-10-21)
 
