@@ -182,6 +182,14 @@ Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
+## Other Mountaineering & Outdoors Tools
+
+I climb, scramble, and hike a lot, and I keep building tools around it. If this one's useful to you, the others might be too:
+
+- **[mountaineers-mcp](https://github.com/dreamiurg/mountaineers-mcp)** -- MCP server that lets AI assistants search and browse mountaineers.org. Activities, courses, trip reports, your account data. Works with Claude Desktop, Claude Code, and Codex CLI.
+- **[mountaineers-assistant](https://github.com/dreamiurg/mountaineers-assistant)** -- Chrome extension that syncs your mountaineers.org activity history and shows you stats, trends, and climbing partners you can't see on the site.
+- **[peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli)** -- Command-line access to PeakBagger.com. Search peaks, check elevation and prominence, browse ascent stats. Outputs JSON for piping into other tools.
+
 ## License
 
 [MIT](LICENSE)
