@@ -52,10 +52,27 @@ jobs:
       - name: Run Semgrep
         run: semgrep scan --config auto --error .
 
+  validate-plugin:
+    name: Validate Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install check-jsonschema==0.31.3
+      - name: Validate marketplace.json
+        run: >-
+          check-jsonschema
+          --schemafile .claude-plugin/schemas/marketplace.schema.json
+          .claude-plugin/marketplace.json
+      - name: Validate plugin.json
+        run: >-
+          check-jsonschema
+          --schemafile .claude-plugin/schemas/plugin.schema.json
+          .claude-plugin/plugin.json
+
   required-checks:
     name: Required Checks
     runs-on: ubuntu-latest
-    needs: [lint, sast]
+    needs: [lint, sast, validate-plugin]
     if: always()
     steps:
       - name: Check results
