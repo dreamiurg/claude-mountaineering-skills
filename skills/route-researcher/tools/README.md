@@ -1,6 +1,6 @@
 # Route Researcher Tools
 
-Python CLI tools for gathering current conditions data for Pacific Northwest route research.
+Python CLI tools for gathering current conditions data for North American mountain route research.
 
 ## Overview
 
@@ -9,7 +9,7 @@ These tools are invoked by the `route-researcher` skill to fetch real-time data 
 **Design Philosophy:**
 
 - Tools focus on **computation and API calls**, not web scraping
-- All tools handle errors gracefully (exit 0 even on failure)
+- All tools handle API/network errors gracefully (exit 0 with JSON error output)
 - JSON output includes helpful fallback info when data unavailable
 - Timeout-friendly (30s default)
 
@@ -67,186 +67,45 @@ uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798" | g
 
 ---
 
-### fetch_weather.py
+### fetch_conditions.py
 
-Fetches mountain weather forecasts from Mountain-Forecast.com.
+Unified conditions fetcher — weather, air quality, daylight, avalanche region, and PeakBagger statistics.
 
 **Usage:**
 
 ```bash
-uv run python fetch_weather.py --peak-name "Mt Baker" --coordinates "48.7767,-121.8144"
+uv run python fetch_conditions.py \
+  --coordinates "48.7767,-121.8144" \
+  --elevation 3286 \
+  --peak-name "Mt Baker" \
+  --peak-id 1798
 ```
 
 **Parameters:**
 
-- `--peak-name` (required): Peak name for forecast lookup
 - `--coordinates` (required): Lat/lon as "lat,lon"
+- `--elevation` (required): Elevation in meters
+- `--peak-name` (required): Peak name
+- `--peak-id` (optional): PeakBagger peak ID for stats/ascents
+- `--date` (optional): Date as YYYY-MM-DD (default: today)
 
 **Output:**
 
-```json
-{
-  "source": "Mountain-Forecast.com",
-  "url": "https://www.mountain-forecast.com/peaks/Mount-Baker",
-  "forecast": ["Day 1 data", "Day 2 data"],
-  "note": "Visit URL for detailed multi-day forecast with temperatures, wind, and precipitation"
-}
-```
+Returns unified JSON with keys: `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger`, `gaps`.
 
-**Behavior:**
+**Data Sources:**
 
-- Attempts to parse Mountain-Forecast.com forecast tables
-- Falls back to URL reference if parsing fails
-- Never hard-fails - always returns useful JSON
-
-**Dependencies:**
-
-- httpx (HTTP client)
-- beautifulsoup4 + lxml (HTML parsing)
-- click (CLI)
-- rich (console output)
+- Open-Meteo Weather API (7-day forecast, freezing levels)
+- Open-Meteo Air Quality API (US AQI)
+- astral library (sunrise, sunset, civil twilight)
+- NWAC region detection by coordinates
+- peakbagger-cli (ascent statistics and recent ascents)
 
 **Testing:**
 
 ```bash
-uv run pytest test_fetch_weather.py -v
+RUN_INTEGRATION_TESTS=1 uv run pytest test_fetch_conditions.py -v
 ```
-
----
-
-### fetch_avalanche.py
-
-Fetches avalanche forecasts from Northwest Avalanche Center (NWAC).
-
-**Usage:**
-
-```bash
-uv run python fetch_avalanche.py --region "North Cascades"
-```
-
-**Parameters:**
-
-- `--region` (required): NWAC forecast region name
-- `--coordinates` (optional): Lat/lon for future enhancements
-
-**Supported Regions:**
-
-- North Cascades
-- Mt Baker
-- Snoqualmie Pass
-- Stevens Pass
-- Olympics
-- Mt Hood
-- East Slopes
-- South Cascades
-
-**Output:**
-
-```json
-{
-  "source": "NWAC",
-  "region": "North Cascades",
-  "url": "https://nwac.us/avalanche-forecast/#north-cascades",
-  "forecast": "Current avalanche forecast available at URL",
-  "note": "NWAC provides detailed avalanche danger ratings by elevation (alpine, treeline, below treeline). Visit the URL for current conditions, weather, snowpack analysis, and recent avalanche activity."
-}
-```
-
-**Behavior:**
-
-- Maps common region names to NWAC URL slugs
-- NWAC is a JavaScript-heavy SPA, so parsing is limited
-- Provides URL for manual checking
-- Includes helpful context about NWAC's elevation-based ratings
-
-**Dependencies:**
-
-- httpx (HTTP client)
-- beautifulsoup4 + lxml (HTML parsing, though limited due to JS)
-- click (CLI)
-- rich (console output)
-
-**Testing:**
-
-```bash
-uv run pytest test_fetch_avalanche.py -v
-```
-
----
-
-### calculate_daylight.py
-
-Calculates sunrise, sunset, and daylight hours for trip planning.
-
-**Usage:**
-
-```bash
-uv run python calculate_daylight.py --date "2025-10-20" --coordinates "48.7767,-121.8144"
-```
-
-**Parameters:**
-
-- `--date` (required): Date as YYYY-MM-DD
-- `--coordinates` (required): Lat/lon as "lat,lon"
-
-**Output:**
-
-```json
-{
-  "date": "2025-10-20",
-  "coordinates": {
-    "latitude": 48.7767,
-    "longitude": -121.8144
-  },
-  "sunrise": "07:42",
-  "sunset": "18:24",
-  "daylight_hours": 10.7,
-  "note": "Times in Pacific timezone"
-}
-```
-
-**Behavior:**
-
-- Uses astral library for astronomical calculations
-- All times in Pacific timezone (America/Los_Angeles)
-- High precision for trip planning (alpine starts, etc.)
-
-**Dependencies:**
-
-- astral (astronomy/solar calculations)
-- click (CLI)
-- rich (console output)
-
-**Testing:**
-
-```bash
-uv run pytest test_calculate_daylight.py -v
-```
-
----
-
-### peakbagger.py (Deprecated)
-
-Originally designed for scraping PeakBagger.com. **No longer used by the skill.**
-
-**Why deprecated:**
-
-- Skill now uses WebSearch/WebFetch for PeakBagger data
-- More reliable than custom HTML parsing
-- Reduces maintenance burden
-- Python tools now focus on computation only
-
-**Still in repository for:**
-
-- Reference implementation
-- Possible future use if WebFetch becomes unavailable
-- Test case examples
-
-**Commands** (if using directly):
-
-- `search "peak name"` - Search for peaks
-- `peak-info "url"` - Extract peak details
-- `stats "url"` - Analyze gear from trip reports
 
 ---
 
@@ -266,31 +125,12 @@ This creates a virtual environment and installs all dependencies.
 **Python Version:**
 Python 3.11+ (specified in `.python-version`)
 
-### Manual Installation
-
-If the plugin's automatic installation failed or you don't have `uv` installed:
-
-```bash
-# Navigate to plugin installation directory
-cd ~/.claude/plugins/mountaineering-skills/skills/route-researcher/tools
-
-# Install dependencies with uv
-uv sync
-
-# Or with pip
-pip install -r requirements.txt
-```
-
-The skill will work without these tools, gracefully falling back to available data sources.
-
 ### Common Issues
 
-**Hook Installation Failed**
-
-If you see "post-install hook failed":
+**Dependencies not installing**
 
 1. Check if `uv` is installed: `uv --version`
-2. Try manual installation (see above)
+2. Try `uv sync --reinstall` in the tools directory
 3. The skill will still work, just without some Python tools
 
 **Cloudflare Blocking Requests**
@@ -314,6 +154,7 @@ Ensure you're in a directory where you have write permissions. Reports are creat
 ```python
 #!/usr/bin/env python3
 import json
+import sys
 import click
 
 @click.command()
@@ -356,11 +197,11 @@ def test_basic_functionality():
 
 All tools follow these principles:
 
-1. **Never hard-fail** - Exit 0 even on errors
+1. **Never hard-fail on API errors** - Exit 0 on network/API failures; exit 1 only on invalid arguments
 2. **Always return JSON** - Structured output for parsing
 3. **Include helpful context** - URLs, notes, suggestions
 4. **Timeout gracefully** - 30s default, degrade if exceeded
-5. **Log to stderr** - Use rich Console(stderr=True) for warnings
+5. **Log to stderr** - Use `click.echo(..., err=True)` or `rich.Console(stderr=True)` for warnings
 
 Example error output:
 
@@ -398,7 +239,7 @@ Tools are invoked by the skill via Bash commands:
 
 ```bash
 cd skills/route-researcher/tools
-uv run python fetch_weather.py --peak-name "Mt Baker" --coordinates "48.7767,-121.8144"
+uv run python fetch_conditions.py --coordinates "48.7767,-121.8144" --elevation 3286 --peak-name "Mt Baker"
 ```
 
 The skill:
@@ -412,9 +253,8 @@ The skill:
 
 **Typical execution times:**
 
-- `calculate_daylight.py`: <0.1s (pure computation)
-- `fetch_weather.py`: 1-3s (HTTP + parsing)
-- `fetch_avalanche.py`: 1-3s (HTTP + parsing)
+- `fetch_conditions.py`: 2-5s without --peak-id; 30-120s with --peak-id (peakbagger-cli is slow)
+- `cloudscrape.py`: 1-3s (HTTP with Cloudflare bypass)
 
 **Timeouts:**
 
@@ -428,7 +268,7 @@ The skill:
 Check:
 
 1. Network connectivity
-2. Service website availability (Mountain-Forecast, NWAC)
+2. Service website availability (Open-Meteo, NWAC)
 3. Coordinate format (must be "lat,lon" with comma, no spaces)
 4. Date format (must be YYYY-MM-DD)
 
@@ -472,20 +312,10 @@ These tools are part of a personal experimental skill. Code is provided as-is fo
 
 Managed in `pyproject.toml`:
 
-```toml
-[project]
-name = "route-researcher-tools"
-version = "0.1.0"
-requires-python = ">=3.11"
-dependencies = [
-    "click>=8.1.0",       # CLI framework
-    "httpx>=0.27.0",      # Modern HTTP client
-    "beautifulsoup4>=4.12.0",  # HTML parsing
-    "lxml>=5.0.0",        # Fast XML/HTML parser
-    "pydantic>=2.0.0",    # Data validation (future use)
-    "rich>=13.0.0",       # Rich terminal output
-    "astral>=3.2",        # Astronomy calculations
-]
-```
+- **click** - CLI framework
+- **httpx** - Modern HTTP client
+- **rich** - Rich terminal output
+- **astral** - Astronomy calculations (daylight)
+- **cloudscraper** - Cloudflare bypass
 
-All pinned to modern versions for security and features.
+Dev dependencies: pytest

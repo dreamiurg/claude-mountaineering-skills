@@ -26,7 +26,7 @@ def cli(url: str, timeout: int):
         response.raise_for_status()
 
         # Output HTML to stdout
-        print(response.text)
+        click.echo(response.text, nl=False)
 
     except Exception as e:
         console.print(f"[red]Error fetching URL: {e}[/red]")

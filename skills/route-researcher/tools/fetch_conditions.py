@@ -41,6 +41,13 @@ WEATHER_CODES = {
     99: ("Thunderstorm with hail", "⛈️"),
 }
 
+PEAKBAGGER_CMD = [
+    "uvx",
+    "--from",
+    "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
+    "peakbagger",
+]
+
 
 def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> dict[str, Any]:
     """Fetch weather forecast from Open-Meteo API."""
@@ -78,7 +85,9 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
                 # Filter out None values
                 day_freezing = [f for f in day_freezing if f is not None]
                 avg_freezing_m = sum(day_freezing) / len(day_freezing) if day_freezing else None
-                avg_freezing_ft = int(avg_freezing_m * 3.28084) if avg_freezing_m else None
+                avg_freezing_ft = (
+                    round(avg_freezing_m * 3.28084) if avg_freezing_m is not None else None
+                )
 
                 # Get temperature values safely
                 temp_max_c = daily.get("temperature_2m_max", [None])[i]
@@ -90,14 +99,14 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
                         "date": date_str,
                         "day": date_obj.strftime("%a"),
                         "conditions": f"{icon} {conditions}",
-                        "temp_high_f": int(temp_max_c * 9 / 5 + 32)
+                        "temp_high_f": round(temp_max_c * 9 / 5 + 32)
                         if temp_max_c is not None
                         else None,
-                        "temp_low_f": int(temp_min_c * 9 / 5 + 32)
+                        "temp_low_f": round(temp_min_c * 9 / 5 + 32)
                         if temp_min_c is not None
                         else None,
                         "precip_prob": daily.get("precipitation_probability_max", [None])[i],
-                        "wind_max_mph": int(wind_max_kmh * 0.621371)
+                        "wind_max_mph": round(wind_max_kmh * 0.621371)
                         if wind_max_kmh is not None
                         else None,
                         "freezing_level_ft": avg_freezing_ft,
@@ -154,8 +163,8 @@ def fetch_air_quality(lat: float, lon: float, days: int = 7) -> dict[str, Any]:
                     )
 
                 return {
-                    "aqi_avg": int(avg_aqi),
-                    "aqi_max": int(max_aqi),
+                    "aqi_avg": round(avg_aqi),
+                    "aqi_max": round(max_aqi),
                     "rating": rating,
                     "concerns": concerns,
                     "source_url": f"https://open-meteo.com/en/docs/air-quality-api#latitude={lat}&longitude={lon}",
@@ -200,32 +209,33 @@ def fetch_daylight(
         daylight = sunset - sunrise
         daylight_hours = daylight.total_seconds() / 3600
 
+        tz_label = tz_name if tz_name else "UTC"
         return {
             "sunrise": sunrise.strftime("%-I:%M %p"),
             "sunset": sunset.strftime("%-I:%M %p"),
             "civil_twilight": dawn.strftime("%-I:%M %p"),
             "daylight_hours": round(daylight_hours, 1),
+            "timezone": tz_label,
         }
     except Exception as e:
         return {"error": str(e)}
 
 
-def fetch_avalanche(_peak_name: str, lat: float, lon: float) -> dict[str, Any]:
+def fetch_avalanche(lat: float, lon: float) -> dict[str, Any]:
     """Get avalanche forecast info (returns URL for manual check).
 
     NWAC regions are roughly determined by coordinates.
     """
-    # Determine NWAC region based on coordinates (rough bounding boxes)
-    if lat > 48.5:
-        region = "north-cascades"
-    elif lat > 48.0 and lon > -122.0:
+    if 48.0 <= lat <= 48.9 and lon > -122.0:
         region = "mt-baker"
+    elif lat > 48.5:
+        region = "north-cascades"
+    elif lat > 47.0 and lon < -123.0:
+        region = "olympics"
     elif lat > 47.5:
         region = "stevens-pass"
     elif lat > 47.0:
         region = "snoqualmie-pass"
-    elif lon < -123.0:
-        region = "olympics"
     else:
         region = "south-cascades"
 
@@ -240,17 +250,7 @@ def run_peakbagger_stats(peak_id: int) -> dict[str, Any]:
     """Run peakbagger-cli to get ascent statistics."""
     try:
         result = subprocess.run(
-            [
-                "uvx",
-                "--from",
-                "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
-                "peakbagger",
-                "peak",
-                "stats",
-                str(peak_id),
-                "--format",
-                "json",
-            ],
+            [*PEAKBAGGER_CMD, "peak", "stats", str(peak_id), "--format", "json"],
             capture_output=True,
             text=True,
             timeout=60,
@@ -272,10 +272,7 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
     try:
         result = subprocess.run(
             [
-                "uvx",
-                "--from",
-                "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
-                "peakbagger",
+                *PEAKBAGGER_CMD,
                 "peak",
                 "ascents",
                 str(peak_id),
@@ -306,7 +303,7 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
 @click.option("--peak-name", required=True, help="Peak name")
 @click.option("--peak-id", type=int, default=None, help="PeakBagger peak ID (optional)")
 @click.option("--date", default=None, help="Date as YYYY-MM-DD (default: today)")
-def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int = None, date: str = None):
+def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int, date: str):
     """Fetch all conditions data for a peak.
 
     Returns unified JSON with weather, air quality, daylight, and avalanche data.
@@ -336,7 +333,7 @@ def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int = None,
     if "error" in daylight:
         gaps.append({"source": "Daylight calculation", "reason": daylight["error"]})
 
-    avalanche = fetch_avalanche(peak_name, lat, lon)
+    avalanche = fetch_avalanche(lat, lon)
 
     # PeakBagger data (if peak_id provided)
     peakbagger = {}
