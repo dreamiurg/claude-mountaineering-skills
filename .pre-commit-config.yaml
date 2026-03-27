@@ -46,6 +46,27 @@ repos:
       - id: markdownlint-cli2
         args: ['--fix']
 
+  # JSON Schema validation for plugin files
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.31.3
+    hooks:
+      - id: check-jsonschema
+        name: validate marketplace.json
+        files: ^\.claude-plugin/(marketplace\.json|schemas/marketplace\.schema\.json)$
+        pass_filenames: false
+        args:
+          - --schemafile
+          - .claude-plugin/schemas/marketplace.schema.json
+          - .claude-plugin/marketplace.json
+      - id: check-jsonschema
+        name: validate plugin.json
+        files: ^\.claude-plugin/(plugin\.json|schemas/plugin\.schema\.json)$
+        pass_filenames: false
+        args:
+          - --schemafile
+          - .claude-plugin/schemas/plugin.schema.json
+          - .claude-plugin/plugin.json
+
   # Secrets detection
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.23.3

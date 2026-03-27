@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Claude Plugin Marketplace",
+  "description": "Schema for .claude-plugin/marketplace.json",
+  "type": "object",
+  "required": ["name", "owner", "plugins"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "version", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
+          "source": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Relative path to plugin directory",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "description": "URL source",
+                "required": ["source", "url"],
+                "additionalProperties": false,
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "const": "url"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "GitHub source",
+                "required": ["source", "owner", "repo"],
+                "additionalProperties": false,
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "const": "github"
+                  },
+                  "owner": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "repo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ref": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
