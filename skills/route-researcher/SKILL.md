@@ -31,7 +31,7 @@ Research Progress:
 - [ ] Phase 1: Peak Identification (peak validated, ID obtained)
 - [ ] Phase 2: Peak Information Retrieval (coordinates and details obtained)
 - [ ] Phase 3: Data Gathering (parallel execution)
-  - [ ] Phase 3a: Python conditions fetch (weather, air quality, daylight, avalanche, peakbagger)
+  - [ ] Phase 3a: Python conditions fetch (weather, air quality, daylight, avalanche, peakbagger stats/ascents)
   - [ ] Phase 3b: Researcher agents (3 in parallel - web sources + trip reports)
   - [ ] Phase 3c: Results aggregated
   - [ ] Phase 3d: Access/permits (inline WebSearch)
@@ -134,7 +134,7 @@ This returns structured JSON with:
 Run the conditions fetcher script to gather all API-based data:
 
 ```bash
-cd skills/route-researcher/tools
+cd "{repo_root}/skills/route-researcher/tools"
 uv run python fetch_conditions.py \
   --coordinates "{latitude},{longitude}" \
   --elevation {elevation_m} \
@@ -151,7 +151,7 @@ This returns JSON with:
 - **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
 - **gaps**: Any API failures noted for report
 
-**Run this in parallel with Step 3B** (no dependency between them).
+**Run this in parallel with Step 3B** — include both the Bash command for fetch_conditions.py and all 3 Task calls in the same response turn to maximize parallelism.
 
 #### Step 3B: Dispatch Researcher Agents (Parallel)
 
@@ -170,8 +170,12 @@ Research from these sources: PeakBagger, SummitPost
 ## PeakBagger Research
 1. Search: "{peak_name} site:peakbagger.com"
 2. Extract route descriptions from peak page
-3. Identify trip reports with content (word_count > 0)
-4. Fetch content for up to 5 recent trip reports using:
+3. List recent ascents with trip reports:
+   ```bash
+   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
+   ```
+4. Identify trip reports with content (word_count > 0)
+5. Fetch content for up to 5 recent trip reports using:
    ```bash
    uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
    ```
@@ -376,8 +380,8 @@ From all synthesized data, identify:
   - **Moderate pace:** Calculate based on 1.5-2 mph and 700-900 ft/hr gain rate
   - **Leisurely pace:** Calculate based on 1-1.5 mph and 500-700 ft/hr gain rate
   - Use the **slower** of distance-based or gain-based calculations for each tier
-  - Example: For 4 miles, 2700 ft gain:
-    - Fast: max(4mi/2mph, 2700ft/1000ft/hr) = max(2hr, 2.7hr) = ~2.5-3 hours
+  - Example: For 4 miles round-trip, 2700 ft gain:
+    - Fast: max(4mi/2mph, 2700ft/1000ft/hr) = max(2hr, 2.7hr) = ~3 hours
     - Moderate: max(4mi/1.5mph, 2700ft/800ft/hr) = max(2.7hr, 3.4hr) = ~3-4 hours
     - Leisurely: max(4mi/1mph, 2700ft/600ft/hr) = max(4hr, 4.5hr) = ~4-5 hours
 - **Freezing Level Analysis:** Compare peak elevation with forecasted freezing levels:
@@ -419,7 +423,8 @@ Organize all gathered and analyzed data into structured JSON:
     "weather": {...},
     "air_quality": {...},
     "daylight": {...},
-    "avalanche": {...}
+    "avalanche": {...},
+    "peakbagger": {...}
   },
   "route_data": {
     // Merged from all Researcher agents
@@ -471,7 +476,7 @@ Task(
    - Break paragraphs >4 sentences
 
 4. **Save the report:**
-   Use the Write tool to save to: {output_dir}/{date}-{peak-name-slug}.md
+   Use the Write tool to save to the user's current working directory: {date}-{peak-name-slug}.md
 
 ## Data Package
 
@@ -629,7 +634,7 @@ Throughout execution, follow these error handling guidelines:
 
 ## Execution Timeouts
 
-- **Individual Python scripts:** 30 seconds each
+- **Individual Python scripts:** 30s for API calls; up to 120s when --peak-id is provided (peakbagger-cli)
 - **WebFetch operations:** Use default timeout
 - **WebSearch operations:** Use default timeout
 - **Total skill execution:** Target 3-5 minutes, acceptable up to 10 minutes for comprehensive research
@@ -666,7 +671,7 @@ The route-researcher skill uses a hybrid architecture combining Python scripts a
 - **Inline prompts** - Agent instructions embedded in SKILL.md for reliability
 - **Clear contracts** - JSON schemas define agent inputs and outputs
 
-See `docs/architecture.md` for detailed execution flow and data contracts.
+See `skills/route-researcher/docs/architecture.md` for detailed execution flow and data contracts.
 
 ### Current Status (as of 2026-01-30)
 
@@ -683,15 +688,14 @@ See `docs/architecture.md` for detailed execution flow and data contracts.
 - **Two-tier fetching strategy:** WebFetch first, cloudscrape.py as automatic fallback
 - **Open-Meteo Weather API** for mountain weather forecasts (temperature, precipitation, freezing level, wind)
 - **Open-Meteo Air Quality API** for AQI forecasting (US AQI scale with conditional alerts)
-- Multi-source weather gathering (Open-Meteo, NOAA/NWS, NWAC)
 - Adaptive ascent data retrieval based on peak popularity
-- **Sunrise-Sunset.org API** for daylight calculations (sunrise, sunset, civil twilight, day length)
+- **astral Python library** for daylight calculations (sunrise, sunset, civil twilight, day length)
 - **High-quality trip report identification** across PeakBagger and WTA sources
 - **WTA AJAX endpoint** for trip report extraction (`{wta_url}/@@related_tripreport_listing`)
+- **Avalanche region detection** (inline in `fetch_conditions.py`) - NWAC region and URL by coordinates
 
 **Pending Implementation:**
 
-- `fetch_avalanche.py` - NWAC avalanche data (currently using WebSearch/WebFetch as fallback)
 - **Browser automation** for Mountaineers.org and AllTrails trip report extraction (requires Playwright/Chrome)
   - Current: Both sites load content via JavaScript, cloudscrape.py cannot extract
   - Future: Add browser automation as 3rd-tier fallback
@@ -752,7 +756,7 @@ Example: `https://www.google.com/maps/search/?api=1&query=48.7768,-121.8144`
 **USGS TopoView (for summit coordinates):**
 
 ```
-https://ngmdb.usgs.gov/topoview/viewer/#{{latitude}}/{longitude}/15
+https://ngmdb.usgs.gov/topoview/viewer/#17/{latitude}/{longitude}
 ```
 
 Example: `https://ngmdb.usgs.gov/topoview/viewer/#17/48.7768/-121.8144`
@@ -781,4 +785,4 @@ Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead
 
 ---
 
-**Skill Version:** --help | **Last Updated:** 2026-01-30
+**Skill Version:** 4.0.2 | **Last Updated:** 2026-01-30
