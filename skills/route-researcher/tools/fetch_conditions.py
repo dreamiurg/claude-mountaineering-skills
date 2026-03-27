@@ -42,7 +42,8 @@ WEATHER_CODES = {
 }
 
 PEAKBAGGER_CMD = [
-    "uvx", "--from",
+    "uvx",
+    "--from",
     "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
     "peakbagger",
 ]
@@ -84,7 +85,9 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
                 # Filter out None values
                 day_freezing = [f for f in day_freezing if f is not None]
                 avg_freezing_m = sum(day_freezing) / len(day_freezing) if day_freezing else None
-                avg_freezing_ft = round(avg_freezing_m * 3.28084) if avg_freezing_m is not None else None
+                avg_freezing_ft = (
+                    round(avg_freezing_m * 3.28084) if avg_freezing_m is not None else None
+                )
 
                 # Get temperature values safely
                 temp_max_c = daily.get("temperature_2m_max", [None])[i]
@@ -268,7 +271,16 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
     """Run peakbagger-cli to get recent ascents."""
     try:
         result = subprocess.run(
-            [*PEAKBAGGER_CMD, "peak", "ascents", str(peak_id), "--format", "json", "--within", within],
+            [
+                *PEAKBAGGER_CMD,
+                "peak",
+                "ascents",
+                str(peak_id),
+                "--format",
+                "json",
+                "--within",
+                within,
+            ],
             capture_output=True,
             text=True,
             timeout=60,
