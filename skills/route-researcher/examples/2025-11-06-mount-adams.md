@@ -314,4 +314,4 @@ Mount Adams sees very high traffic with 2,981 viewable ascents on PeakBagger (3,
 ---
 
 **Research completed:** 2025-11-06
-**Skill:** route-researcher (mountaineering-skills plugin)
+**Skill:** route-researcher (mountaineering plugin)

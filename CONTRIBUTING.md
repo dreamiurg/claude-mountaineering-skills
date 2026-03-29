@@ -22,10 +22,10 @@ Thank you for your interest in contributing! This guide will help you get starte
 
    ```bash
    mkdir -p ~/.claude/plugins
-   ln -s /path/to/claude-mountaineering-skills ~/.claude/plugins/mountaineering-skills
+   ln -s /path/to/claude-mountaineering-skills ~/.claude/plugins/mountaineering
 
    # Verify
-   ls -la ~/.claude/plugins/mountaineering-skills
+   ls -la ~/.claude/plugins/mountaineering
    ```
 
 3. **Restart Claude Code**
@@ -140,6 +140,10 @@ pytest tests/test_cloudscrape.py -v         # Specific test
 ```
 claude-mountaineering-skills/
 ├── .claude-plugin/          # Plugin metadata
+├── commands/                # Slash commands
+│   ├── research.md          # /mountaineering:research
+│   ├── conditions.md        # /mountaineering:conditions
+│   └── trip-reports.md      # /mountaineering:trip-reports
 ├── skills/route-researcher/ # Main skill
 │   ├── SKILL.md            # Skill instructions
 │   ├── examples/           # Example reports
