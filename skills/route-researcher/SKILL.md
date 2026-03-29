@@ -162,6 +162,7 @@ Dispatch 3 Researcher agents in a single message (all Task calls together). Each
 ```
 Task(
   subagent_type="general-purpose",
+  model="sonnet",
   prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
 ## Your Assignment
@@ -174,8 +175,10 @@ Research from these sources: PeakBagger, SummitPost
    ```bash
    uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
    ```
+
 4. Identify trip reports with content (word_count > 0)
 5. Fetch content for up to 5 recent trip reports using:
+
    ```bash
    uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
    ```
@@ -216,6 +219,7 @@ For each report fetched, extract: date, author, route conditions, gear mentioned
 ```
 Task(
   subagent_type="general-purpose",
+  model="sonnet",
   prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
 ## Your Assignment
@@ -261,6 +265,7 @@ If WebFetch fails for any page, use cloudscrape.py as shown above.
 ```
 Task(
   subagent_type="general-purpose",
+  model="sonnet",
   prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
 ## Your Assignment
@@ -449,6 +454,7 @@ Organize all gathered and analyzed data into structured JSON:
 ```
 Task(
   subagent_type="general-purpose",
+  model="sonnet",
   prompt="""You are a Report Writer generating a mountaineering route report.
 
 ## Instructions
@@ -507,6 +513,7 @@ Extract `file_path` from agent's JSON response for use in Phase 6.
 ```
 Task(
   subagent_type="general-purpose",
+  model="opus",
   prompt="""You are a Report Reviewer validating a mountaineering route report.
 
 ## Instructions

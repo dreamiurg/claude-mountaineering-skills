@@ -20,11 +20,11 @@ This approach minimizes token usage while maximizing parallelism and reliability
 
 ### Agent Types (3 total)
 
-| Agent | Role | Count | When |
-| :---- | :--- | :---- | :--- |
-| **Researcher** | Gather data from web sources, fetch trip reports | 3 parallel | Phase 3 |
-| **Report Writer** | Generate markdown report from data package | 1 | Phase 5 |
-| **Report Reviewer** | Validate report quality, fix issues | 1 | Phase 6 |
+| Agent | Role | Model | Count | When |
+| :---- | :--- | :---- | :---- | :--- |
+| **Researcher** | Gather data from web sources, fetch trip reports | Sonnet | 3 parallel | Phase 3 |
+| **Report Writer** | Generate markdown report from data package | Sonnet | 1 | Phase 5 |
+| **Report Reviewer** | Validate report quality, fix issues | Opus | 1 | Phase 6 |
 
 ### Orchestrator (SKILL.md)
 
