@@ -44,9 +44,10 @@ Ask Claude to research any mountain. The route-researcher skill pulls from 10+ m
 /plugin install mountaineering@mountaineering-marketplace
 ```
 
-Restart Claude Code, then try:
+Then reload and try:
 
 ```
+/reload-plugins
 /mountaineering:research Mount Rainier
 ```
 
@@ -126,17 +127,10 @@ Missing data? The skill notes what's unavailable in an "Information Gaps" sectio
 ```
 /plugin marketplace add dreamiurg/claude-mountaineering-skills
 /plugin install mountaineering@mountaineering-marketplace
+/reload-plugins
 ```
 
-Python dependencies install automatically if `uv` is available.
-
-**Verify it worked:**
-
-```
-"What skills are available?"
-```
-
-You should see `route-researcher` in the list.
+Python dependencies install automatically if `uv` is available. No restart needed -- `/reload-plugins` activates the plugin in the current session.
 
 ---
 
