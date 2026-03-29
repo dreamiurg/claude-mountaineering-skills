@@ -1,12 +1,12 @@
 {
-  "name": "mountaineering-skills-marketplace",
+  "name": "mountaineering-marketplace",
   "owner": {
     "name": "dreamiurg",
     "url": "https://github.com/dreamiurg"
   },
   "plugins": [
     {
-      "name": "mountaineering-skills",
+      "name": "mountaineering",
       "source": {
         "source": "url",
         "url": "https://github.com/dreamiurg/claude-mountaineering-skills.git"
