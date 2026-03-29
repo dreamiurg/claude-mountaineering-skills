@@ -1,5 +1,5 @@
 {
-  "name": "mountaineering-skills",
+  "name": "mountaineering",
   "version": "4.0.2",
   "description": "Automated mountain route research combining PeakBagger data, weather forecasts, avalanche conditions, and trip reports into comprehensive beta documents",
   "author": {

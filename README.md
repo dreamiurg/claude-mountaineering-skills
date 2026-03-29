@@ -41,16 +41,17 @@ Ask Claude to research any mountain. The route-researcher skill pulls from 10+ m
 
 ```
 /plugin marketplace add dreamiurg/claude-mountaineering-skills
-/plugin install mountaineering-skills@mountaineering-skills-marketplace
+/plugin install mountaineering@mountaineering-marketplace
 ```
 
-Restart Claude Code, then ask:
+Then reload and try:
 
 ```
-"Research Mount Rainier"
+/reload-plugins
+/mountaineering:research Mount Rainier
 ```
 
-That's it. Claude generates a route beta report in your current directory.
+Or just ask naturally: `"Research Mount Rainier"`. Claude generates a route beta report in your current directory.
 
 ---
 
@@ -125,24 +126,27 @@ Missing data? The skill notes what's unavailable in an "Information Gaps" sectio
 
 ```
 /plugin marketplace add dreamiurg/claude-mountaineering-skills
-/plugin install mountaineering-skills@mountaineering-skills-marketplace
+/plugin install mountaineering@mountaineering-marketplace
+/reload-plugins
 ```
 
-Python dependencies install automatically if `uv` is available.
-
-**Verify it worked:**
-
-```
-"What skills are available?"
-```
-
-You should see `route-researcher` in the list.
+Python dependencies install automatically if `uv` is available. No restart needed -- `/reload-plugins` activates the plugin in the current session.
 
 ---
 
 ## Usage
 
-Just ask naturally:
+### Commands
+
+| Command | What it does | Time |
+|---------|-------------|------|
+| `/mountaineering:research <peak>` | Full route research report | 3-5 min |
+| `/mountaineering:conditions <peak>` | Weather, avalanche, air quality, daylight | ~30 sec |
+| `/mountaineering:trip-reports <peak>` | Recent trip reports from PeakBagger and WTA | 1-2 min |
+
+### Natural Language
+
+You can also just ask naturally:
 
 ```
 "Research Mt Baker"
@@ -151,6 +155,17 @@ Just ask naturally:
 ```
 
 Reports save to your current directory as `YYYY-MM-DD-peak-name.md`.
+
+---
+
+## Migration from v4.x
+
+If you previously installed the plugin as `mountaineering-skills`, reinstall with the new name:
+
+```
+/plugin uninstall mountaineering-skills
+/plugin install mountaineering@mountaineering-marketplace
+```
 
 ---
 
@@ -165,7 +180,7 @@ Reports save to your current directory as `YYYY-MM-DD-peak-name.md`.
 
 ```
 /plugin list                          # check current version
-/plugin update mountaineering-skills  # update to latest
+/plugin update mountaineering  # update to latest
 ```
 
 ---
