@@ -31,8 +31,8 @@ jobs:
 
       - name: Verify scripts
         run: |
-          test -f scripts/update-versions.js
-          node scripts/update-versions.js --help || true
+          node --check scripts/update-versions.js
+          node --check scripts/sync-changelog-to-readme.js
 
       - name: Release
         env:
