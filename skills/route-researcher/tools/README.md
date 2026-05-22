@@ -94,19 +94,32 @@ uv run python fetch_conditions.py \
 - `--elevation` (required): Elevation in meters
 - `--peak-name` (required): Peak name
 - `--peak-id` (optional): PeakBagger peak ID for stats/ascents
+- `--trailhead` (optional): Trailhead coordinates as "lat,lon" — enables multi-county sampling and trailhead-relative hospital/ranger lookups
 - `--date` (optional): Date as YYYY-MM-DD (default: today)
+- `--distance-mi` (optional): Round-trip distance in miles — required for `time_estimates` and `itinerary`
+- `--gain-ft` (optional): Total elevation gain in feet — required for `time_estimates` and `itinerary`
+- `--start-time` (optional): Trip start time as HH:MM — requires `--distance-mi` and `--gain-ft`; adds `itinerary` key
+- `--waypoint` (optional, repeatable): Waypoint as "lat,lon" — provide 2+ to add `bearings` key
 
 **Output:**
 
-Returns unified JSON with keys: `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger`, `gaps`.
+Returns unified JSON. Always-present keys: `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger` (when `--peak-id` given), `counties`, `nearest_hospital`, `ranger_station`, `campgrounds`, `gaps`.
+
+Conditional keys (only emitted when inputs are provided):
+- `time_estimates` — roped/unroped + 3-tier pacing (requires `--distance-mi` + `--gain-ft`)
+- `itinerary` — start/summit-ETA/turnaround-by/return-ETA, `after_dark` bool, `dusk_cutoff` (requires `--start-time` + `--distance-mi` + `--gain-ft`)
+- `bearings` — per-segment spherical azimuth and distance (requires 2+ `--waypoint` args)
 
 **Data Sources:**
 
-- Open-Meteo Weather API (7-day forecast, freezing levels)
+- Open-Meteo Weather API (7-day forecast, freezing levels, per-day `snow_line_note`/`near_summit`)
 - Open-Meteo Air Quality API (US AQI)
-- astral library (sunrise, sunset, civil twilight)
+- astral library (full 8-key twilight table; null on white-night dates)
 - NWAC region detection by coordinates
 - peakbagger-cli (ascent statistics and recent ascents)
+- FCC Area API (counties trailhead→summit)
+- OSM Overpass (nearest hospital/ER, ranger station, campgrounds within ~12 mi)
+- USFS ArcGIS EDW (admin district when on NF land)
 
 **Testing:**
 

@@ -55,7 +55,10 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
         "latitude": lat,
         "longitude": lon,
         "elevation": elevation_m,
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,weather_code",
+        "daily": (
+            "temperature_2m_max,temperature_2m_min,precipitation_sum,"
+            "precipitation_probability_max,wind_speed_10m_max,weather_code"
+        ),
         "hourly": "freezing_level_height",
         "timezone": "auto",
         "forecast_days": days,
@@ -596,7 +599,13 @@ def build_itinerary(
     from datetime import datetime, timedelta
 
     fmt_in = "%H:%M"
-    fmt_out = "%H:%M"
+
+    def _fmt(dt: datetime, ref: datetime) -> str:
+        """Format dt as HH:MM, appending ' (+1d)' when it falls on the next calendar day."""
+        s = dt.strftime("%H:%M")
+        if dt.date() > ref.date():
+            s += " (+1d)"
+        return s
 
     try:
         start_dt = datetime.strptime(start_time, fmt_in)
@@ -642,9 +651,9 @@ def build_itinerary(
 
     return {
         "start_time": start_time,
-        "summit_eta": summit_dt.strftime(fmt_out),
-        "turnaround_by": turnaround_dt.strftime(fmt_out),
-        "return_eta": return_dt.strftime(fmt_out),
+        "summit_eta": _fmt(summit_dt, start_dt),
+        "turnaround_by": _fmt(turnaround_dt, start_dt),
+        "return_eta": _fmt(return_dt, start_dt),
         "after_dark": after_dark,
         "dusk_cutoff": dusk_str,
         "total_hr": total_hr,
@@ -883,7 +892,11 @@ def cli(
     # Navigation bearings: needs 2+ waypoints
     if waypoints and len(waypoints) >= 2:
         try:
-            parsed = [tuple(map(float, w.split(","))) for w in waypoints]
+            parsed = [
+                (float(parts[0]), float(parts[1]))
+                for w in waypoints
+                if (parts := w.split(",")) and len(parts) >= 2
+            ]
             output["bearings"] = compute_bearings(parsed)
         except Exception as e:
             gaps.append({"source": "Navigation bearings", "reason": str(e)})

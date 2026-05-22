@@ -139,8 +139,15 @@ uv run python fetch_conditions.py \
   --coordinates "{latitude},{longitude}" \
   --elevation {elevation_m} \
   --peak-name "{peak_name}" \
-  --peak-id {peak_id}
+  --peak-id {peak_id} \
+  --trailhead "{trailhead_lat},{trailhead_lon}" \
+  --distance-mi {round_trip_distance_mi} \
+  --gain-ft {total_gain_ft} \
+  --start-time "{HH:MM}" \
+  --waypoint "{lat1},{lon1}" --waypoint "{lat2},{lon2}"
 ```
+
+Optional args: `--trailhead` enables multi-county sampling and hospital/ranger lookups from the trailhead; `--distance-mi`/`--gain-ft` enable `time_estimates`; `--start-time` (with distance + gain) enables `itinerary`; `--waypoint` (2+) enables `bearings`.
 
 This returns JSON with:
 
@@ -148,6 +155,8 @@ This returns JSON with:
 - **air_quality**: AQI ratings and any concerns
 - **daylight**: Full twilight table — `astronomical_dawn`, `nautical_dawn`, `civil_twilight` (dawn), `sunrise`, `sunset`, `civil_dusk`, `nautical_dusk`, `astronomical_dusk`; values are `null` at high latitudes when sun doesn't reach threshold (white nights); `daylight_hours`, `timezone`
 - **time_estimates**: Roped/unroped + 3-tier pacing (`roped_hr`, `unroped_hr`, `fast_hr`, `moderate_hr`, `leisurely_hr`) — only present when `--distance-mi` and `--gain-ft` CLI args are provided
+- **itinerary**: Trip schedule with safety signals (`start_time`, `summit_eta`, `turnaround_by`, `return_eta`, `total_hr`, `after_dark` bool, `dusk_cutoff`, `note`) — only present when `--start-time`, `--distance-mi`, AND `--gain-ft` are all provided; `after_dark: true` is a safety warning that must be prominently surfaced; `total_hr` is the full round-trip duration in hours
+- **bearings**: Navigation bearings between waypoints (`segments[]` with `bearing_deg`, `distance_mi`, `cumulative_distance_mi`; `total_distance_mi`) — only present when 2 or more `--waypoint "lat,lon"` args are provided
 - **avalanche**: NWAC region and URL for manual check
 - **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
 - **counties**: Counties traversed trailhead→summit (`counties[]` with `county_name`, `county_fips`, `state_name`, `state_code`); pass `--trailhead "lat,lon"` for multi-county routes
@@ -534,7 +543,9 @@ Organize all gathered and analyzed data into structured JSON:
     "nearest_hospital": {"hospitals": [{"name": "...", "distance_miles": N, "emergency": "yes|null", "phone": "..."}]},
     "ranger_station": {"stations": [{"name": "...", "distance_miles": N, "phone": null, "website": null}], "admin_district": {"district_name": "...", "forest_name": "...", "region": "..."}},
     "campgrounds": {"campgrounds": [{"name": "...", "distance_miles": N, "camp_type": "..."}], "note": "..."},
-    "time_estimates": {"roped_hr": N, "unroped_hr": N, "fast_hr": N, "moderate_hr": N, "leisurely_hr": N, "note": "..."}
+    "time_estimates": {"roped_hr": N, "unroped_hr": N, "fast_hr": N, "moderate_hr": N, "leisurely_hr": N, "note": "..."},
+    "itinerary": {"start_time": "HH:MM", "summit_eta": "HH:MM", "turnaround_by": "HH:MM", "return_eta": "HH:MM", "total_hr": N, "after_dark": false, "dusk_cutoff": "HH:MM label", "note": "..."},
+    "bearings": {"segments": [{"from": 0, "to": 1, "bearing_deg": N, "distance_mi": N, "cumulative_distance_mi": N}], "total_distance_mi": N}
   },
   "route_data": {
     // Merged from all Researcher agents
@@ -701,6 +712,8 @@ Report to user:
    - Review the report
    - Verify critical information from primary sources
    - Check current conditions before attempting route
+   - **Itinerary and navigation**: If the user wants a start-time schedule and/or compass bearings, re-run `fetch_conditions.py` with `--start-time HH:MM` (adds `itinerary` key) and/or `--waypoint lat,lon` flags (2+ waypoints add `bearings` key). Surface `after_dark: true` as a prominent safety warning.
+   - **Post-climb trip report**: After the climb, offer the trip-report template at `skills/route-researcher/assets/trip-report-template.md` as a starting point for filing a trip report.
 
 **Example completion message:**
 
@@ -809,6 +822,9 @@ See `skills/route-researcher/docs/architecture.md` for detailed execution flow a
 - **Avalanche region detection** (inline in `fetch_conditions.py`) - NWAC region and URL by coordinates
 - **New source sites** (Agent 2): northwesthikers.net, hikeoftheweek.com (Cloudflare → `--render`), oregonhikers.org (WebFetch-friendly), cascadeclimbers.com, Mountain Project
 - **Weather source ranking**: NOAA + Meteoblue are most reliable; Mountain-Forecast for multi-elevation; Windy for visual wind/precip
+- **Itinerary scheduling** (`--start-time HH:MM`): `itinerary` key adds start/summit-ETA/turnaround-by/return-ETA; `after_dark: true` means projected return exceeds nautical dusk — surface as a safety warning
+- **Navigation bearings** (`--waypoint lat,lon`, repeatable): `bearings` key adds per-segment spherical azimuth (0=N, 90=E) and cumulative distance; requires 2+ waypoints
+- **Trip-report template**: `skills/route-researcher/assets/trip-report-template.md` — a climber-facing post-climb template; offer it in Phase 7 next steps
 
 **Pending Implementation:**
 
@@ -901,4 +917,4 @@ Example: `https://www.google.com/maps/search/?api=1&query=Cascade+Pass+Trailhead
 
 ---
 
-**Skill Version:** 4.0.2 | **Last Updated:** 2026-01-30
+**Skill Version:** 4.0.3 | **Last Updated:** 2026-01-31

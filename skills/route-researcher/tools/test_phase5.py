@@ -233,6 +233,45 @@ class TestBuildItinerary:
         assert "total_hr" in result
         assert result["total_hr"] > 0
 
+    # --- cross-midnight day-marker tests (Wave F P1 re-open) ---
+
+    def test_cross_midnight_summit_eta_has_plus1d_marker(self):
+        """Evening start (18:00) with long route: summit_eta wraps to next day.
+
+        summit_eta '07:18' is ambiguous — looks like 7am same day, before the
+        18:00 start.  Must be '07:18 (+1d)' to be unambiguous.
+        """
+        result = build_itinerary("18:00", 20.0, 8000, self.DAYLIGHT)
+        assert "(+1d)" in result["summit_eta"], (
+            f"summit_eta {result['summit_eta']!r} should contain '(+1d)' for cross-midnight route"
+        )
+
+    def test_cross_midnight_return_eta_has_plus1d_marker(self):
+        """Evening start with long route: return_eta wraps to next day, must say (+1d)."""
+        result = build_itinerary("18:00", 20.0, 8000, self.DAYLIGHT)
+        assert "(+1d)" in result["return_eta"], (
+            f"return_eta {result['return_eta']!r} should contain '(+1d)' for cross-midnight route"
+        )
+
+    def test_cross_midnight_after_dark_true(self):
+        """Evening start with 20mi/8000ft route: return is well past dusk → after_dark=True."""
+        result = build_itinerary("18:00", 20.0, 8000, self.DAYLIGHT)
+        assert result["after_dark"] is True
+
+    def test_normal_daytime_route_has_no_plus1d_marker(self):
+        """A standard daytime route that finishes same day must NOT have (+1d) markers."""
+        result = build_itinerary("06:00", 8.0, 4000, self.DAYLIGHT)
+        assert "(+1d)" not in result["summit_eta"]
+        assert "(+1d)" not in result["return_eta"]
+
+    def test_turnaround_same_day_no_plus1d_when_evening_start(self):
+        """For evening start, turnaround_by (dusk - descent_hr) stays same day — no (+1d)."""
+        # 18:00 start, dusk 22:00: turnaround = 22:00 - descent, same evening
+        result = build_itinerary("18:00", 20.0, 8000, self.DAYLIGHT)
+        assert "(+1d)" not in result["turnaround_by"], (
+            f"turnaround_by {result['turnaround_by']!r} should be same-day for evening start"
+        )
+
 
 # ---------------------------------------------------------------------------
 # 2. compute_bearings helper

@@ -183,6 +183,43 @@ AVOID bolding: common descriptors (wet, icy, loose), general skills (scrambling,
 
 **Named camps / bivy sites:** {High camp, bivy, or established camp names/locations from trip reports and route beta. Note if windward/exposed. These are NOT from the campground database above.}
 
+### Itinerary / Schedule
+
+{If itinerary key present in fetch_conditions.py output (--start-time + --distance-mi + --gain-ft provided):}
+
+| Milestone | Time |
+|-----------|------|
+| Trailhead depart | {start_time} |
+| Summit ETA | {summit_eta} |
+| Turnaround by | {turnaround_by} |
+| Return to trailhead | {return_eta} |
+| **Total car-to-car** | **{total_hr} hrs** |
+
+{If itinerary.after_dark is true:}
+> **⚠️ After-Dark Warning:** Projected return time ({return_eta}) is after {dusk_cutoff}. Carry a headlamp; consider an earlier start or a faster pace.
+
+{itinerary.note — display the note string from fetch_conditions.py}
+
+{If itinerary key absent from fetch_conditions.py output:}
+*Itinerary not calculated — pass `--start-time HH:MM`, `--distance-mi`, and `--gain-ft` to fetch_conditions.py.*
+
+### Navigation Bearings
+
+{If bearings key present in fetch_conditions.py output (2+ --waypoint args provided):}
+
+| Segment | Bearing | Distance | Cumulative |
+|---------|---------|----------|------------|
+| {from} → {to} | {bearing_deg}° | {distance_mi} mi | {cumulative_distance_mi} mi |
+
+{Repeat one row per segment from bearings.segments[]}
+
+**Total route distance:** {bearings.total_distance_mi} mi
+
+*Bearings are true-north spherical azimuths (0° = N, 90° = E, 180° = S, 270° = W). Apply local declination for compass use.*
+
+{If bearings key absent:}
+*Navigation bearings not calculated — pass 2 or more `--waypoint "lat,lon"` args to fetch_conditions.py.*
+
 ## Current Conditions
 
 ### Daylight
@@ -411,6 +448,13 @@ IMPORTANT PRIORITY RULES:
 
 - PeakBagger: {url}
 - {Other source names and URLs}
+
+## Post-Climb
+
+After your climb, consider filing a trip report to help future parties. A structured template is available at:
+`skills/route-researcher/assets/trip-report-template.md`
+
+It covers: conditions, cruxes, hazards encountered, water sources, camps, gear notes, timing, navigation notes, and photos.
 
 ---
 
