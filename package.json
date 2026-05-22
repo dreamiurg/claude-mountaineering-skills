@@ -1,13 +1,17 @@
 {
   "name": "claude-mountaineering-skills",
-  "version": "4.0.1",
+  "version": "5.0.0",
   "description": "Claude Code plugin for North American mountain route research",
   "private": true,
   "repository": {
     "type": "git",
     "url": "git@github.com:dreamiurg/claude-mountaineering-skills.git"
   },
-  "keywords": ["claude-code", "mountaineering", "climbing"],
+  "keywords": [
+    "claude-code",
+    "mountaineering",
+    "climbing"
+  ],
   "author": "dreamiurg",
   "license": "MIT",
   "devDependencies": {

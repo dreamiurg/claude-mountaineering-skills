@@ -11,6 +11,13 @@ if (!version) {
 
 console.log(`Updating version to ${version}`);
 
+// Update root package.json
+const packageJsonPath = path.join(__dirname, '..', 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+packageJson.version = version;
+fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+console.log(`✓ Updated ${packageJsonPath}`);
+
 // Update plugin.json
 const pluginJsonPath = path.join(__dirname, '..', '.claude-plugin', 'plugin.json');
 const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
