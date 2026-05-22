@@ -17,52 +17,58 @@ These tools are invoked by the `route-researcher` skill to fetch real-time data 
 
 ### cloudscrape.py
 
-Fetches HTML content from Cloudflare-protected websites using cloudscraper.
+Fetches HTML content from websites, with optional JS-rendering for Cloudflare-protected or JavaScript-heavy pages.
 
 **Usage:**
 
 ```bash
+# Default: fast httpx fetch (browser-like headers, no browser)
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798"
+
+# --render: Patchright headless browser for JS-rendered / Cloudflare-challenged pages
+uv run python cloudscrape.py --render "https://www.hikeoftheweek.com/some-hike"
 ```
 
 **Parameters:**
 
 - `url` (required): URL to fetch
+- `--render` (optional): Use Patchright stealth browser for JS-rendered or Cloudflare-protected pages
 - `--timeout` (optional): Request timeout in seconds (default: 30)
 
 **Output:**
-Returns the full HTML content to stdout.
+Returns the full HTML content to stdout. On failure, exits 0 with a JSON error note to stdout so callers always succeed.
 
 **Purpose:**
 
-- Bypasses Cloudflare bot protection on PeakBagger and SummitPost
-- Uses cloudscraper library which solves Cloudflare's JavaScript challenges
-- No browser required - pure HTTP with smart request mimicking
+- Default path: plain httpx with browser-like headers (no browser required, no TLS spoofing)
+- `--render` path: stealth headless Chromium via Patchright for pages that block plain HTTP or require JavaScript execution
 
 **Behavior:**
 
-- Creates scraper instance with Chrome browser profile
-- Mimics macOS desktop Chrome browser
-- Automatically solves Cloudflare challenges
-- Returns raw HTML for parsing by the skill
+- Default: plain httpx with browser-like headers; fast, no external install, no TLS spoofing
+- `--render`: launches Patchright (undetected Playwright); Chromium is installed lazily on first use via `patchright install chromium` — base install stays light
+- Any failure exits 0 (graceful degradation); error details go to stdout as JSON
 
 **Dependencies:**
 
-- cloudscraper (Cloudflare bypass)
+- httpx (default fetch path)
+- patchright (stealth headless browser, `--render` path)
 - click (CLI)
-- rich (console output)
 
 **Use Cases:**
 
-- Fetching PeakBagger peak pages
-- Fetching SummitPost route descriptions
-- Any Cloudflare-protected climbing/hiking resource
+- Fetching PeakBagger, SummitPost, WTA pages (default path usually sufficient)
+- hikeoftheweek.com and other Cloudflare-challenged sites (require `--render`)
+- Any site that serves content via JavaScript (require `--render`)
 
 **Example:**
 
 ```bash
-# Fetch Mount Pilchuck page from PeakBagger
+# Standard fetch — fast, no browser
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798" | grep -i "elevation"
+
+# JS-rendered / Cloudflare page
+uv run python cloudscrape.py --render "https://www.hikeoftheweek.com/mount-baker"
 ```
 
 ---
@@ -87,19 +93,32 @@ uv run python fetch_conditions.py \
 - `--elevation` (required): Elevation in meters
 - `--peak-name` (required): Peak name
 - `--peak-id` (optional): PeakBagger peak ID for stats/ascents
+- `--trailhead` (optional): Trailhead coordinates as "lat,lon" — enables multi-county path sampling (trailhead→summit); hospital/ranger lookups always run from the summit regardless
 - `--date` (optional): Date as YYYY-MM-DD (default: today)
+- `--distance-mi` (optional): Round-trip distance in miles — required for `time_estimates` and `itinerary`
+- `--gain-ft` (optional): Total elevation gain in feet — required for `time_estimates` and `itinerary`
+- `--start-time` (optional): Trip start time as HH:MM — requires `--distance-mi` and `--gain-ft`; adds `itinerary` key
+- `--waypoint` (optional, repeatable): Waypoint as "lat,lon" — provide 2+ to add `bearings` key
 
 **Output:**
 
-Returns unified JSON with keys: `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger`, `gaps`.
+Returns unified JSON. Always-present keys: `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger` (when `--peak-id` given), `counties`, `nearest_hospital`, `ranger_station`, `campgrounds`, `gaps`.
+
+Conditional keys (only emitted when inputs are provided):
+- `time_estimates` — roped/unroped + 3-tier pacing (requires `--distance-mi` + `--gain-ft`)
+- `itinerary` — start/summit-ETA/turnaround-by/return-ETA, `after_dark` bool, `dusk_cutoff` (requires `--start-time` + `--distance-mi` + `--gain-ft`)
+- `bearings` — per-segment spherical azimuth and distance (requires 2+ `--waypoint` args)
 
 **Data Sources:**
 
-- Open-Meteo Weather API (7-day forecast, freezing levels)
+- Open-Meteo Weather API (7-day forecast, freezing levels, per-day `snow_line_note`/`near_summit`)
 - Open-Meteo Air Quality API (US AQI)
-- astral library (sunrise, sunset, civil twilight)
+- astral library (full 8-key twilight table; null on white-night dates)
 - NWAC region detection by coordinates
 - peakbagger-cli (ascent statistics and recent ascents)
+- FCC Area API (counties trailhead→summit)
+- OSM Overpass (nearest hospital/ER, ranger station, campgrounds within ~12 mi)
+- USFS ArcGIS EDW (admin district when on NF land)
 
 **Testing:**
 
@@ -135,11 +154,12 @@ Python 3.11+ (specified in `.python-version`)
 
 **Cloudflare Blocking Requests**
 
-The `cloudscrape.py` tool handles Cloudflare protection, but may occasionally fail:
+The `cloudscrape.py` tool handles Cloudflare and JS-rendered pages. If the default path fails:
 
-- Skill automatically falls back to available sources
-- Check "Information Gaps" section in generated reports
-- Use manual verification links provided
+- Retry with `--render` flag to use Patchright stealth browser
+- First `--render` use installs Chromium lazily (`patchright install chromium`) — subsequent calls are fast
+- If both paths fail, the skill notes it in "Information Gaps" and continues
+- Use manual verification links provided in the report
 
 **No Route Beta Generated**
 
@@ -253,8 +273,8 @@ The skill:
 
 **Typical execution times:**
 
-- `fetch_conditions.py`: 2-5s without --peak-id; 30-120s with --peak-id (peakbagger-cli is slow)
-- `cloudscrape.py`: 1-3s (HTTP with Cloudflare bypass)
+- `fetch_conditions.py`: 5-15s without --peak-id (includes OSM/FCC geodata calls); 30-120s with --peak-id (peakbagger-cli is slow)
+- `cloudscrape.py`: 1-3s default httpx; 10-30s first `--render` (Chromium install), 3-8s subsequent `--render`
 
 **Timeouts:**
 
@@ -314,8 +334,7 @@ Managed in `pyproject.toml`:
 
 - **click** - CLI framework
 - **httpx** - Modern HTTP client
-- **rich** - Rich terminal output
 - **astral** - Astronomy calculations (daylight)
-- **cloudscraper** - Cloudflare bypass
+- **patchright** - Stealth headless browser (`--render` path in cloudscrape.py)
 
 Dev dependencies: pytest

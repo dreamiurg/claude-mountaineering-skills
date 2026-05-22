@@ -171,7 +171,7 @@ If you previously installed the plugin as `mountaineering-skills`, reinstall wit
 
 ## Dependencies
 
-- [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) v1.7.0 - peak data and trip reports
+- [peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli) >= v1.10.0 - peak data and trip reports
 - [Python tools](skills/route-researcher/tools/README.md) - weather, avalanche, and daylight calculations
 
 ---

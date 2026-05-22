@@ -14,7 +14,7 @@ If the user provided a peak name as an argument (e.g., `/mountaineering:trip-rep
 1. **Search PeakBagger** for the peak:
 
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak search "{peak_name}" --format json
+   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak search "{peak_name}" --format json
    ```
 
 2. **Handle results:**
@@ -30,7 +30,7 @@ If the user provided a peak name as an argument (e.g., `/mountaineering:trip-rep
 Fetch peak coordinates and basic info:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak show {peak_id} --format json
+uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak show {peak_id} --format json
 ```
 
 Extract: `peak_name`, `elevation_ft`, `location`, `latitude`, `longitude`.
@@ -44,13 +44,13 @@ Run these two sources **in parallel**:
 1. Get recent ascents with trip reports:
 
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --with-tr --within 2y --limit 20 --format json
+   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak ascents {peak_id} --with-tr --within 2y --limit 20 --format json
    ```
 
 2. For the **10 most recent** ascents that have trip reports (word_count > 0), fetch full content:
 
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
+   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger ascent show {ascent_id} --format json
    ```
 
 3. From each report extract: date, author, route taken, conditions described, gear mentioned, hazards noted, key observations.

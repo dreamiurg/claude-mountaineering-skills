@@ -31,16 +31,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          pip install pytest pytest-cov
-          # Install any requirements if they exist
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          # Check for requirements in skills directories
-          find . -name "requirements.txt" -not -path "*/.git/*" -exec pip install -r {} \;
-      - name: Run tests
-        run: pytest --tb=short -q
-        continue-on-error: true
+      - name: Install uv
+        run: pip install uv
+      - name: Run route-researcher tools tests
+        working-directory: skills/route-researcher/tools
+        run: uv run --group dev pytest --tb=short -q
 
   sast:
     name: SAST
