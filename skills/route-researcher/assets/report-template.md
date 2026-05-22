@@ -26,7 +26,7 @@
 
 {1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 
-**Counties traversed:** {county_name}, {state_name}{, additional counties if multiple} *(trailhead → summit; OSM/FCC data)*
+**Counties traversed:** {Iterate counties[] from fetch_conditions output; render each as "{county_name}, {state_name}" and join multiple with "; "} *(trailhead → summit; OSM/FCC data)*
 
 {If counties data unavailable:}
 **Counties traversed:** Not available — check with local forest service for jurisdiction.

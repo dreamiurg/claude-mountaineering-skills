@@ -117,18 +117,16 @@ class TestFetchCounties:
         assert "counties" in result
         assert result["counties"] == []
 
-    def test_early_exit_after_five_stale_points(self):
-        """With 25 sample points all returning the same county, stops after 1+5=6 calls.
-
-        First call adds the county (stale resets to 0); next 5 calls add nothing
-        (stale reaches 5) → break.  Total: ≤6 GET calls, not 25.
+    def test_scans_all_points_on_success(self):
+        """Same-county successes must NOT early-exit — a route can re-enter a new
+        county after a long stretch, so every sample point is queried.
         """
         with patch("fetch_conditions.httpx.Client") as mock_cls:
             mock_client = _mock_httpx_get(self.FCC_RESPONSE)
             mock_cls.return_value = mock_client
             fetch_counties((47.44, -121.41), (48.77, -121.81), n_samples=25)
 
-        assert mock_client.get.call_count <= 6
+        assert mock_client.get.call_count == 25
 
     def test_early_exit_after_five_consecutive_errors(self):
         """Five consecutive per-point network errors trigger the stale early-exit.

@@ -336,10 +336,9 @@ def fetch_counties(
     try:
         points = _sample_line(trailhead, summit, n_samples) if trailhead else [summit]
         seen: dict[str, dict] = {}
-        stale = 0  # consecutive points that added no new counties
+        errors = 0  # consecutive failed requests (API likely down)
         with httpx.Client(timeout=30.0) as client:
             for lat, lon in points:
-                prev_count = len(seen)
                 try:
                     resp = client.get(
                         FCC_AREA_URL,
@@ -356,17 +355,15 @@ def fetch_counties(
                                 "state_name": r.get("state_name"),
                                 "state_code": r.get("state_code"),
                             }
+                    errors = 0  # a successful request resets the failure counter
                 except Exception:
-                    stale += 1
-                    if stale >= 5:
-                        break
+                    errors += 1
+                    if errors >= 5:
+                        break  # API appears down; stop hammering it
                     continue  # single-point failure is non-fatal
-                if len(seen) == prev_count:
-                    stale += 1
-                    if stale >= 5:
-                        break
-                else:
-                    stale = 0
+                # Keep sampling every point on success — a route can re-enter a
+                # new county after a long stretch in one, so never early-exit on
+                # "no new county" (would miss later boundary crossings).
 
         if not seen and points:
             return {
@@ -908,7 +905,15 @@ def cli(
                 for w in waypoints
                 if (parts := w.split(",")) and len(parts) >= 2
             ]
-            output["bearings"] = compute_bearings(parsed)
+            if len(parsed) < 2:
+                gaps.append(
+                    {
+                        "source": "Navigation bearings",
+                        "reason": "Need at least 2 valid waypoints in lat,lon format.",
+                    }
+                )
+            else:
+                output["bearings"] = compute_bearings(parsed)
         except Exception as e:
             gaps.append({"source": "Navigation bearings", "reason": str(e)})
 
