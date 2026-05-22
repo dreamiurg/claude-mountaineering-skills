@@ -1,3 +1,20 @@
+## [5.1.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v5.0.0...v5.1.0) (2026-05-22)
+
+
+### Features
+
+* **route-researcher:** link CalTopo, Gaia GPS, and PeakVisor centered on the objective in the report Overview (US Topo removed) ([#81](https://github.com/dreamiurg/claude-mountaineering-skills/pull/81))
+* **route-researcher:** hyperlink every specific trip/climb-report attribution back to its source ([#81](https://github.com/dreamiurg/claude-mountaineering-skills/pull/81))
+* **route-researcher:** actively research current road/gate status (WSDOT, USFS forest alerts, NPS road pages, WTA, InciWeb) and report a dated status with sources, instead of telling the user to check ([#81](https://github.com/dreamiurg/claude-mountaineering-skills/pull/81))
+* **route-researcher:** emergency-contacts table now links each hospital/ranger to its website or Google Maps place and includes phone + address (geodata fetchers gained lat/lon/website/address); the Report Reviewer verifies these independently ([#81](https://github.com/dreamiurg/claude-mountaineering-skills/pull/81))
+* **route-researcher:** every named location (campsite, bivy, high camp, trailhead) is accompanied by Google Maps + Gaia GPS links ([#81](https://github.com/dreamiurg/claude-mountaineering-skills/pull/81))
+* **route-researcher:** trip-report template links the GitHub repository at the top ([#81](https://github.com/dreamiurg/claude-mountaineering-skills/pull/81))
+
+
+### Bug Fixes
+
+* **ci:** verify release scripts with `node --check` instead of running `--help` (which corrupted version files in the workspace) ([#80](https://github.com/dreamiurg/claude-mountaineering-skills/pull/80))
+
 ## [5.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v4.0.2...v5.0.0) (2026-05-22)
 
 
