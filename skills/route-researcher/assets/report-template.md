@@ -22,7 +22,7 @@
 
 ## Overview
 
-{Peak name} rises to **{elevation with units}** with {prominence with units} of prominence in the {state, range}. The peak is located at {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [USGS Topo]({usgs_topo_link})). The standard route is a **{route type}** rated **{difficulty}**.
+{Peak name} rises to **{elevation with units}** with {prominence with units} of prominence in the {state, range}. The peak is located at {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [CalTopo]({caltopo_link}) | [Gaia GPS]({gaia_gps_link}) | [PeakVisor]({peakvisor_link})). The standard route is a **{route type}** rated **{difficulty}**.
 
 {1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 

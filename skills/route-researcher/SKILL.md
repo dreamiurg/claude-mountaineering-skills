@@ -805,27 +805,44 @@ Common variations to try if initial search fails:
 - **Remove title:** "Baker" instead of "Mt Baker"
 - **Combine variations:** Try reversed order with title expansion (e.g., "Mountain Pratt" → "Pratt Mount" + "Pratt Mountain")
 
-### Google Maps and USGS Links
+### Navigation Map Links
 
 #### Summit Coordinates Links
 
-**Google Maps (for summit coordinates):**
+Build these centered on the summit (decimal degrees) for the report Overview line.
+
+**Google Maps:**
 
 ```
 https://www.google.com/maps/search/?api=1&query={latitude},{longitude}
 ```
 
-Example: `https://www.google.com/maps/search/?api=1&query=48.7768,-121.8144`
-
-**USGS TopoView (for summit coordinates):**
+**CalTopo** (MapBuilder Topo base, zoom 14):
 
 ```
-https://ngmdb.usgs.gov/topoview/viewer/#17/{latitude}/{longitude}
+https://caltopo.com/map.html#ll={latitude},{longitude}&z=14&b=mbt
 ```
 
-Example: `https://ngmdb.usgs.gov/topoview/viewer/#17/48.7768/-121.8144`
+**Gaia GPS** (order is zoom/longitude/latitude):
 
-**Note:** Use decimal degree format for coordinates. TopoView uses zoom level in URL (15-17 works well for peaks).
+```
+https://www.gaiagps.com/map/?loc=14/{longitude}/{latitude}
+```
+
+**PeakVisor hiking map** (zoom/latitude/longitude; slashes URL-encoded as `%2F` in the query):
+
+```
+https://peakvisor.com/hiking-map?custom=14%2F{latitude}%2F{longitude}#14/{latitude}/{longitude}
+```
+
+Example (Mt Baker, 48.7768, -121.8144):
+
+- Google Maps: `https://www.google.com/maps/search/?api=1&query=48.7768,-121.8144`
+- CalTopo: `https://caltopo.com/map.html#ll=48.7768,-121.8144&z=14&b=mbt`
+- Gaia GPS: `https://www.gaiagps.com/map/?loc=14/-121.8144/48.7768`
+- PeakVisor: `https://peakvisor.com/hiking-map?custom=14%2F48.7768%2F-121.8144#14/48.7768/-121.8144`
+
+**Note:** Use decimal degrees. Gaia GPS expects zoom/longitude/latitude order; CalTopo and PeakVisor use latitude then longitude.
 
 #### Trailhead Google Maps Links
 
