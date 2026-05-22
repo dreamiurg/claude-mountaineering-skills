@@ -576,6 +576,129 @@ def estimate_times(distance_mi: float, gain_ft: float) -> dict[str, Any]:
     }
 
 
+def build_itinerary(
+    start_time: str,
+    distance_mi: float,
+    gain_ft: float,
+    daylight: dict[str, Any],
+) -> dict[str, Any]:
+    """Generate a climb timeline from start time, route stats, and daylight.
+
+    Turnaround definition: latest time to begin descent and return before nautical dusk
+    (dusk - descent_hr).  If that time is before the summit ETA the route cannot be
+    completed before dark, and after_dark=True.
+
+    All arithmetic uses timedelta from start_dt so pre-dawn starts and after-midnight
+    finishes are handled correctly without re-parsing wall-clock strings.
+    Dusk is anchored to the start date (or day+1 when the dusk time-of-day is earlier
+    than start time-of-day, e.g. a 23:00 start with 22:00 dusk).
+    """
+    from datetime import datetime, timedelta
+
+    fmt_in = "%H:%M"
+    fmt_out = "%H:%M"
+
+    try:
+        start_dt = datetime.strptime(start_time, fmt_in)
+    except ValueError:
+        return {"error": f"Invalid start_time format: {start_time!r}. Use HH:MM."}
+
+    times = estimate_times(distance_mi, gain_ft)
+
+    # Ascent: moderate pace; descent: fast pace (downhill)
+    ascent_hr = times["moderate_hr"]
+    descent_hr = times["fast_hr"] * 0.5
+    total_hr = round(ascent_hr + descent_hr, 1)
+
+    summit_dt = start_dt + timedelta(hours=ascent_hr)
+    return_dt = summit_dt + timedelta(hours=descent_hr)
+
+    # Dusk cutoff: prefer nautical_dusk → civil_dusk → sunset → None
+    dusk_str = daylight.get("nautical_dusk") or daylight.get("civil_dusk") or daylight.get("sunset")
+    dusk_dt = None
+    if dusk_str:
+        for fmt in ("%I:%M %p", "%H:%M"):
+            try:
+                dusk_dt = datetime.strptime(dusk_str, fmt)
+                break
+            except ValueError:
+                continue
+
+    if dusk_dt:
+        # Anchor dusk to the same calendar date as start.  When the dusk time-of-day
+        # is earlier than start (e.g. 23:00 start, 22:00 dusk) it must be day+1.
+        if dusk_dt.time() < start_dt.time():
+            dusk_dt += timedelta(days=1)
+
+        # Turnaround = latest moment to begin descent and reach the trailhead before dusk.
+        turnaround_dt = dusk_dt - timedelta(hours=descent_hr)
+        # Clamp: turnaround cannot be before start (edge case: tiny window)
+        if turnaround_dt < start_dt:
+            turnaround_dt = start_dt
+        after_dark = return_dt > dusk_dt
+    else:
+        turnaround_dt = summit_dt  # no dusk info — use summit as turnaround
+        after_dark = False
+
+    return {
+        "start_time": start_time,
+        "summit_eta": summit_dt.strftime(fmt_out),
+        "turnaround_by": turnaround_dt.strftime(fmt_out),
+        "return_eta": return_dt.strftime(fmt_out),
+        "after_dark": after_dark,
+        "dusk_cutoff": dusk_str,
+        "total_hr": total_hr,
+        "note": (
+            "Ascent at moderate pace; descent at fast pace. "
+            "Adjust for terrain, conditions, and party speed."
+        ),
+    }
+
+
+def compute_bearings(waypoints: list[tuple[float, float]]) -> dict[str, Any]:
+    """Return per-segment compass bearings and distances for an ordered list of waypoints.
+
+    Each segment: bearing_deg (0–360), distance_mi, cumulative_distance_mi, from/to indices.
+    """
+    import math as _math
+
+    if len(waypoints) < 2:
+        return {"segments": [], "total_distance_mi": 0.0}
+
+    segments = []
+    cumulative = 0.0
+
+    for i in range(len(waypoints) - 1):
+        lat1, lon1 = float(waypoints[i][0]), float(waypoints[i][1])
+        lat2, lon2 = float(waypoints[i + 1][0]), float(waypoints[i + 1][1])
+
+        # Forward azimuth (bearing) using spherical formula
+        phi1 = _math.radians(lat1)
+        phi2 = _math.radians(lat2)
+        dl = _math.radians(lon2 - lon1)
+        x = _math.sin(dl) * _math.cos(phi2)
+        y = _math.cos(phi1) * _math.sin(phi2) - _math.sin(phi1) * _math.cos(phi2) * _math.cos(dl)
+        bearing = (_math.degrees(_math.atan2(x, y)) + 360) % 360
+
+        dist = _haversine_miles(lat1, lon1, lat2, lon2)
+        cumulative += dist
+
+        segments.append(
+            {
+                "from": i,
+                "to": i + 1,
+                "bearing_deg": round(bearing, 1),
+                "distance_mi": round(dist, 2),
+                "cumulative_distance_mi": round(cumulative, 2),
+            }
+        )
+
+    return {
+        "segments": segments,
+        "total_distance_mi": round(cumulative, 2),
+    }
+
+
 def run_peakbagger_stats(peak_id: int) -> dict[str, Any]:
     """Run peakbagger-cli to get ascent statistics."""
     try:
@@ -638,10 +761,17 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
     "--distance-mi",
     type=float,
     default=None,
-    help="Round-trip distance in miles (for time estimates)",
+    help="Round-trip distance in miles (for time estimates and itinerary)",
 )
 @click.option(
     "--gain-ft", type=float, default=None, help="Total elevation gain in feet (for time estimates)"
+)
+@click.option("--start-time", default=None, help="Planned start time as HH:MM (for itinerary)")
+@click.option(
+    "--waypoint",
+    "waypoints",
+    multiple=True,
+    help="Waypoint as lat,lon (repeat for multiple; enables navigation bearings)",
 )
 def cli(
     coordinates: str,
@@ -652,6 +782,8 @@ def cli(
     trailhead: str,
     distance_mi: float,
     gain_ft: float,
+    start_time: str,
+    waypoints: tuple,
 ):
     """Fetch all conditions data for a peak.
 
@@ -743,6 +875,18 @@ def cli(
 
     if distance_mi is not None and gain_ft is not None:
         output["time_estimates"] = estimate_times(distance_mi, gain_ft)
+
+    # Itinerary: needs start_time + distance + gain + daylight
+    if start_time and distance_mi is not None and gain_ft is not None:
+        output["itinerary"] = build_itinerary(start_time, distance_mi, gain_ft, daylight)
+
+    # Navigation bearings: needs 2+ waypoints
+    if waypoints and len(waypoints) >= 2:
+        try:
+            parsed = [tuple(map(float, w.split(","))) for w in waypoints]
+            output["bearings"] = compute_bearings(parsed)
+        except Exception as e:
+            gaps.append({"source": "Navigation bearings", "reason": str(e)})
 
     click.echo(json.dumps(output, indent=2))
 

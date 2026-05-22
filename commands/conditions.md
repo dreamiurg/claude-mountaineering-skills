@@ -47,7 +47,7 @@ cd ${CLAUDE_PLUGIN_ROOT}/skills/route-researcher/tools && uv run python fetch_co
   --peak-id {peak_id}
 ```
 
-This returns JSON with `weather`, `air_quality`, `daylight`, `avalanche`, and `peakbagger` sections.
+This returns JSON with `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger`, `counties`, `nearest_hospital`, `ranger_station`, `campgrounds`, and (when `--distance-mi`/`--gain-ft` provided) `time_estimates` sections.
 
 **If the script fails:** Note the failure and provide manual check links:
 
@@ -60,11 +60,15 @@ This returns JSON with `weather`, `air_quality`, `daylight`, `avalanche`, and `p
 Format the conditions data for the user. Include:
 
 1. **Peak summary:** Name, elevation, coordinates
-2. **Weather forecast:** 7-day table with date, conditions, high/low temps, precipitation, wind, freezing level
-3. **Freezing level alert:** If any forecasted freezing level is within 2000 ft of summit elevation, warn about potential ice/snow at summit
+2. **Weather forecast:** 7-day table with date, conditions, high/low temps, precipitation, wind, freezing level; include **Snow Line** column from `weather.forecast[].snow_line_note` + ⚠️ when `near_summit=true`
+3. **Freezing level / snow-line alert:** If any day has `near_summit=true` (freezing level within 2000 ft of summit), call it out prominently
 4. **Air quality:** AQI rating. Only highlight if AQI > 50 (anything above "Good")
-5. **Daylight:** Sunrise, sunset, civil twilight, day length for the next day
+5. **Daylight:** Full twilight table — astronomical dawn, nautical dawn, civil twilight, sunrise, sunset, civil dusk, nautical dusk, astronomical dusk; show "— (white night)" for null values; include day length
 6. **Avalanche:** Region, danger rating if available, link to full forecast
 7. **PeakBagger stats:** Recent ascent count and patterns (if available)
+8. **Counties traversed:** From `counties.counties[]` — list `county_name`, `state_name`; note if unavailable
+9. **Emergency contacts:** Nearest hospital from `nearest_hospital.hospitals[]` (name, distance, phone); nearest ranger station from `ranger_station.stations[]` + `admin_district` if on NF land; note OSM data may be incomplete in remote areas
+10. **Campgrounds near trailhead:** From `campgrounds.campgrounds[]` — name, distance, type; note backcountry/high camps not included
+11. **Time estimates** (if present): roped (`time_estimates.roped_hr`), unroped (`time_estimates.unroped_hr`), fast/moderate/leisurely — only shown when tool was called with `--distance-mi`/`--gain-ft`
 
-Keep the output concise and scannable. Use tables for the weather forecast.
+Keep the output concise and scannable. Use tables for the weather forecast and twilight.

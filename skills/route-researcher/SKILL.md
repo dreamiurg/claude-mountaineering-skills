@@ -144,9 +144,10 @@ uv run python fetch_conditions.py \
 
 This returns JSON with:
 
-- **weather**: 7-day forecast with temperatures, precipitation, freezing levels
+- **weather**: 7-day forecast with temperatures, precipitation, freezing levels; each day includes `snow_line_note` (human-readable framing of freezing level as snow line) and `near_summit` (bool: true when freezing level within 2000 ft of summit)
 - **air_quality**: AQI ratings and any concerns
-- **daylight**: Sunrise, sunset, civil twilight
+- **daylight**: Full twilight table — `astronomical_dawn`, `nautical_dawn`, `civil_twilight` (dawn), `sunrise`, `sunset`, `civil_dusk`, `nautical_dusk`, `astronomical_dusk`; values are `null` at high latitudes when sun doesn't reach threshold (white nights); `daylight_hours`, `timezone`
+- **time_estimates**: Roped/unroped + 3-tier pacing (`roped_hr`, `unroped_hr`, `fast_hr`, `moderate_hr`, `leisurely_hr`) — only present when `--distance-mi` and `--gain-ft` CLI args are provided
 - **avalanche**: NWAC region and URL for manual check
 - **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
 - **counties**: Counties traversed trailhead→summit (`counties[]` with `county_name`, `county_fips`, `state_name`, `state_code`); pass `--trailhead "lat,lon"` for multi-county routes
@@ -234,7 +235,7 @@ For each report fetched, extract:
 )
 ```
 
-**Agent 2: WTA + Mountaineers**
+**Agent 2: WTA + Mountaineers + Regional Sources**
 
 ```
 Task(
@@ -243,7 +244,7 @@ Task(
   prompt="""You are a route researcher gathering mountaineering data for {peak_name}.
 
 ## Your Assignment
-Research from these sources: WTA, Mountaineers.org
+Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoftheweek.com, Oregon Hikers Field Guide (oregonhikers.org), Cascade Climbers (cascadeclimbers.com), Mountain Project
 
 ## WTA Research
 1. Search: "{peak_name} site:wta.org"
@@ -262,6 +263,41 @@ Research from these sources: WTA, Mountaineers.org
 
 1. Search: "{peak_name} site:mountaineers.org route"
 2. Extract route beta, technical requirements, hazards
+
+## NWHikers Research (northwesthikers.net / nwhikers.net)
+
+1. Search: "{peak_name} site:nwhikers.net OR site:northwesthikers.net"
+2. Use WebFetch to extract first-person trip reports, GPS track notes, conditions
+3. If WebFetch fails, use `cloudscrape.py "{url}"` (fast path usually sufficient)
+
+## Hike of the Week (hikeoftheweek.com — REQUIRES --render)
+
+1. Search: "{peak_name} site:hikeoftheweek.com"
+2. **MUST use `--render` flag** — site is Cloudflare-protected and blocks WebFetch:
+
+   ```bash
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{url}"
+   ```
+
+3. Extract: logistics, route narrative, access notes, trailhead directions
+
+## Oregon Hikers Field Guide (oregonhikers.org — Oregon objectives only)
+
+1. Search: "{peak_name} site:oregonhikers.org"
+2. Use WebFetch — site is static MediaWiki HTML, WebFetch-friendly
+3. Extract: route description, access, permits, conditions notes
+
+## Cascade Climbers (cascadeclimbers.com)
+
+1. Search: "{peak_name} site:cascadeclimbers.com"
+2. Use WebFetch; if blocked use `cloudscrape.py "{url}"`
+3. Extract: technical route beta, gear lists, trip reports, conditions
+
+## Mountain Project (for technical/rock sections)
+
+1. Search: "{peak_name} site:mountainproject.com"
+2. Use WebFetch to extract: route name, grade, gear, description, rock quality
+3. If WebFetch fails, use `cloudscrape.py "{url}"`
 
 ## Fallback
 
@@ -285,7 +321,7 @@ For each report fetched, extract:
 
 ```json
 {
-  "sources": ["WTA", "Mountaineers"],
+  "sources": ["WTA", "Mountaineers", "NWHikers", "HikeOfTheWeek", "OregonHikers", "CascadeClimbers", "MountainProject"],
   "route_info": [
     {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
   ],
@@ -489,15 +525,16 @@ Organize all gathered and analyzed data into structured JSON:
   },
   "conditions": {
     // From fetch_conditions.py output
-    "weather": {...},
+    "weather": {"forecast": [{"date": "...", "snow_line_note": "...", "near_summit": bool, "freezing_level_ft": N, ...}], ...},
     "air_quality": {...},
-    "daylight": {...},
+    "daylight": {"astronomical_dawn": "...", "nautical_dawn": "...", "civil_twilight": "...", "sunrise": "...", "sunset": "...", "civil_dusk": "...", "nautical_dusk": "...", "astronomical_dusk": "...", "daylight_hours": N},
     "avalanche": {...},
     "peakbagger": {...},
     "counties": {"counties": [{"county_name": "...", "county_fips": "...", "state_name": "...", "state_code": "..."}], ...},
     "nearest_hospital": {"hospitals": [{"name": "...", "distance_miles": N, "emergency": "yes|null", "phone": "..."}]},
     "ranger_station": {"stations": [{"name": "...", "distance_miles": N, "phone": null, "website": null}], "admin_district": {"district_name": "...", "forest_name": "...", "region": "..."}},
-    "campgrounds": {"campgrounds": [{"name": "...", "distance_miles": N, "camp_type": "..."}], "note": "..."}
+    "campgrounds": {"campgrounds": [{"name": "...", "distance_miles": N, "camp_type": "..."}], "note": "..."},
+    "time_estimates": {"roped_hr": N, "unroped_hr": N, "fast_hr": N, "moderate_hr": N, "leisurely_hr": N, "note": "..."}
   },
   "route_data": {
     // Merged from all Researcher agents
@@ -735,7 +772,7 @@ The route-researcher skill uses a hybrid architecture combining Python scripts a
 **Components:**
 
 - **Python script** (`tools/fetch_conditions.py`) - Deterministic API calls for weather, air quality, daylight, avalanche, and PeakBagger data
-- **Researcher agents** (3 total) - Web research for route info and trip reports from PeakBagger+SummitPost, WTA+Mountaineers, and AllTrails
+- **Researcher agents** (3 total) - Web research for route info and trip reports from PeakBagger+SummitPost, WTA+Mountaineers+NWHikers+HikeOfTheWeek+OregonHikers+CascadeClimbers+MountainProject, and AllTrails
 - **Report Writer agent** - Generates markdown reports from aggregated data
 - **Report Reviewer agent** - Validates report quality before presentation
 
@@ -763,10 +800,15 @@ See `skills/route-researcher/docs/architecture.md` for detailed execution flow a
 - **Open-Meteo Weather API** for mountain weather forecasts (temperature, precipitation, freezing level, wind)
 - **Open-Meteo Air Quality API** for AQI forecasting (US AQI scale with conditional alerts)
 - Adaptive ascent data retrieval based on peak popularity
-- **astral Python library** for daylight calculations (sunrise, sunset, civil twilight, day length)
+- **astral Python library** for daylight calculations — full twilight table (astronomical/nautical/civil dawn + dusk, sunrise, sunset); null values for white-night dates
+- **Snow line / freezing level emphasis** — per-day `snow_line_note` and `near_summit` flag in weather output
+- **Speed/time estimates** — `time_estimates` key with roped/unroped + 3-tier pacing (when `--distance-mi` and `--gain-ft` provided)
+- **Geodata fetchers** — counties (FCC), nearest hospital/ER (OSM), ranger station + USFS admin district (OSM + ArcGIS), campgrounds (OSM)
 - **High-quality trip report identification** across PeakBagger and WTA sources
 - **WTA AJAX endpoint** for trip report extraction (`{wta_url}/@@related_tripreport_listing`)
 - **Avalanche region detection** (inline in `fetch_conditions.py`) - NWAC region and URL by coordinates
+- **New source sites** (Agent 2): northwesthikers.net, hikeoftheweek.com (Cloudflare → `--render`), oregonhikers.org (WebFetch-friendly), cascadeclimbers.com, Mountain Project
+- **Weather source ranking**: NOAA + Meteoblue are most reliable; Mountain-Forecast for multi-elevation; Windy for visual wind/precip
 
 **Pending Implementation:**
 

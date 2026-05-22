@@ -53,7 +53,16 @@
 
 #### Road Conditions
 
-{Current access notes, seasonal closures}
+{Current access notes. Extract from researcher agents: USFS road closures, seasonal gate status, washouts, fire closures. Be explicit — note the specific road number/name and any reported obstacles.}
+
+{If no current closure info found:} Road status not confirmed. Verify before departure.
+
+**Verify current status:**
+
+- [USFS Road Conditions](https://www.fs.usda.gov/) — search ranger district for road/gate closures
+- [CalTopo Closure Layers](https://caltopo.com/) — enable "Closures" layer; pin trailhead at `https://caltopo.com/map.html#ll={latitude},{longitude}&z=14`
+- [Google Maps]({google_maps_trailhead_link}) — check current road status and satellite view
+- [Recreation.gov](https://www.recreation.gov/) — permit/reservation requirements
 
 ### Emergency Contacts
 
@@ -108,9 +117,18 @@ The route covers approximately **{round trip distance}** with **{total gain}** o
 
 **Typical completion times:**
 
-- **{fast time range}** (~{fast mph} mph, {fast gain rate}+ ft/hr): Experienced hikers, trail runners, solo climbers
-- **{moderate time range}** (~{moderate mph} mph, {moderate gain rate} ft/hr): Average fitness, steady pace with brief breaks
-- **{leisurely time range}** (~{leisurely mph} mph, {leisurely gain rate} ft/hr): Relaxed pace, groups, taking time for photos
+- **{fast_hr} hrs** (~2+ mph, 1000+ ft/hr): Experienced hikers, trail runners, solo climbers
+- **{moderate_hr} hrs** (~1.5–2 mph, 700–900 ft/hr): Average fitness, steady pace with brief breaks
+- **{leisurely_hr} hrs** (~1–1.5 mph, 500–700 ft/hr): Relaxed pace, groups, taking time for photos
+
+{If glacier/roped terrain (time_estimates.roped_hr present):}
+
+**Glacier/roped pace:**
+- **Roped (~{roped_hr} hrs):** ~1 mi/hr glacier pace (slower of distance or gain-limited)
+- **Unroped (~{unroped_hr} hrs):** ~1,000 ft/hr gain-based estimate
+
+{If time_estimates key absent from fetch_conditions.py output (--distance-mi/--gain-ft not provided):}
+*Completion time estimates not available — pass `--distance-mi` and `--gain-ft` to fetch_conditions.py for calculated times.*
 
 {Continue with detailed route description}
 
@@ -170,7 +188,22 @@ AVOID bolding: common descriptors (wet, icy, loose), general skills (scrambling,
 ### Daylight
 
 {If available from API:}
-For **{date}**, sunrise is at **{time}** and sunset at **{time}**, providing **{hours}** of daylight. Civil twilight begins at **{civil_twilight_begin}**, useful for planning alpine starts.
+For **{date}**, sunrise is at **{sunrise}** and sunset at **{sunset}**, providing **{daylight_hours}** of daylight.
+
+| Phase | Time |
+|-------|------|
+| Astronomical dawn | {astronomical_dawn or "— (white night)"} |
+| Nautical dawn | {nautical_dawn or "— (white night)"} |
+| Civil twilight (dawn) | {civil_twilight} |
+| **Sunrise** | **{sunrise}** |
+| **Sunset** | **{sunset}** |
+| Civil dusk | {civil_dusk} |
+| Nautical dusk | {nautical_dusk or "— (white night)"} |
+| Astronomical dusk | {astronomical_dusk or "— (white night)"} |
+
+{When any twilight value is null:} *At this latitude and date, the sun does not reach the threshold for nautical/astronomical twilight — effectively a white night. Plan accordingly.*
+
+**Alpine start guidance:** Civil twilight ({civil_twilight}) is the earliest practical light for travel. Nautical twilight ({nautical_dawn}) allows rough navigation by natural light. For glacier travel requiring precise footing, target no earlier than civil twilight.
 
 {If not available:}
 Daylight calculations not available. Check sunrise/sunset times for your planned date at [Sunrise-Sunset.org](https://sunrise-sunset.org/us/{location}) or [TimeAndDate.com](https://www.timeanddate.com/sun/).
@@ -213,14 +246,16 @@ AVOID bolding: descriptive terms (dry, wet, cold), common conditions (partly clo
 
 {Omit this section entirely if freezing level stays >2000 ft above peak throughout forecast period - not relevant for summer conditions}
 
-| Day | Conditions | Temperature | Precipitation |
-|-----|-----------|-------------|---------------|
-| {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Icon} {Conditions} | High: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {22}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {23}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {24}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {25}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
-| {DayOfWeek} {Mon} {Day} {26}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} |
+| Day | Conditions | Temperature | Precipitation | Snow Line |
+|-----|-----------|-------------|---------------|-----------|
+| {DayOfWeek} {Mon} {Day} {21}, {2025} (Today) | {Icon} {Conditions} | High: {temp}°F | {Precip amount/chance} | {snow_line_note} {⚠️ if near_summit} |
+| {DayOfWeek} {Mon} {Day} {22}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} | {snow_line_note} {⚠️ if near_summit} |
+| {DayOfWeek} {Mon} {Day} {23}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} | {snow_line_note} {⚠️ if near_summit} |
+| {DayOfWeek} {Mon} {Day} {24}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} | {snow_line_note} {⚠️ if near_summit} |
+| {DayOfWeek} {Mon} {Day} {25}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} | {snow_line_note} {⚠️ if near_summit} |
+| {DayOfWeek} {Mon} {Day} {26}, {2025} | {Icon} {Conditions} | High: {temp}°F, Low: {temp}°F | {Precip amount/chance} | {snow_line_note} {⚠️ if near_summit} |
+
+{snow_line_note: from `weather[].snow_line_note`; show ⚠️ when `near_summit=true` (freezing level within 2000 ft of summit); show "—" if freezing_level_ft is null}
 
 {Format notes:
 
@@ -260,10 +295,14 @@ Air quality is **good** (AQI <50) during the forecast period.
 
 **Check Current Forecasts:**
 
-- [Mountain-Forecast.com]({mountain_forecast_link}) - Summit-level forecast with multiple elevations
+*Most reliable sources (per IGC lecture recommendation): **NOAA** and **Meteoblue***
+
+- [NOAA Point Forecast]({noaa_link}) - Official NWS forecast and alerts *(most reliable)*
+- [Meteoblue]({meteoblue_link}) - High-resolution mountain weather *(most reliable)*
+- [Mountain-Forecast.com]({mountain_forecast_link}) - Multi-elevation forecast (summit / mid / base)
 - [Open-Meteo Weather]({open_meteo_weather_link}) - Detailed mountain weather data (source for this report)
 - [Open-Meteo Air Quality]({open_meteo_air_quality_link}) - Air quality forecast for this location
-- [NOAA Point Forecast]({noaa_link}) - Official NWS forecast and alerts
+- [Windy](https://www.windy.com/?{latitude},{longitude},10) - Visual wind/precip map
 
 {If winter season:}
 
