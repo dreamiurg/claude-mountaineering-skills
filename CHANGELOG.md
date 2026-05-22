@@ -1,3 +1,30 @@
+## [5.0.0](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v4.0.2...v5.0.0) (2026-05-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* The plugin was renamed to `mountaineering` and now ships slash commands. Reinstall: `/plugin uninstall mountaineering-skills` then `/plugin install mountaineering@mountaineering-marketplace` ([#73](https://github.com/dreamiurg/claude-mountaineering-skills/pull/73)).
+
+
+### Features
+
+* **route-researcher:** safety/emergency geodata — counties traversed, nearest 24/7 hospital, nearest ranger station, and campgrounds via FCC + OSM Overpass + USFS ArcGIS (no API key) ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **route-researcher:** Patchright `--render` fetching engine replacing the dead cloudscraper fallback — reliably fetches JavaScript-rendered / Cloudflare-protected pages ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **route-researcher:** explicit rockfall / icefall / cornice hazard callouts plus terrain detail — downclimbs, river crossings, water sources, named camps ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **route-researcher:** conditions overhaul — snow-line / freezing-level emphasis, nautical & astronomical twilight, roped vs unroped speed models, NOAA + Meteoblue source ranking, expanded road/trailhead closure detail ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **route-researcher:** itinerary/schedule generator, navigation bearings, and a post-climb trip-report template ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **route-researcher:** add sources — Hike of the Week, NWHikers, Cascade Climbers, Mountain Project, Oregon Hikers ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* rename plugin to mountaineering and add slash commands ([#73](https://github.com/dreamiurg/claude-mountaineering-skills/pull/73))
+* add JSON Schema validation for `.claude-plugin/` files ([#71](https://github.com/dreamiurg/claude-mountaineering-skills/pull/71))
+
+
+### Bug Fixes
+
+* **route-researcher:** set an Overpass User-Agent so the geodata fetchers work against the live API (was HTTP 406) ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **route-researcher:** pin peakbagger-cli to git@v1.10.0 (it is not published on PyPI) ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **ci:** run the route-researcher tools tests via uv and gate on them — deps were never installed and failures were swallowed ([#78](https://github.com/dreamiurg/claude-mountaineering-skills/pull/78))
+* **release:** bump root `package.json` in `update-versions.js` so every version file stays in sync
+
 ## [4.0.2](https://github.com/dreamiurg/claude-mountaineering-skills/compare/v4.0.1...v4.0.2) (2026-01-30)
 
 
