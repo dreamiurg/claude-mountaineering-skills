@@ -137,12 +137,33 @@ AVOID bolding: common descriptors (wet, icy, loose), general skills (scrambling,
 
 ### Hazards
 
-{Synthesized from multiple sources:
+{Synthesized from trip reports and route beta. Safety-critical — be comprehensive. If a hazard type was not mentioned in any source, omit the sub-bullet rather than guessing; note absence in Information Gaps only if the route type makes it expected.}
 
-- Known hazards (crevasses, rockfall, exposure)
-- Seasonal considerations
-- Bailout options
-- If trip reports mention unusual or important gear (e.g., "approach shoes recommended for talus" or "bring extra pickets"), include brief mention here}
+**Rockfall:** {Location on route (e.g., "upper couloir above 7,000 ft"), trigger sources (other parties, freeze-thaw), mitigation — move through quickly, cross before sun hits the face, consider pre-dawn passage. If no reports mention rockfall: omit.}
+
+**Icefall / Serac:** {Location, stability assessment from trip reports, timing guidance — pre-dawn passage, avoid when warm, size and frequency of seracs. If not present or not a glacier route: omit.}
+
+**Cornice:** {Location (ridge crest, summit plateau), conditions (buildup direction, season), avoidance line. If not present: omit.}
+
+**Crevasses:** {Zone(s) on glacier, bridging condition from recent reports, roped travel requirement. Omit if non-glaciated route.}
+
+**Exposure / Fall hazard:** {Location, consequence of a fall, protection options.}
+
+**Seasonal considerations:** {Early season snow, late season ice, typical window, conditions-dependent gear changes.}
+
+**Bailout options:** {Escape routes and conditions under which to use them.}
+
+{If trip reports mention unusual or important gear (e.g., "approach shoes recommended for talus" or "bring extra pickets"), include brief mention here.}
+
+### Terrain Detail
+
+**Downclimbs:** {Steep or technical reversal sections requiring downclimbing; location, difficulty, whether rappel anchors exist. Extract from trip reports. If none mentioned: omit.}
+
+**River / stream crossings:** {Location, typical flow conditions by season, ford difficulty, footwear notes. Extract from trip reports. If none: omit.}
+
+**Water sources:** {Named or described water sources along route (lake, snowmelt, stream), per-day availability by season, treat/filter note. Extract from trip reports. If none found: state "Water source locations not confirmed in available trip reports — carry sufficient water or verify before departure."}
+
+**Named camps / bivy sites:** {High camp, bivy, or established camp names/locations from trip reports and route beta. Note if windward/exposed. These are NOT from the campground database above.}
 
 ## Current Conditions
 

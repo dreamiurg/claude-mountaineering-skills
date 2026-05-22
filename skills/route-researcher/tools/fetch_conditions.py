@@ -200,25 +200,66 @@ def fetch_daylight(
             tz = zoneinfo.ZoneInfo(tz_name) if tz_name else zoneinfo.ZoneInfo("UTC")
         except Exception:
             tz = zoneinfo.ZoneInfo("UTC")
+        from astral.sun import dawn as astral_dawn
+        from astral.sun import dusk as astral_dusk
+
         s = sun(location.observer, date=date_obj, tzinfo=tz)
 
         sunrise = s["sunrise"]
         sunset = s["sunset"]
-        dawn = s["dawn"]  # Civil twilight
+        civil_dawn = s["dawn"]  # −6° depression
+        civil_dusk = s["dusk"]  # −6° depression
+
+        fmt = "%-I:%M %p"
+
+        def _try_twilight(fn, depression):
+            """Return formatted time or None if sun never reaches that depression."""
+            try:
+                t = fn(location.observer, date=date_obj, depression=depression, tzinfo=tz)
+                return t.strftime(fmt)
+            except Exception:
+                return None
+
+        nautical_dawn = _try_twilight(astral_dawn, 12)
+        nautical_dusk = _try_twilight(astral_dusk, 12)
+        astronomical_dawn = _try_twilight(astral_dawn, 18)
+        astronomical_dusk = _try_twilight(astral_dusk, 18)
 
         daylight = sunset - sunrise
         daylight_hours = daylight.total_seconds() / 3600
 
         tz_label = tz_name if tz_name else "UTC"
         return {
-            "sunrise": sunrise.strftime("%-I:%M %p"),
-            "sunset": sunset.strftime("%-I:%M %p"),
-            "civil_twilight": dawn.strftime("%-I:%M %p"),
+            "astronomical_dawn": astronomical_dawn,
+            "nautical_dawn": nautical_dawn,
+            "civil_twilight": civil_dawn.strftime(fmt),
+            "sunrise": sunrise.strftime(fmt),
+            "sunset": sunset.strftime(fmt),
+            "civil_dusk": civil_dusk.strftime(fmt),
+            "nautical_dusk": nautical_dusk,
+            "astronomical_dusk": astronomical_dusk,
             "daylight_hours": round(daylight_hours, 1),
             "timezone": tz_label,
         }
     except Exception as e:
         return {"error": str(e)}
+
+
+def _enrich_forecast_snow_line(forecast: list[dict], summit_elevation_ft: float) -> None:
+    """Add snow_line_note and near_summit fields to each forecast day (in-place)."""
+    for day in forecast:
+        fl = day.get("freezing_level_ft")
+        if fl is not None:
+            note = f"Snow line ~{fl:,} ft (freezing level)"
+            diff = abs(summit_elevation_ft - fl)
+            near = diff <= 2000
+            if near:
+                note += f" — within {int(diff):,} ft of summit"
+        else:
+            note = "Freezing level data unavailable"
+            near = False
+        day["snow_line_note"] = note
+        day["near_summit"] = near
 
 
 def fetch_avalanche(lat: float, lon: float) -> dict[str, Any]:
@@ -504,6 +545,37 @@ out center tags;
         return {"error": str(e), "note": "Campground lookup failed; check OSM Overpass."}
 
 
+def estimate_times(distance_mi: float, gain_ft: float) -> dict[str, Any]:
+    """Estimate travel times using roped/unroped and standard pacing models.
+
+    Roped (glacier): slower of distance/1.0 mph or gain/1000 ft/hr.
+    Unroped: gain / 1000 ft/hr.
+    Standard tiers use Naismith's rule variants.
+    """
+    roped_by_distance = distance_mi / 1.0 if distance_mi else 0.0
+    roped_by_gain = gain_ft / 1000.0 if gain_ft else 0.0
+    roped_hr = max(roped_by_distance, roped_by_gain)
+    unroped_hr = gain_ft / 1000.0 if gain_ft else 0.0
+
+    # Standard pacing tiers (distance / pace + gain adjustment)
+    fast_hr = round(distance_mi / 3.5 + gain_ft / 2000, 1)
+    moderate_hr = round(distance_mi / 2.5 + gain_ft / 1500, 1)
+    leisurely_hr = round(distance_mi / 2.0 + gain_ft / 1000, 1)
+
+    return {
+        "roped_hr": round(roped_hr, 1),
+        "unroped_hr": round(unroped_hr, 1),
+        "fast_hr": fast_hr,
+        "moderate_hr": moderate_hr,
+        "leisurely_hr": leisurely_hr,
+        "note": (
+            "Roped: ~1 mi/hr on glacier (slower of distance or gain limit). "
+            "Unroped: ~1,000 ft/hr gain. "
+            "Standard tiers use Naismith-variant pacing."
+        ),
+    }
+
+
 def run_peakbagger_stats(peak_id: int) -> dict[str, Any]:
     """Run peakbagger-cli to get ascent statistics."""
     try:
@@ -562,6 +634,15 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
 @click.option("--peak-id", type=int, default=None, help="PeakBagger peak ID (optional)")
 @click.option("--date", default=None, help="Date as YYYY-MM-DD (default: today)")
 @click.option("--trailhead", default=None, help="Trailhead coordinates as lat,lon (optional)")
+@click.option(
+    "--distance-mi",
+    type=float,
+    default=None,
+    help="Round-trip distance in miles (for time estimates)",
+)
+@click.option(
+    "--gain-ft", type=float, default=None, help="Total elevation gain in feet (for time estimates)"
+)
 def cli(
     coordinates: str,
     elevation: float,
@@ -569,6 +650,8 @@ def cli(
     peak_id: int,
     date: str,
     trailhead: str,
+    distance_mi: float,
+    gain_ft: float,
 ):
     """Fetch all conditions data for a peak.
 
@@ -593,10 +676,14 @@ def cli(
     date_str = date or datetime.now().strftime("%Y-%m-%d")
     gaps = []
 
+    summit_elevation_ft = round(elevation * 3.28084)
+
     # Existing fetchers
     weather = fetch_weather(lat, lon, elevation)
     if "error" in weather:
         gaps.append({"source": "Open-Meteo Weather", "reason": weather["error"]})
+    else:
+        _enrich_forecast_snow_line(weather.get("forecast", []), summit_elevation_ft)
 
     air_quality = fetch_air_quality(lat, lon)
     if "error" in air_quality:
@@ -641,7 +728,7 @@ def cli(
         else:
             peakbagger["ascents"] = ascents
 
-    output = {
+    output: dict[str, Any] = {
         "weather": weather,
         "air_quality": air_quality,
         "daylight": daylight,
@@ -653,6 +740,9 @@ def cli(
         "peakbagger": peakbagger,
         "gaps": gaps,
     }
+
+    if distance_mi is not None and gain_ft is not None:
+        output["time_estimates"] = estimate_times(distance_mi, gain_ft)
 
     click.echo(json.dumps(output, indent=2))
 

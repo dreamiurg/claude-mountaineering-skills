@@ -203,7 +203,17 @@ Research from these sources: PeakBagger, SummitPost
 
 ## Trip Report Extraction
 
-For each report fetched, extract: date, author, route conditions, gear mentioned, hazards.
+For each report fetched, extract:
+- date, author, route conditions, gear mentioned
+- **Hazards (extract explicitly and separately):**
+  - Rockfall zones: location on route, conditions, timing guidance mentioned
+  - Icefall/serac hazard: location, stability, pre-dawn/timing advice
+  - Cornice hazard: location, buildup direction, avoidance notes
+- **Terrain detail (extract if mentioned):**
+  - Downclimb sections: location, difficulty, rappel anchors if any
+  - River/stream crossings: location, flow conditions, ford difficulty
+  - Water sources: named locations, seasonal availability
+  - Named camps or bivy sites: name/location, exposure notes
 
 ## Output Format (return EXACTLY this JSON)
 
@@ -214,7 +224,9 @@ For each report fetched, extract: date, author, route conditions, gear mentioned
     {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
   ],
   "trip_reports": [
-    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false}
+    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false,
+     "rockfall": "...", "icefall": "...", "cornices": "...",
+     "downclimbs": "...", "crossings": "...", "water_sources": "...", "camps": "..."}
   ],
   "gaps": ["what couldn't be fetched and why"]
 }
@@ -255,6 +267,20 @@ Research from these sources: WTA, Mountaineers.org
 
 If WebFetch fails for any page, use the fetching ladder: `cloudscrape.py "{url}"` (fast) → `cloudscrape.py --render "{url}"` for JS-rendered or Cloudflare-protected pages.
 
+## Trip Report Extraction
+
+For each report fetched, extract:
+- date, author, route conditions, gear mentioned
+- **Hazards (extract explicitly and separately):**
+  - Rockfall zones: location on route, conditions, timing guidance mentioned
+  - Icefall/serac hazard: location, stability, pre-dawn/timing advice
+  - Cornice hazard: location, buildup direction, avoidance notes
+- **Terrain detail (extract if mentioned):**
+  - Downclimb sections: location, difficulty, rappel anchors if any
+  - River/stream crossings: location, flow conditions, ford difficulty
+  - Water sources: named locations, seasonal availability
+  - Named camps or bivy sites: name/location, exposure notes
+
 ## Output Format (return EXACTLY this JSON)
 
 ```json
@@ -264,7 +290,9 @@ If WebFetch fails for any page, use the fetching ladder: `cloudscrape.py "{url}"
     {"source": "...", "name": "...", "difficulty": "...", "description": "...", "hazards": [...]}
   ],
   "trip_reports": [
-    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false}
+    {"source": "...", "date": "...", "author": "...", "url": "...", "summary": "...", "conditions": "...", "has_gpx": false,
+     "rockfall": "...", "icefall": "...", "cornices": "...",
+     "downclimbs": "...", "crossings": "...", "water_sources": "...", "camps": "..."}
   ],
   "gaps": ["what couldn't be fetched and why"]
 }
@@ -291,13 +319,19 @@ Research from AllTrails
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
    ```
 
+4. From route description and any visible reviews/comments, extract if present:
+   - Rockfall zones, icefall/serac hazard, cornice hazard
+   - Downclimb sections, river/stream crossings, water sources, named camps
+
 ## Output Format (return EXACTLY this JSON)
 
 ```json
 {
   "sources": ["AllTrails"],
   "route_info": [
-    {"source": "...", "name": "...", "difficulty": "...", "distance_miles": N, "elevation_gain_ft": N, "description": "...", "hazards": [...]}
+    {"source": "...", "name": "...", "difficulty": "...", "distance_miles": N, "elevation_gain_ft": N, "description": "...", "hazards": [...],
+     "rockfall": "...", "icefall": "...", "cornices": "...",
+     "downclimbs": "...", "crossings": "...", "water_sources": "...", "camps": "..."}
   ],
   "trip_reports": [],
   "gaps": ["what couldn't be fetched and why"]
@@ -380,7 +414,17 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 
 - **Route:** Use baseline structure, add landmarks/navigation from trip reports, include actual times
 - **Crux:** Describe location/difficulty, add trip report assessments, note conditions-dependent variations
-- **Hazards:** Extract ALL hazards from trip reports (rockfall, exposure, route-finding, seasonal), organize by type, include specific locations and mitigation strategies. Be comprehensive—safety-critical.
+- **Hazards:** Extract ALL hazards from trip reports. Organize by type with explicit, SEPARATE sub-sections — do NOT bury rockfall or icefall under generic "exposure":
+  - **Rockfall:** tag location, trigger (other parties / freeze-thaw / sun hitting the face), timing mitigation (pre-dawn passage, move quickly through zone)
+  - **Icefall/Serac:** tag location, stability assessment, timing mitigation (avoid afternoon, pre-dawn passage)
+  - **Cornice:** tag location, avoidance line, conditions (buildup direction, season)
+  - Other hazards (crevasses, exposure, route-finding, seasonal) as separate bullets
+  - Be comprehensive — safety-critical; include specific locations and mitigation strategies
+- **Terrain detail:** Surface the following in the report when found in trip reports/beta:
+  - Downclimbs: location, difficulty, whether rappel anchors exist
+  - River/stream crossings: location, seasonal flow, ford difficulty
+  - Water sources: named locations and per-day availability by season
+  - Named camps/bivy sites: name, location, exposure; note these come from trip reports, not the campground database
 
 **Extract Key Information:**
 
