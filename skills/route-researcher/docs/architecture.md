@@ -89,9 +89,9 @@ All keys are top-level in the returned JSON object. Optional keys are emitted on
 | `avalanche` | always | NWAC region + URL |
 | `peakbagger` | when `--peak-id` provided | ascent stats + recent ascents |
 | `counties` | always | `counties[]` with `county_name`, `county_fips`, `state_name`, `state_code`; `sampled` bool (true when trailhead→summit path sampling ran), `sample_points` int |
-| `nearest_hospital` | always | `hospitals[]` — name, distance_miles, emergency, phone (optional — omitted when OSM has no phone tag); sorted emergency-first |
-| `ranger_station` | always | `stations[]` + optional `admin_district` (district_name, forest_name, region) when summit coordinates intersect a USFS ranger district |
-| `campgrounds` | always | `campgrounds[]` within ~12 mi (20 km) — name, distance_miles, camp_type, backcountry, operator |
+| `nearest_hospital` | always | `hospitals[]` — name, lat, lon, distance_miles, emergency, + phone/website/address when OSM has them; sorted emergency-first |
+| `ranger_station` | always | `stations[]` (name, lat, lon, distance_miles, + phone/website/address when present) + optional `admin_district` (district_name, forest_name, region) |
+| `campgrounds` | always | `campgrounds[]` within ~12 mi (20 km) — name, lat, lon, distance_miles, camp_type, backcountry, operator, + website when present |
 | `time_estimates` | `--distance-mi` + `--gain-ft` | roped_hr, unroped_hr, fast_hr, moderate_hr, leisurely_hr, note |
 | `itinerary` | `--start-time` + `--distance-mi` + `--gain-ft` | start_time, summit_eta, turnaround_by, return_eta, total_hr, after_dark bool, dusk_cutoff, note |
 | `bearings` | 2+ `--waypoint` args | segments[] (bearing_deg, distance_mi, cumulative_distance_mi) + total_distance_mi |

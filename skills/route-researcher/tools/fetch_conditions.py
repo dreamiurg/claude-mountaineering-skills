@@ -396,6 +396,20 @@ def _osm_coords(el: dict) -> tuple[float | None, float | None]:
     return elat, elon
 
 
+def _osm_website(tags: dict) -> str | None:
+    """Best website URL from common OSM tags, if any."""
+    return tags.get("website") or tags.get("contact:website") or tags.get("url")
+
+
+def _osm_address(tags: dict) -> str | None:
+    """Compose a human address from OSM addr:* tags, if present."""
+    if tags.get("addr:full"):
+        return tags["addr:full"]
+    street = " ".join(p for p in (tags.get("addr:housenumber"), tags.get("addr:street")) if p)
+    locality = ", ".join(p for p in (tags.get("addr:city"), tags.get("addr:state")) if p)
+    return ", ".join(p for p in (street, locality) if p) or None
+
+
 _OVERPASS_HEADERS = {
     "User-Agent": (
         "claude-mountaineering-skills/route-researcher "
@@ -437,11 +451,17 @@ out center tags;
                 continue
             entry: dict[str, Any] = {
                 "name": tags.get("name", "Unknown hospital"),
+                "lat": elat,
+                "lon": elon,
                 "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
                 "emergency": tags.get("emergency"),
             }
             if "phone" in tags:
                 entry["phone"] = tags["phone"]
+            if _osm_website(tags):
+                entry["website"] = _osm_website(tags)
+            if _osm_address(tags):
+                entry["address"] = _osm_address(tags)
             hospitals.append(entry)
 
         # Sort: emergency=yes first, then by distance
@@ -474,14 +494,19 @@ out center tags;
             elat, elon = _osm_coords(el)
             if elat is None or elon is None:
                 continue
-            stations.append(
-                {
-                    "name": tags.get("name", "Unknown station"),
-                    "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
-                    "phone": tags.get("phone"),
-                    "website": tags.get("website"),
-                }
-            )
+            s_entry: dict[str, Any] = {
+                "name": tags.get("name", "Unknown station"),
+                "lat": elat,
+                "lon": elon,
+                "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
+            }
+            if tags.get("phone"):
+                s_entry["phone"] = tags["phone"]
+            if _osm_website(tags):
+                s_entry["website"] = _osm_website(tags)
+            if _osm_address(tags):
+                s_entry["address"] = _osm_address(tags)
+            stations.append(s_entry)
         stations.sort(key=lambda s: s["distance_miles"])
 
         result: dict[str, Any] = {"stations": stations[:3]}
@@ -537,15 +562,18 @@ out center tags;
             elat, elon = _osm_coords(el)
             if elat is None or elon is None:
                 continue
-            campgrounds.append(
-                {
-                    "name": tags.get("name", "Unnamed campground"),
-                    "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
-                    "camp_type": tags.get("camp_type"),
-                    "backcountry": tags.get("backcountry"),
-                    "operator": tags.get("operator"),
-                }
-            )
+            c_entry: dict[str, Any] = {
+                "name": tags.get("name", "Unnamed campground"),
+                "lat": elat,
+                "lon": elon,
+                "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
+                "camp_type": tags.get("camp_type"),
+                "backcountry": tags.get("backcountry"),
+                "operator": tags.get("operator"),
+            }
+            if _osm_website(tags):
+                c_entry["website"] = _osm_website(tags)
+            campgrounds.append(c_entry)
         campgrounds.sort(key=lambda c: c["distance_miles"])
 
         return {
