@@ -149,6 +149,10 @@ This returns JSON with:
 - **daylight**: Sunrise, sunset, civil twilight
 - **avalanche**: NWAC region and URL for manual check
 - **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
+- **counties**: Counties traversed trailhead→summit (`counties[]` with `county_name`, `county_fips`, `state_name`, `state_code`); pass `--trailhead "lat,lon"` for multi-county routes
+- **nearest_hospital**: Nearest hospitals/ERs (`hospitals[]` with `name`, `distance_miles`, `emergency`, `phone`); sorted emergency-first then by distance; max 3
+- **ranger_station**: Nearest ranger stations (`stations[]` with `name`, `distance_miles`, `phone`, `website`) + optional `admin_district` (`district_name`, `forest_name`, `region`) when trailhead is on NF land
+- **campgrounds**: Established campgrounds within ~12 mi (20 km) (`campgrounds[]` with `name`, `distance_miles`, `camp_type`, `backcountry`, `operator`); backcountry/high camps are NOT included — extract those from trip reports
 - **gaps**: Any API failures noted for report
 
 **Run this in parallel with Step 3B** — include both the Bash command for fetch_conditions.py and all 3 Task calls in the same response turn to maximize parallelism.
@@ -403,7 +407,15 @@ From all synthesized data, identify:
   - Example: 5,469 ft peak with 5,000-8,000 ft freezing levels → Include alert (marginal conditions)
   - Example: 4,000 ft peak with 10,000+ ft freezing levels → Omit alert (well above summit)
 
-#### Step 4C: Identify Information Gaps
+#### Step 4C: Surface Geodata in Report
+
+Include these geodata fields in the report when available:
+
+- **Counties:** List `county_name + state_name` from `conditions.counties.counties[]` in the Overview section. If the array is empty or `error` is present, note in Information Gaps.
+- **Emergency contacts:** Populate the Emergency Contacts section from `conditions.nearest_hospital.hospitals[]` and `conditions.ranger_station` (stations + admin_district). If either is missing or has an `error` key, note in Information Gaps and direct the user to check manually.
+- **Campgrounds:** Populate the Camping section from `conditions.campgrounds.campgrounds[]`. Explicitly state that backcountry/high camps are not in this list and must be extracted from trip reports.
+
+#### Step 4D: Identify Information Gaps
 
 Explicitly document what data was **not found or unreliable:**
 
@@ -437,7 +449,11 @@ Organize all gathered and analyzed data into structured JSON:
     "air_quality": {...},
     "daylight": {...},
     "avalanche": {...},
-    "peakbagger": {...}
+    "peakbagger": {...},
+    "counties": {"counties": [{"county_name": "...", "county_fips": "...", "state_name": "...", "state_code": "..."}], ...},
+    "nearest_hospital": {"hospitals": [{"name": "...", "distance_miles": N, "emergency": "yes|null", "phone": "..."}]},
+    "ranger_station": {"stations": [{"name": "...", "distance_miles": N, "phone": null, "website": null}], "admin_district": {"district_name": "...", "forest_name": "...", "region": "..."}},
+    "campgrounds": {"campgrounds": [{"name": "...", "distance_miles": N, "camp_type": "..."}], "note": "..."}
   },
   "route_data": {
     // Merged from all Researcher agents

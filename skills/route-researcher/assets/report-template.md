@@ -26,6 +26,11 @@
 
 {1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 
+**Counties traversed:** {county_name}, {state_name}{, additional counties if multiple} *(trailhead → summit; OSM/FCC data)*
+
+{If counties data unavailable:}
+**Counties traversed:** Not available — check with local forest service for jurisdiction.
+
 **Sources:** [PeakBagger]({peakbagger_url}){, [AllTrails]({alltrails_url}) if found}{, [WTA]({wta_url}) if found}{, [SummitPost]({summitpost_url}) if found}{, [Mountaineers]({mountaineers_url}) if found}{, [Mountain Project]({mountain_project_url}) if found}
 
 ## Route
@@ -49,6 +54,51 @@
 #### Road Conditions
 
 {Current access notes, seasonal closures}
+
+### Emergency Contacts
+
+{If ranger_station data available:}
+
+**Nearest Ranger Station:**
+
+- **{station name}** — {distance_miles} mi ({admin_district.district_name}, {admin_district.forest_name} if on NF land)
+  {Phone: {phone} if available}
+  {Website: {website} if available}
+
+{If admin_district present:}
+*Administrative district: {district_name}, {forest_name} ({region})*
+
+{If ranger_station unavailable or error:}
+**Nearest Ranger Station:** Data not available (OSM). Check with local forest service or park service.
+
+{If nearest_hospital data available:}
+
+**Nearest 24/7 Hospital / Emergency Room:**
+
+- **{hospital name}** — {distance_miles} mi {(emergency=yes if tagged)}
+  {Phone: {phone} if available}
+
+{List up to 3 hospitals from hospitals[]. Prefer emergency=yes entries.}
+
+*Note: Hospital data is sourced from OpenStreetMap and may be incomplete or outdated in remote areas. Verify locations before travel.*
+
+{If nearest_hospital unavailable or error:}
+**Nearest Hospital:** Data not available. Check local emergency services for the area.
+
+### Camping
+
+**Established campgrounds near trailhead** *(within ~12 mi (20 km), OSM data):*
+
+{If campgrounds available:}
+
+| Campground | Distance | Type | Operator |
+|------------|----------|------|----------|
+| {name} | {distance_miles} mi | {camp_type} | {operator or —} |
+
+{If no campgrounds found or error:}
+No established campgrounds found in OSM data near this trailhead. Check Recreation.gov or the local ranger district.
+
+**Backcountry and high camps** are not in any database — locations and conditions are extracted from trip reports and route beta in the Trip Reports and Route Description sections above.
 
 ### Route Description
 
