@@ -161,6 +161,11 @@ OVERPASS_HOSPITAL_RESPONSE = {
                 "amenity": "hospital",
                 "emergency": "yes",
                 "phone": "+1-360-734-5400",
+                "website": "https://www.peacehealth.org/st-joseph",
+                "addr:housenumber": "2901",
+                "addr:street": "Squalicum Pkwy",
+                "addr:city": "Bellingham",
+                "addr:state": "WA",
             },
         },
         {
@@ -214,6 +219,17 @@ class TestFetchNearestHospital:
 
         peace = next(h for h in result["hospitals"] if h["name"] == "PeaceHealth St. Joseph")
         assert peace.get("phone") == "+1-360-734-5400"
+
+    def test_website_address_and_coords_surfaced(self):
+        """website, composed address, and lat/lon are surfaced for linking."""
+        with patch("fetch_conditions.httpx.Client") as mock_cls:
+            mock_cls.return_value = _mock_httpx_post(OVERPASS_HOSPITAL_RESPONSE)
+            result = fetch_nearest_hospital(48.77, -121.81)
+
+        peace = next(h for h in result["hospitals"] if h["name"] == "PeaceHealth St. Joseph")
+        assert peace["website"] == "https://www.peacehealth.org/st-joseph"
+        assert peace["address"] == "2901 Squalicum Pkwy, Bellingham, WA"
+        assert peace["lat"] == 48.42 and peace["lon"] == -122.33
 
     def test_network_error_returns_error_dict(self):
         """Network failure returns error dict without raising."""

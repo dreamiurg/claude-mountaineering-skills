@@ -1,5 +1,7 @@
 # Trip Report: {Route Name} via {Route}
 
+> Generated with the [mountaineering route-researcher skill](https://github.com/dreamiurg/claude-mountaineering-skills).
+
 **Date:** {YYYY-MM-DD}
 **Party size:** {N}
 **Summit reached:** Yes / No / Turned around at {location}

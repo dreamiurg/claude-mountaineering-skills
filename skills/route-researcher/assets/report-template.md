@@ -22,7 +22,7 @@
 
 ## Overview
 
-{Peak name} rises to **{elevation with units}** with {prominence with units} of prominence in the {state, range}. The peak is located at {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [USGS Topo]({usgs_topo_link})). The standard route is a **{route type}** rated **{difficulty}**.
+{Peak name} rises to **{elevation with units}** with {prominence with units} of prominence in the {state, range}. The peak is located at {latitude}, {longitude} ([Google Maps]({google_maps_coordinates_link}) | [CalTopo]({caltopo_link}) | [Gaia GPS]({gaia_gps_link}) | [PeakVisor]({peakvisor_link})). The standard route is a **{route type}** rated **{difficulty}**.
 
 {1-2 sentence synthesized description of the route character, typical approach, and what makes it notable or challenging. Example: "The route follows a classic alpine traverse combining glacier travel with moderate scrambling. Most parties complete the climb in a long day from the trailhead, navigating crevassed terrain on the approach glacier before tackling exposed rock near the summit."}
 
@@ -53,65 +53,53 @@
 
 #### Road Conditions
 
-{Current access notes. Extract from researcher agents: USFS road closures, seasonal gate status, washouts, fire closures. Be explicit — note the specific road number/name and any reported obstacles.}
+**Gate / road status (as of {date researched}):** {State the ACTUAL current status determined by the road/gate research workflow (SKILL.md Step 3D). Name the specific highway/forest road, say **OPEN / CLOSED / SEASONAL GATE / UNKNOWN**, give the gate location/milepost and added on-foot mileage if closed, and cite the source as a link. Example: "The upper 2.7 mi of SR-542 to Artist Point is **closed (seasonal snow gate)** as of 2026-05-22 per [WSDOT]({wsdot_pass_link}) and a [June 8 WTA report]({wta_report_link}); park at the lower gate and add ~2.7 mi each way."}
 
-{If no current closure info found:} Road status not confirmed. Verify before departure.
+{If status could not be confirmed from any source:} Road/gate status **not confirmed** from automated sources — verify before driving via the links/phone below.
 
-**Verify current status:**
+**Sources checked / verify 24-48 hr before departure:**
 
-- [USFS Road Conditions](https://www.fs.usda.gov/) — search ranger district for road/gate closures
-- [CalTopo Closure Layers](https://caltopo.com/) — enable "Closures" layer; pin trailhead at `https://caltopo.com/map.html#ll={latitude},{longitude}&z=14`
-- [Google Maps]({google_maps_trailhead_link}) — check current road status and satellite view
-- [Recreation.gov](https://www.recreation.gov/) — permit/reservation requirements
+- [WSDOT pass report]({wsdot_pass_link}) — state-highway gate/restriction status (WA routes)
+- [{forest name} alerts]({usfs_alerts_link}) — USFS road closures & seasonal gates
+- [NPS road conditions]({nps_roads_link}) — if accessed via a national park
+- [CalTopo]({caltopo_trailhead_link}) (enable "Closures" layer) · [Google Maps]({google_maps_trailhead_link})
+- [Recreation.gov](https://www.recreation.gov/) — permits/reservations
+- {Ranger station phone — for direct confirmation when web sources are inconclusive}
 
 ### Emergency Contacts
 
-{If ranger_station data available:}
+> Dial **911** (or trigger a satellite-messenger / PLB SOS) in an emergency. Backcountry rescue is coordinated by the managing agency (NPS / USFS) and the county sheriff/SAR.
 
-**Nearest Ranger Station:**
+{Build the table below. Link each **Resource name** to its official website if available, otherwise to a Google Maps **place** search by name + address — `https://www.google.com/maps/search/?api=1&query={URL-encoded name + address}` — NOT bare GPS coordinates. Always populate Phone and Address: if missing from OSM, do your best to find the entity's real phone/address (official site or Google Maps listing) rather than leaving blank; if still unknown, write "—". List up to 3 hospitals (prefer emergency=yes) plus the nearest ranger station.}
 
-- **{station name}** — {distance_miles} mi ({admin_district.district_name}, {admin_district.forest_name} if on NF land)
-  {Phone: {phone} if available}
-  {Website: {website} if available}
+| Resource | Distance | Phone | Address |
+|----------|----------|-------|---------|
+| [{hospital name}]({website_or_google_maps_place}) {(ER) if emergency=yes} | {distance_miles} mi | {phone or —} | {address or —} |
+| [{ranger station name}]({website_or_google_maps_place}) | {distance_miles} mi | {phone or —} | {address or —} |
 
-{If admin_district present:}
-*Administrative district: {district_name}, {forest_name} ({region})*
+{If admin_district present:} *Managing district: {district_name}, {forest_name} ({region}).*
 
-{If ranger_station unavailable or error:}
-**Nearest Ranger Station:** Data not available (OSM). Check with local forest service or park service.
+*Hospital/ranger data is from OpenStreetMap and may be incomplete in remote/border areas. Phone and address are independently re-checked by the Report Reviewer; verify before travel.*
 
-{If nearest_hospital data available:}
-
-**Nearest 24/7 Hospital / Emergency Room:**
-
-- **{hospital name}** — {distance_miles} mi {(emergency=yes if tagged)}
-  {Phone: {phone} if available}
-
-{List up to 3 hospitals from hospitals[]. Prefer emergency=yes entries.}
-
-*Note: Hospital data is sourced from OpenStreetMap and may be incomplete or outdated in remote areas. Verify locations before travel.*
-
-{If nearest_hospital unavailable or error:}
-**Nearest Hospital:** Data not available. Check local emergency services for the area.
+{If nearest_hospital and ranger_station are both unavailable:} Emergency-services data not available from OSM for this area — look up the nearest hospital and managing ranger district/park dispatch directly before your trip.
 
 ### Camping
 
 **Established campgrounds near trailhead** *(within ~12 mi (20 km), OSM data):*
 
-{If campgrounds available:}
+{If campgrounds available — link the campground name to its website or a Google Maps place search by name, and add Map links built from its lat/lon:}
 
-| Campground | Distance | Type | Operator |
-|------------|----------|------|----------|
-| {name} | {distance_miles} mi | {camp_type} | {operator or —} |
+| Campground | Distance | Type | Operator | Map |
+|------------|----------|------|----------|-----|
+| [{name}]({website_or_google_maps_place}) | {distance_miles} mi | {camp_type or —} | {operator or —} | [Google Maps](https://www.google.com/maps/search/?api=1&query={lat},{lon}) · [Gaia](https://www.gaiagps.com/map/?loc=14/{lon}/{lat}) |
 
-{If no campgrounds found or error:}
-No established campgrounds found in OSM data near this trailhead. Check Recreation.gov or the local ranger district.
+{If no campgrounds found or error:} No established campgrounds in OSM near this trailhead. Check Recreation.gov or the local ranger district.
 
-**Backcountry and high camps** are not in any database — locations and conditions are extracted from trip reports and route beta in the Trip Reports and Route Description sections above.
+**Location-linking rule (applies report-wide):** Every named place this report brings up — campground, backcountry/high camp, bivy site, trailhead, named feature — MUST be accompanied by map links: at minimum [Google Maps] and [Gaia GPS]. Build them from coordinates when known (`https://www.gaiagps.com/map/?loc=14/{lon}/{lat}` and `https://www.google.com/maps/search/?api=1&query={lat},{lon}`); when only a name is known (e.g. a high camp from a trip report), use a Google Maps place search by name and do your best to locate it. If a place genuinely can't be located, say so explicitly rather than omitting the attempt. Backcountry/high camps come from trip reports and route beta (see Trip Reports and Terrain Detail), not the campground database.
 
 ### Route Description
 
-{Route description synthesized from multiple sources}
+{Route description synthesized from multiple sources. Whenever a detail comes from a specific trip/climb report, hyperlink the attribution to that report's URL — e.g., "a [Sep 2025 party](report_url) found…" — never plain-text attribution. This applies throughout the report (Route, Crux, Hazards, Terrain Detail, Conditions): cite specific reports as links, not bare words.}
 
 The route covers approximately **{round trip distance}** with **{total gain}** of elevation gain.
 

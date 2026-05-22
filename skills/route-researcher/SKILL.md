@@ -160,9 +160,9 @@ This returns JSON with:
 - **avalanche**: NWAC region and URL for manual check
 - **peakbagger**: Ascent statistics and recent ascents (if peak_id provided)
 - **counties**: Counties traversed trailhead→summit (`counties[]` with `county_name`, `county_fips`, `state_name`, `state_code`); `sampled` bool and `sample_points` int indicate whether path sampling ran (requires `--trailhead`); without `--trailhead` only the summit county is returned
-- **nearest_hospital**: Nearest hospitals/ERs (`hospitals[]` with `name`, `distance_miles`, `emergency`, `phone` (optional — omitted when OSM has no phone tag)); sorted emergency-first then by distance; max 3
-- **ranger_station**: Nearest ranger stations (`stations[]` with `name`, `distance_miles`, `phone`, `website`) + optional `admin_district` (`district_name`, `forest_name`, `region`) when the summit coordinates intersect a USFS ranger district
-- **campgrounds**: Established campgrounds within ~12 mi (20 km) (`campgrounds[]` with `name`, `distance_miles`, `camp_type`, `backcountry`, `operator`); backcountry/high camps are NOT included — extract those from trip reports
+- **nearest_hospital**: Nearest hospitals/ERs (`hospitals[]` with `name`, `lat`, `lon`, `distance_miles`, `emergency`, and `phone`/`website`/`address` when OSM has them); sorted emergency-first then by distance; max 3
+- **ranger_station**: Nearest ranger stations (`stations[]` with `name`, `lat`, `lon`, `distance_miles`, and `phone`/`website`/`address` when present) + optional `admin_district` (`district_name`, `forest_name`, `region`) when the summit coordinates intersect a USFS ranger district
+- **campgrounds**: Established campgrounds within ~12 mi (20 km) (`campgrounds[]` with `name`, `lat`, `lon`, `distance_miles`, `camp_type`, `backcountry`, `operator`, and `website` when present); backcountry/high camps are NOT included — extract those from trip reports
 - **gaps**: Any API failures noted for report
 
 **Run this in parallel with Step 3B** — include both the Bash command for fetch_conditions.py and all 3 Task calls in the same response turn to maximize parallelism.
@@ -408,18 +408,28 @@ After Python script and all agents return, aggregate into unified data structure
 - Note failed sources in the gaps array
 - Minimum viable: conditions data + at least one route source
 
-#### Step 3D: Access and Permits (Inline)
+#### Step 3D: Access, Permits, and Road/Gate Status (Inline)
 
-Run WebSearch for access information:
+Determine permits AND the **current road/gate status** to the trailhead — do not just tell the user to go check. Actively research and report the actual status with a source and date.
+
+**Permits:**
 
 ```
-WebSearch queries:
-1. "{peak_name} trailhead access"
-2. "{peak_name} permit requirements"
-3. "{peak_name} forest service road conditions"
+WebSearch: "{peak_name} trailhead access" ; "{peak_name} permit requirements"
 ```
 
-Extract trailhead names, required permits, access notes. Add to route_data.
+**Road / gate status workflow** (identify the access highway + forest road + managing agency first, then check sources in order; capture each source URL for the report):
+
+1. **State DOT pass report** (WA → WSDOT): fetch the relevant pass page, e.g. `https://wsdot.com/travel/real-time/mountainpasses/mt.-baker` (SR-542) or `.../north-cascades` (SR-20). Read `RoadCondition` / `TravelAdvisoryActive` / restrictions. Other states: `WebSearch "{state} DOT mountain pass report {highway}"`.
+2. **USFS forest alerts/conditions**: fetch `https://www.fs.usda.gov/{region}/{forest-shortname}/alerts` (e.g. `r06/mbs/alerts`) and `/conditions`; search the page for the road number / trailhead name → closure milepost, reason, seasonal gate. Also `WebSearch "{forest name} {road or trailhead} road open {year}"` for seasonal-opening press releases.
+3. **NPS road conditions** (if in/through a national park): fetch `https://www.nps.gov/{park-code}/planyourvisit/road-conditions.htm` (e.g. `noca`, `mora`, `olym`) → per-road OPEN/CLOSED + milepost.
+4. **WTA ground truth** (PNW): `WebSearch "site:wta.org {trail} gate road open closed {year}"` or fetch the hike page; scan the 3-5 most recent trip reports for "gate"/"road open/closed"/"drove to" (use `cloudscrape.py --render` if WTA 403s).
+5. **InciWeb fire closures** (Jul-Oct): `WebSearch "inciweb {area} closure {trailhead} {year}"`; if an active incident is near the trailhead, read its closure page.
+
+**Synthesize** into a dated status statement for the report's Road Conditions section:
+> "Gate/road status (as of {date}): {road} is {OPEN/CLOSED/SEASONAL GATE/UNKNOWN} per [source](url). {If closed: gate at {milepost}, adds ~{N} mi each way.}"
+
+If no source confirms it, say so explicitly and include the managing ranger station phone as the fallback. Add trailhead names, permits, the status statement, and all source URLs to route_data.
 
 ### Phase 4: Route Analysis
 
@@ -451,9 +461,10 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 3. **Note conflicts** when trip reports disagree with published info
 4. **Highlight consensus** ("Multiple reports mention...")
 5. **Include specifics** (elevations, locations, quotes)
+6. **Link every specific-report attribution to its source.** Whenever a detail is drawn from a *particular* trip/climb report (a date, a quote, "one party found…", "a recent report noted…"), the attribution MUST be a Markdown hyperlink to that report's URL — never plain text. Carry each trip report's `url` (and date/author) through synthesis so it can be linked; use the date/author as the link text. For consensus phrasing ("multiple reports mention…"), link 2-3 of the contributing reports inline. Only general/published beta with no specific source stays unlinked.
 
 **Example (Route Description):**
-> "The standard route follows the East Ridge (Class 3). Multiple trip reports mention a well-cairned use trail branching right at 4,800 ft—this is the correct turn. The use trail climbs through talus (described as 'tedious' and 'ankle-rolling'). In early season, this section may be snow-covered, requiring microspikes."
+> "The standard route follows the East Ridge (Class 3). A [Sep 2025 party](https://www.peakbagger.com/climber/ascent.aspx?aid=12345) found a well-cairned use trail branching right at 4,800 ft—the correct turn—through talus they called 'tedious' and 'ankle-rolling'. An [Oct 2025 report](https://www.wta.org/go-hiking/trip-reports/trip_report.123) noted the section was snow-covered, requiring microspikes."
 
 **Apply this pattern to:**
 
@@ -490,11 +501,20 @@ From all synthesized data, identify:
 
 #### Step 4C: Surface Geodata in Report
 
-Include these geodata fields in the report when available:
+Include these geodata fields when available. **Every place named in the report must be a link** — see the link patterns below.
 
-- **Counties:** List `county_name + state_name` from `conditions.counties.counties[]` in the Overview section. If the array is empty or `error` is present, note in Information Gaps.
-- **Emergency contacts:** Populate the Emergency Contacts section from `conditions.nearest_hospital.hospitals[]` and `conditions.ranger_station` (stations + admin_district). If either is missing or has an `error` key, note in Information Gaps and direct the user to check manually.
-- **Campgrounds:** Populate the Camping section from `conditions.campgrounds.campgrounds[]`. Explicitly state that backcountry/high camps are not in this list and must be extracted from trip reports.
+**Place / map link patterns** (build from a place's `lat`/`lon` and `name`):
+
+- Google Maps **place** (named entity): `https://www.google.com/maps/search/?api=1&query={URL-encoded name + address}` — use this (not bare coordinates) for hospitals, ranger stations, campgrounds, and any named place, so the link resolves to the actual entity. When only coordinates are meaningful, `query={lat},{lon}`.
+- Gaia GPS: `https://www.gaiagps.com/map/?loc=14/{lon}/{lat}` (zoom/lon/lat).
+- CalTopo: `https://caltopo.com/map.html#ll={lat},{lon}&z=14&b=mbt`.
+
+Surfacing rules:
+
+- **Counties:** list `county_name + state_name` from `conditions.counties.counties[]` in the Overview. Empty/`error` → Information Gaps.
+- **Emergency contacts:** build the table from `conditions.nearest_hospital.hospitals[]` and `conditions.ranger_station` (stations + admin_district). **Link each name** to its `website` if present, else a Google Maps place search by `name + address`. **Always include phone AND address columns** — each entry now carries `phone`/`website`/`address`/`lat`/`lon` when OSM has them; if `phone` or `address` is missing, make a best effort to find the entity's real phone/address (its official site or Google Maps listing) before writing "—". Missing/`error` → note in Information Gaps.
+- **Campgrounds:** build the Camping table from `conditions.campgrounds.campgrounds[]`; link the name (website or Google Maps place) and add Google Maps + Gaia map links from each entry's `lat`/`lon`.
+- **Any named location report-wide** (campsite, bivy, high camp, named feature, trailhead): accompany with at least Google Maps + Gaia links, per the patterns above. For trip-report-named camps without coordinates, use a Google Maps place search by name and do your best to locate it; if it cannot be located, say so explicitly. Backcountry/high camps come from trip reports, not the campground DB.
 
 #### Step 4D: Identify Information Gaps
 
@@ -532,9 +552,9 @@ Organize all gathered and analyzed data into structured JSON:
     "avalanche": {...},
     "peakbagger": {...},
     "counties": {"counties": [{"county_name": "...", "county_fips": "...", "state_name": "...", "state_code": "..."}], "sampled": bool, "sample_points": N},  // sampled + sample_points only present when --trailhead was given
-    "nearest_hospital": {"hospitals": [{"name": "...", "distance_miles": N, "emergency": "yes|null", "phone": "..." /* optional */}]},
-    "ranger_station": {"stations": [{"name": "...", "distance_miles": N, "phone": null, "website": null}], "admin_district": {"district_name": "...", "forest_name": "...", "region": "..."}},
-    "campgrounds": {"campgrounds": [{"name": "...", "distance_miles": N, "camp_type": "..."}], "note": "..."},
+    "nearest_hospital": {"hospitals": [{"name": "...", "lat": N, "lon": N, "distance_miles": N, "emergency": "yes|null", "phone": "...", "website": "...", "address": "..." /* phone/website/address optional */}]},
+    "ranger_station": {"stations": [{"name": "...", "lat": N, "lon": N, "distance_miles": N, "phone": "...", "website": "...", "address": "..." /* optional */}], "admin_district": {"district_name": "...", "forest_name": "...", "region": "..."}},
+    "campgrounds": {"campgrounds": [{"name": "...", "lat": N, "lon": N, "distance_miles": N, "camp_type": "...", "operator": "...", "website": "..." /* optional */}], "note": "..."},
     "time_estimates": {"roped_hr": N, "unroped_hr": N, "fast_hr": N, "moderate_hr": N, "leisurely_hr": N, "note": "..."},
     "itinerary": {"start_time": "HH:MM", "summit_eta": "HH:MM", "turnaround_by": "HH:MM", "return_eta": "HH:MM", "total_hr": N, "after_dark": false, "dusk_cutoff": "9:15 PM" /* 12-hr AM/PM format, unlike other time fields */, "note": "..."},
     "bearings": {"segments": [{"from": 0, "to": 1, "bearing_deg": N, "distance_mi": N, "cumulative_distance_mi": N}], "total_distance_mi": N}
@@ -587,6 +607,7 @@ Task(
    - Use `-` for bullets (not `*` or `+`)
    - Use `**text**` for bold emphasis
    - Break paragraphs >4 sentences
+   - **Link specific-report attributions.** Any statement attributed to a particular trip/climb report (a date, a quote, "one party…", "a recent report…") MUST be a Markdown link `[date/author](report_url)` to that report's source URL — never plain-text attribution. Pull the URL from the matching `trip_reports[].url` in the data package. Leave only generic/published beta (no specific source) unlinked.
 
 4. **Save the report:**
    Use the Write tool to save to the user's current working directory: {date}-{peak-name-slug}.md
@@ -659,6 +680,12 @@ Task(
    - AI disclaimer present and prominent
    - Critical hazards properly emphasized
    - Users directed to verify information from primary sources
+
+   **Emergency contacts & location links (verify INDEPENDENTLY):**
+   - Each emergency contact (hospital, ranger station) has a working name link (website or a Google Maps place link to the actual entity — NOT bare coordinates), a phone, and an address. Independently confirm the phone/address look right for that named entity (e.g. via its official site / Google Maps); fix or flag mismatches and fill blanks you can confirm.
+   - Road/gate status is a dated statement with a cited source, not a "go check it yourself" punt.
+   - Every named place in the report (campsite, bivy, high camp, trailhead, named feature) carries map links (Google Maps + Gaia GPS). Flag any named location missing links.
+   - Specific trip-report attributions are hyperlinks to their source, not plain text.
 
 3. **Fix issues:**
    - **Critical** (safety errors, factual errors, missing disclaimers): MUST fix using Edit tool
@@ -805,27 +832,44 @@ Common variations to try if initial search fails:
 - **Remove title:** "Baker" instead of "Mt Baker"
 - **Combine variations:** Try reversed order with title expansion (e.g., "Mountain Pratt" → "Pratt Mount" + "Pratt Mountain")
 
-### Google Maps and USGS Links
+### Navigation Map Links
 
 #### Summit Coordinates Links
 
-**Google Maps (for summit coordinates):**
+Build these centered on the summit (decimal degrees) for the report Overview line.
+
+**Google Maps:**
 
 ```
 https://www.google.com/maps/search/?api=1&query={latitude},{longitude}
 ```
 
-Example: `https://www.google.com/maps/search/?api=1&query=48.7768,-121.8144`
-
-**USGS TopoView (for summit coordinates):**
+**CalTopo** (MapBuilder Topo base, zoom 14):
 
 ```
-https://ngmdb.usgs.gov/topoview/viewer/#17/{latitude}/{longitude}
+https://caltopo.com/map.html#ll={latitude},{longitude}&z=14&b=mbt
 ```
 
-Example: `https://ngmdb.usgs.gov/topoview/viewer/#17/48.7768/-121.8144`
+**Gaia GPS** (order is zoom/longitude/latitude):
 
-**Note:** Use decimal degree format for coordinates. TopoView uses zoom level in URL (15-17 works well for peaks).
+```
+https://www.gaiagps.com/map/?loc=14/{longitude}/{latitude}
+```
+
+**PeakVisor hiking map** (zoom/latitude/longitude; slashes URL-encoded as `%2F` in the query):
+
+```
+https://peakvisor.com/hiking-map?custom=14%2F{latitude}%2F{longitude}#14/{latitude}/{longitude}
+```
+
+Example (Mt Baker, 48.7768, -121.8144):
+
+- Google Maps: `https://www.google.com/maps/search/?api=1&query=48.7768,-121.8144`
+- CalTopo: `https://caltopo.com/map.html#ll=48.7768,-121.8144&z=14&b=mbt`
+- Gaia GPS: `https://www.gaiagps.com/map/?loc=14/-121.8144/48.7768`
+- PeakVisor: `https://peakvisor.com/hiking-map?custom=14%2F48.7768%2F-121.8144#14/48.7768/-121.8144`
+
+**Note:** Use decimal degrees. Gaia GPS expects zoom/longitude/latitude order; CalTopo and PeakVisor use latitude then longitude.
 
 #### Trailhead Google Maps Links
 
