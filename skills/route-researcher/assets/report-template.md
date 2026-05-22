@@ -111,7 +111,7 @@ No established campgrounds found in OSM data near this trailhead. Check Recreati
 
 ### Route Description
 
-{Route description synthesized from multiple sources}
+{Route description synthesized from multiple sources. Whenever a detail comes from a specific trip/climb report, hyperlink the attribution to that report's URL — e.g., "a [Sep 2025 party](report_url) found…" — never plain-text attribution. This applies throughout the report (Route, Crux, Hazards, Terrain Detail, Conditions): cite specific reports as links, not bare words.}
 
 The route covers approximately **{round trip distance}** with **{total gain}** of elevation gain.
 

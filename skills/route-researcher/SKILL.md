@@ -451,9 +451,10 @@ Based on route descriptions, elevation, and gear mentions, classify as:
 3. **Note conflicts** when trip reports disagree with published info
 4. **Highlight consensus** ("Multiple reports mention...")
 5. **Include specifics** (elevations, locations, quotes)
+6. **Link every specific-report attribution to its source.** Whenever a detail is drawn from a *particular* trip/climb report (a date, a quote, "one party found…", "a recent report noted…"), the attribution MUST be a Markdown hyperlink to that report's URL — never plain text. Carry each trip report's `url` (and date/author) through synthesis so it can be linked; use the date/author as the link text. For consensus phrasing ("multiple reports mention…"), link 2-3 of the contributing reports inline. Only general/published beta with no specific source stays unlinked.
 
 **Example (Route Description):**
-> "The standard route follows the East Ridge (Class 3). Multiple trip reports mention a well-cairned use trail branching right at 4,800 ft—this is the correct turn. The use trail climbs through talus (described as 'tedious' and 'ankle-rolling'). In early season, this section may be snow-covered, requiring microspikes."
+> "The standard route follows the East Ridge (Class 3). A [Sep 2025 party](https://www.peakbagger.com/climber/ascent.aspx?aid=12345) found a well-cairned use trail branching right at 4,800 ft—the correct turn—through talus they called 'tedious' and 'ankle-rolling'. An [Oct 2025 report](https://www.wta.org/go-hiking/trip-reports/trip_report.123) noted the section was snow-covered, requiring microspikes."
 
 **Apply this pattern to:**
 
@@ -587,6 +588,7 @@ Task(
    - Use `-` for bullets (not `*` or `+`)
    - Use `**text**` for bold emphasis
    - Break paragraphs >4 sentences
+   - **Link specific-report attributions.** Any statement attributed to a particular trip/climb report (a date, a quote, "one party…", "a recent report…") MUST be a Markdown link `[date/author](report_url)` to that report's source URL — never plain-text attribution. Pull the URL from the matching `trip_reports[].url` in the data package. Leave only generic/published beta (no specific source) unlinked.
 
 4. **Save the report:**
    Use the Write tool to save to the user's current working directory: {date}-{peak-name-slug}.md
