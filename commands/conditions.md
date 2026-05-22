@@ -14,7 +14,7 @@ If the user provided a peak name as an argument (e.g., `/mountaineering:conditio
 1. **Search PeakBagger** for the peak:
 
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak search "{peak_name}" --format json
+   uvx --from "peakbagger-cli>=1.10.0" peakbagger peak search "{peak_name}" --format json
    ```
 
 2. **Handle results:**
@@ -30,7 +30,7 @@ If the user provided a peak name as an argument (e.g., `/mountaineering:conditio
 Fetch peak coordinates and elevation:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak show {peak_id} --format json
+uvx --from "peakbagger-cli>=1.10.0" peakbagger peak show {peak_id} --format json
 ```
 
 Extract: `latitude`, `longitude`, `elevation_m` (elevation in meters), `peak_name`.

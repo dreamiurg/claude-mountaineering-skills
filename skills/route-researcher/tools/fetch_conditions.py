@@ -44,7 +44,7 @@ WEATHER_CODES = {
 PEAKBAGGER_CMD = [
     "uvx",
     "--from",
-    "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0",
+    "peakbagger-cli>=1.10.0",
     "peakbagger",
 ]
 
@@ -246,6 +246,264 @@ def fetch_avalanche(lat: float, lon: float) -> dict[str, Any]:
     }
 
 
+def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Haversine distance in miles between two lat/lon points."""
+    import math
+
+    R = 3958.8  # Earth radius in miles
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlam = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _sample_line(
+    start: tuple[float, float], end: tuple[float, float], n: int
+) -> list[tuple[float, float]]:
+    """Return n evenly-spaced points along the line from start to end (inclusive)."""
+    if n <= 1:
+        return [start]
+    points = []
+    for i in range(n):
+        t = i / (n - 1)
+        lat = start[0] + t * (end[0] - start[0])
+        lon = start[1] + t * (end[1] - start[1])
+        points.append((lat, lon))
+    return points
+
+
+FCC_AREA_URL = "https://geo.fcc.gov/api/census/area"
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+USFS_DISTRICTS_URL = (
+    "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RangerDistricts_01/MapServer/0/query"
+)
+
+
+def fetch_counties(
+    summit: tuple[float, float],
+    trailhead: tuple[float, float] | None,
+    n_samples: int = 25,
+) -> dict[str, Any]:
+    """Return counties traversed from trailhead to summit via FCC Area API.
+
+    If trailhead is None, only the summit point is queried and a note is added.
+    Deduplicates by county_fips.
+    """
+    try:
+        points = _sample_line(trailhead, summit, n_samples) if trailhead else [summit]
+        seen: dict[str, dict] = {}
+        with httpx.Client(timeout=30.0) as client:
+            for lat, lon in points:
+                try:
+                    resp = client.get(
+                        FCC_AREA_URL,
+                        params={"lat": float(lat), "lon": float(lon), "format": "json"},
+                    )
+                    resp.raise_for_status()
+                    data = resp.json()
+                    for r in data.get("results", []):
+                        fips = r.get("county_fips")
+                        if fips and fips not in seen:
+                            seen[fips] = {
+                                "county_name": r.get("county_name"),
+                                "county_fips": fips,
+                                "state_name": r.get("state_name"),
+                                "state_code": r.get("state_code"),
+                            }
+                except Exception:
+                    continue  # single-point failure is non-fatal
+
+        if not seen and points:
+            return {
+                "error": "FCC Area API returned no data for any sampled point.",
+                "note": "County lookup failed; check https://geo.fcc.gov/api/census/area",
+                "counties": [],
+            }
+
+        result: dict[str, Any] = {"counties": list(seen.values())}
+        if trailhead:
+            result["sampled"] = True
+            result["sample_points"] = len(points)
+        else:
+            result["note"] = (
+                "Only summit county returned — provide --trailhead to sample the full route."
+            )
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "note": "County lookup failed; check FCC Area API.",
+            "counties": [],
+        }
+
+
+def fetch_nearest_hospital(lat: float, lon: float) -> dict[str, Any]:
+    """Return nearest hospitals via OSM Overpass, sorted by distance.
+
+    Prefers emergency=yes / opening_hours=24/7 but does not require them.
+    Returns top 3 results.
+    """
+    query = f"""
+[out:json][timeout:25];
+nwr[amenity=hospital](around:50000,{float(lat)},{float(lon)});
+out center tags;
+"""
+    try:
+        with httpx.Client(timeout=35.0) as client:
+            resp = client.post(OVERPASS_URL, data={"data": query})
+            resp.raise_for_status()
+            elements = resp.json().get("elements", [])
+
+        hospitals = []
+        for el in elements:
+            tags = el.get("tags", {})
+            elat = el.get("lat") or (el.get("center") or {}).get("lat")
+            elon = el.get("lon") or (el.get("center") or {}).get("lon")
+            if elat is None or elon is None:
+                continue
+            entry: dict[str, Any] = {
+                "name": tags.get("name", "Unknown hospital"),
+                "lat": elat,
+                "lon": elon,
+                "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
+                "emergency": tags.get("emergency"),
+                "opening_hours": tags.get("opening_hours"),
+            }
+            if "phone" in tags:
+                entry["phone"] = tags["phone"]
+            hospitals.append(entry)
+
+        # Sort: emergency=yes first, then by distance
+        hospitals.sort(key=lambda h: (h.get("emergency") != "yes", h["distance_miles"]))
+        return {"hospitals": hospitals[:3]}
+    except Exception as e:
+        return {"error": str(e), "note": "Hospital lookup failed; check OSM Overpass."}
+
+
+def fetch_ranger_station(lat: float, lon: float) -> dict[str, Any]:
+    """Return nearest ranger stations (OSM) plus USFS administrative district name.
+
+    OSM query unions amenity=ranger_station with tourism=information+information=visitor_centre.
+    USFS ArcGIS EDW provides the administrative district/forest name (no key required).
+    USFS failure is soft — OSM data still returned.
+    """
+    overpass_query = f"""
+[out:json][timeout:25];
+(
+  nwr[amenity=ranger_station](around:50000,{float(lat)},{float(lon)});
+  nwr[tourism=information][information=visitor_centre](around:50000,{float(lat)},{float(lon)});
+);
+out center tags;
+"""
+    try:
+        with httpx.Client(timeout=35.0) as client:
+            resp = client.post(OVERPASS_URL, data={"data": overpass_query})
+            resp.raise_for_status()
+            elements = resp.json().get("elements", [])
+
+        stations = []
+        for el in elements:
+            tags = el.get("tags", {})
+            elat = el.get("lat") or (el.get("center") or {}).get("lat")
+            elon = el.get("lon") or (el.get("center") or {}).get("lon")
+            if elat is None or elon is None:
+                continue
+            stations.append(
+                {
+                    "name": tags.get("name", "Unknown station"),
+                    "lat": elat,
+                    "lon": elon,
+                    "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
+                    "phone": tags.get("phone"),
+                    "website": tags.get("website"),
+                }
+            )
+        stations.sort(key=lambda s: s["distance_miles"])
+
+        result: dict[str, Any] = {"stations": stations[:3]}
+
+        # USFS administrative district (soft — failure just omits district)
+        try:
+            with httpx.Client(timeout=20.0) as client:
+                usfs_resp = client.get(
+                    USFS_DISTRICTS_URL,
+                    params={
+                        "geometry": f"{float(lon)},{float(lat)}",
+                        "geometryType": "esriGeometryPoint",
+                        "inSR": "4326",
+                        "spatialRel": "esriSpatialRelIntersects",
+                        "outFields": "districtname,forestname,region",
+                        "f": "json",
+                        "returnGeometry": "false",
+                    },
+                )
+                usfs_resp.raise_for_status()
+                features = usfs_resp.json().get("features", [])
+                if features:
+                    attrs = features[0].get("attributes", {})
+                    result["admin_district"] = {
+                        "district_name": attrs.get("districtname"),
+                        "forest_name": attrs.get("forestname"),
+                        "region": attrs.get("region"),
+                    }
+        except Exception:
+            pass  # USFS failure is non-fatal
+
+        return result
+    except Exception as e:
+        return {"error": str(e), "note": "Ranger station lookup failed; check OSM Overpass."}
+
+
+def fetch_campgrounds(lat: float, lon: float) -> dict[str, Any]:
+    """Return established campgrounds within ~20 km via OSM Overpass.
+
+    Note: backcountry/high camps are NOT in any database — they come from
+    trip reports and route beta, not this fetcher.
+    """
+    query = f"""
+[out:json][timeout:25];
+nwr[tourism=camp_site](around:20000,{float(lat)},{float(lon)});
+out center tags;
+"""
+    try:
+        with httpx.Client(timeout=35.0) as client:
+            resp = client.post(OVERPASS_URL, data={"data": query})
+            resp.raise_for_status()
+            elements = resp.json().get("elements", [])
+
+        campgrounds = []
+        for el in elements:
+            tags = el.get("tags", {})
+            elat = el.get("lat") or (el.get("center") or {}).get("lat")
+            elon = el.get("lon") or (el.get("center") or {}).get("lon")
+            if elat is None or elon is None:
+                continue
+            campgrounds.append(
+                {
+                    "name": tags.get("name", "Unnamed campground"),
+                    "lat": elat,
+                    "lon": elon,
+                    "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
+                    "camp_type": tags.get("camp_type"),
+                    "backcountry": tags.get("backcountry"),
+                    "operator": tags.get("operator"),
+                }
+            )
+        campgrounds.sort(key=lambda c: c["distance_miles"])
+
+        return {
+            "campgrounds": campgrounds,
+            "note": (
+                "Established campgrounds only (OSM data). "
+                "Backcountry and high camps are not in any database — "
+                "extract from trip reports and route beta."
+            ),
+        }
+    except Exception as e:
+        return {"error": str(e), "note": "Campground lookup failed; check OSM Overpass."}
+
+
 def run_peakbagger_stats(peak_id: int) -> dict[str, Any]:
     """Run peakbagger-cli to get ascent statistics."""
     try:
@@ -298,16 +556,24 @@ def run_peakbagger_ascents(peak_id: int, within: str = "1y") -> dict[str, Any]:
 
 
 @click.command()
-@click.option("--coordinates", required=True, help="Coordinates as lat,lon")
+@click.option("--coordinates", required=True, help="Summit coordinates as lat,lon")
 @click.option("--elevation", required=True, type=float, help="Elevation in meters")
 @click.option("--peak-name", required=True, help="Peak name")
 @click.option("--peak-id", type=int, default=None, help="PeakBagger peak ID (optional)")
 @click.option("--date", default=None, help="Date as YYYY-MM-DD (default: today)")
-def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int, date: str):
+@click.option("--trailhead", default=None, help="Trailhead coordinates as lat,lon (optional)")
+def cli(
+    coordinates: str,
+    elevation: float,
+    peak_name: str,
+    peak_id: int,
+    date: str,
+    trailhead: str,
+):
     """Fetch all conditions data for a peak.
 
-    Returns unified JSON with weather, air quality, daylight, and avalanche data.
-    Optionally fetches PeakBagger statistics if --peak-id is provided.
+    Returns unified JSON with weather, air quality, daylight, avalanche,
+    geodata (counties, hospital, ranger station, campgrounds), and PeakBagger data.
     """
     try:
         lat, lon = map(float, coordinates.split(","))
@@ -315,10 +581,19 @@ def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int, date: 
         click.echo(json.dumps({"error": "Invalid coordinates format. Use lat,lon"}), err=True)
         sys.exit(1)
 
+    trailhead_coords: tuple[float, float] | None = None
+    if trailhead:
+        try:
+            th_lat, th_lon = map(float, trailhead.split(","))
+            trailhead_coords = (th_lat, th_lon)
+        except ValueError:
+            click.echo(json.dumps({"error": "Invalid --trailhead format. Use lat,lon"}), err=True)
+            sys.exit(1)
+
     date_str = date or datetime.now().strftime("%Y-%m-%d")
     gaps = []
 
-    # Fetch all data
+    # Existing fetchers
     weather = fetch_weather(lat, lon, elevation)
     if "error" in weather:
         gaps.append({"source": "Open-Meteo Weather", "reason": weather["error"]})
@@ -327,13 +602,29 @@ def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int, date: 
     if "error" in air_quality:
         gaps.append({"source": "Open-Meteo Air Quality", "reason": air_quality["error"]})
 
-    # Pass timezone from weather API to daylight calculation
     tz_name = weather.get("timezone")
     daylight = fetch_daylight(lat, lon, date_str, tz_name)
     if "error" in daylight:
         gaps.append({"source": "Daylight calculation", "reason": daylight["error"]})
 
     avalanche = fetch_avalanche(lat, lon)
+
+    # Phase 1 geodata fetchers
+    counties = fetch_counties((lat, lon), trailhead_coords)
+    if "error" in counties:
+        gaps.append({"source": "FCC Counties", "reason": counties["error"]})
+
+    nearest_hospital = fetch_nearest_hospital(lat, lon)
+    if "error" in nearest_hospital:
+        gaps.append({"source": "OSM Nearest Hospital", "reason": nearest_hospital["error"]})
+
+    ranger_station = fetch_ranger_station(lat, lon)
+    if "error" in ranger_station:
+        gaps.append({"source": "OSM/USFS Ranger Station", "reason": ranger_station["error"]})
+
+    campgrounds = fetch_campgrounds(lat, lon)
+    if "error" in campgrounds:
+        gaps.append({"source": "OSM Campgrounds", "reason": campgrounds["error"]})
 
     # PeakBagger data (if peak_id provided)
     peakbagger = {}
@@ -355,6 +646,10 @@ def cli(coordinates: str, elevation: float, peak_name: str, peak_id: int, date: 
         "air_quality": air_quality,
         "daylight": daylight,
         "avalanche": avalanche,
+        "counties": counties,
+        "nearest_hospital": nearest_hospital,
+        "ranger_station": ranger_station,
+        "campgrounds": campgrounds,
         "peakbagger": peakbagger,
         "gaps": gaps,
     }

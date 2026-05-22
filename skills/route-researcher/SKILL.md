@@ -53,7 +53,7 @@ Research Progress:
 2. **Search PeakBagger** using peakbagger-cli:
 
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak search "{peak_name}" --format json
+   uvx --from "peakbagger-cli>=1.10.0" peakbagger peak search "{peak_name}" --format json
    ```
 
    - Parse JSON output to extract peak matches
@@ -100,7 +100,7 @@ This phase must complete before Phase 3, as coordinates are required for weather
 Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak show {peak_id} --format json
+uvx --from "peakbagger-cli>=1.10.0" peakbagger peak show {peak_id} --format json
 ```
 
 This returns structured JSON with:
@@ -173,24 +173,28 @@ Research from these sources: PeakBagger, SummitPost
 2. Extract route descriptions from peak page
 3. List recent ascents with trip reports:
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
+   uvx --from "peakbagger-cli>=1.10.0" peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
    ```
 
 4. Identify trip reports with content (word_count > 0)
 5. Fetch content for up to 5 recent trip reports using:
 
    ```bash
-   uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger ascent show {ascent_id} --format json
+   uvx --from "peakbagger-cli>=1.10.0" peakbagger ascent show {ascent_id} --format json
    ```
 
 ## SummitPost Research
 
 1. Search: "{peak_name} site:summitpost.org"
 2. Use WebFetch to extract: route name, difficulty, approach, description, hazards
-3. If WebFetch fails, use:
+3. If WebFetch fails, use the fetching ladder:
 
    ```bash
+   # Fast path (TLS-spoofed httpx, no browser)
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{url}"
+
+   # If the above returns empty or is blocked (Cloudflare / JS-rendered):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{url}"
    ```
 
 ## Trip Report Extraction
@@ -229,9 +233,13 @@ Research from these sources: WTA, Mountaineers.org
 1. Search: "{peak_name} site:wta.org"
 2. Find the hike page and extract: trail name, difficulty, distance, elevation gain, hazards
 3. Get trip reports from AJAX endpoint: {wta_url}/@@related_tripreport_listing
-4. Fetch content for up to 5 recent trip reports using:
+4. Fetch content for up to 5 recent trip reports using the fetching ladder:
    ```bash
+   # Fast path first
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py "{trip_report_url}"
+
+   # If blocked or returns empty content:
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{trip_report_url}"
    ```
 
 ## Mountaineers Research
@@ -241,7 +249,7 @@ Research from these sources: WTA, Mountaineers.org
 
 ## Fallback
 
-If WebFetch fails for any page, use cloudscrape.py as shown above.
+If WebFetch fails for any page, use the fetching ladder: `cloudscrape.py "{url}"` (fast) → `cloudscrape.py --render "{url}"` for JS-rendered or Cloudflare-protected pages.
 
 ## Output Format (return EXACTLY this JSON)
 
@@ -633,10 +641,10 @@ Throughout execution, follow these error handling guidelines:
 
 ### WebFetch/WebSearch Issues
 
-- **Universal fallback pattern:** Always try WebFetch first, then cloudscrape.py if it fails
-- **Automatic retry:** If WebFetch fails or returns incomplete data, immediately retry with cloudscrape.py
-- **Graceful degradation:** Missing one source shouldn't stop entire research
-- **Document gaps:** Note which sources were unavailable (both WebFetch AND cloudscrape.py failed)
+- **Fetching ladder:** WebFetch first → `cloudscrape.py "{url}"` (fast httpx, no browser) → `cloudscrape.py --render "{url}"` (Patchright stealth browser, for JS-rendered or Cloudflare-protected pages)
+- **When to use `--render`:** hikeoftheweek.com and any site where the default path returns empty or blocked content
+- **Graceful degradation:** Missing one source shouldn't stop entire research; cloudscrape.py exits 0 on failure
+- **Document gaps:** Note which sources were unavailable (WebFetch AND both cloudscrape.py paths failed)
 - **Prioritize safety:** If critical safety info (avalanche, hazards) unavailable, emphasize in gaps section
 
 ## Execution Timeouts
@@ -687,12 +695,11 @@ See `skills/route-researcher/docs/architecture.md` for detailed execution flow a
 - **peakbagger-cli** integration for peak search, info, and ascent data
 - Python tools directory structure
 - Report generation in user's current working directory
-- **cloudscrape.py** - Universal fallback for WebFetch failures, works with ANY website including:
-  - Cloudflare-protected sites (SummitPost, PeakBagger, Mountaineers.org)
-  - AllTrails (when WebFetch fails)
-  - WTA (when WebFetch fails)
-  - Any other site that blocks or limits WebFetch access
-- **Two-tier fetching strategy:** WebFetch first, cloudscrape.py as automatic fallback
+- **cloudscrape.py** - Fallback fetcher with two modes:
+  - Default (fast): httpx with TLS spoofing — no browser, works for most sites
+  - `--render` (stealth browser): Patchright headless Chromium for Cloudflare-challenged and JS-rendered pages (lazy Chromium install on first use)
+  - Exits 0 on failure — callers always succeed; error detail goes to stderr
+- **Three-tier fetching strategy:** WebFetch → `cloudscrape.py` (fast) → `cloudscrape.py --render` (stealth browser)
 - **Open-Meteo Weather API** for mountain weather forecasts (temperature, precipitation, freezing level, wind)
 - **Open-Meteo Air Quality API** for AQI forecasting (US AQI scale with conditional alerts)
 - Adaptive ascent data retrieval based on peak popularity
@@ -714,12 +721,12 @@ See `skills/route-researcher/docs/architecture.md` for detailed execution flow a
 - Continue with available data
 - Don't block report generation
 
-### peakbagger-cli Command Reference (v1.7.0)
+### peakbagger-cli Command Reference (v1.10.0+)
 
 All commands use `--format json` for structured output. Run via:
 
 ```bash
-uvx --from git+https://github.com/dreamiurg/peakbagger-cli.git@v1.7.0 peakbagger <command> --format json
+uvx --from "peakbagger-cli>=1.10.0" peakbagger <command> --format json
 ```
 
 **Available Commands:**

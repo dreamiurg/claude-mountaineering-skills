@@ -17,52 +17,59 @@ These tools are invoked by the `route-researcher` skill to fetch real-time data 
 
 ### cloudscrape.py
 
-Fetches HTML content from Cloudflare-protected websites using cloudscraper.
+Fetches HTML content from websites, with optional JS-rendering for Cloudflare-protected or JavaScript-heavy pages.
 
 **Usage:**
 
 ```bash
+# Default: fast httpx fetch (TLS-spoofed, no browser)
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798"
+
+# --render: Patchright headless browser for JS-rendered / Cloudflare-challenged pages
+uv run python cloudscrape.py --render "https://www.hikeoftheweek.com/some-hike"
 ```
 
 **Parameters:**
 
 - `url` (required): URL to fetch
+- `--render` (optional): Use Patchright stealth browser for JS-rendered or Cloudflare-protected pages
 - `--timeout` (optional): Request timeout in seconds (default: 30)
 
 **Output:**
-Returns the full HTML content to stdout.
+Returns the full HTML content to stdout. On failure, exits 0 with a JSON error note to stderr so callers always succeed.
 
 **Purpose:**
 
-- Bypasses Cloudflare bot protection on PeakBagger and SummitPost
-- Uses cloudscraper library which solves Cloudflare's JavaScript challenges
-- No browser required - pure HTTP with smart request mimicking
+- Default path: fast TLS-spoofed HTTP via httpx (no browser required)
+- `--render` path: stealth headless Chromium via Patchright for pages that block plain HTTP or require JavaScript execution
 
 **Behavior:**
 
-- Creates scraper instance with Chrome browser profile
-- Mimics macOS desktop Chrome browser
-- Automatically solves Cloudflare challenges
-- Returns raw HTML for parsing by the skill
+- Default: httpx with spoofed TLS fingerprint; fast, no external install
+- `--render`: launches Patchright (undetected Playwright); Chromium is installed lazily on first use via `patchright install chromium` — base install stays light
+- Any failure exits 0 (graceful degradation); error details go to stderr as JSON
 
 **Dependencies:**
 
-- cloudscraper (Cloudflare bypass)
+- httpx (default fetch path)
+- patchright (stealth headless browser, `--render` path)
 - click (CLI)
 - rich (console output)
 
 **Use Cases:**
 
-- Fetching PeakBagger peak pages
-- Fetching SummitPost route descriptions
-- Any Cloudflare-protected climbing/hiking resource
+- Fetching PeakBagger, SummitPost, WTA pages (default path usually sufficient)
+- hikeoftheweek.com and other Cloudflare-challenged sites (require `--render`)
+- Any site that serves content via JavaScript (require `--render`)
 
 **Example:**
 
 ```bash
-# Fetch Mount Pilchuck page from PeakBagger
+# Standard fetch — fast, no browser
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798" | grep -i "elevation"
+
+# JS-rendered / Cloudflare page
+uv run python cloudscrape.py --render "https://www.hikeoftheweek.com/mount-baker"
 ```
 
 ---
@@ -135,11 +142,12 @@ Python 3.11+ (specified in `.python-version`)
 
 **Cloudflare Blocking Requests**
 
-The `cloudscrape.py` tool handles Cloudflare protection, but may occasionally fail:
+The `cloudscrape.py` tool handles Cloudflare and JS-rendered pages. If the default path fails:
 
-- Skill automatically falls back to available sources
-- Check "Information Gaps" section in generated reports
-- Use manual verification links provided
+- Retry with `--render` flag to use Patchright stealth browser
+- First `--render` use installs Chromium lazily (`patchright install chromium`) — subsequent calls are fast
+- If both paths fail, the skill notes it in "Information Gaps" and continues
+- Use manual verification links provided in the report
 
 **No Route Beta Generated**
 
@@ -316,6 +324,6 @@ Managed in `pyproject.toml`:
 - **httpx** - Modern HTTP client
 - **rich** - Rich terminal output
 - **astral** - Astronomy calculations (daylight)
-- **cloudscraper** - Cloudflare bypass
+- **patchright** - Stealth headless browser (`--render` path in cloudscrape.py)
 
 Dev dependencies: pytest
