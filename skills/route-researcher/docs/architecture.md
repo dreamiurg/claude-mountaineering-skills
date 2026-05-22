@@ -88,14 +88,14 @@ All keys are top-level in the returned JSON object. Optional keys are emitted on
 | `daylight` | always | 8 twilight keys (null = white night) + `daylight_hours`, `timezone` |
 | `avalanche` | always | NWAC region + URL |
 | `peakbagger` | when `--peak-id` provided | ascent stats + recent ascents |
-| `counties` | always | `counties[]` with `county_name`, `county_fips`, `state_name`, `state_code` |
-| `nearest_hospital` | always | `hospitals[]` — name, distance_miles, emergency, phone; sorted emergency-first |
-| `ranger_station` | always | `stations[]` + optional `admin_district` (district_name, forest_name, region) on NF land |
+| `counties` | always | `counties[]` with `county_name`, `county_fips`, `state_name`, `state_code`; `sampled` bool (true when trailhead→summit path sampling ran), `sample_points` int |
+| `nearest_hospital` | always | `hospitals[]` — name, distance_miles, emergency, phone (optional — omitted when OSM has no phone tag); sorted emergency-first |
+| `ranger_station` | always | `stations[]` + optional `admin_district` (district_name, forest_name, region) when summit coordinates intersect a USFS ranger district |
 | `campgrounds` | always | `campgrounds[]` within ~12 mi (20 km) — name, distance_miles, camp_type, backcountry, operator |
 | `time_estimates` | `--distance-mi` + `--gain-ft` | roped_hr, unroped_hr, fast_hr, moderate_hr, leisurely_hr, note |
 | `itinerary` | `--start-time` + `--distance-mi` + `--gain-ft` | start_time, summit_eta, turnaround_by, return_eta, total_hr, after_dark bool, dusk_cutoff, note |
-| `bearings` | 2+ `--waypoint` args | segments[] (bearing_deg, distance_mi, cumulative_distance_mi) + total_distance_mi, note |
-| `gaps` | always | string array of API/fetch failures |
+| `bearings` | 2+ `--waypoint` args | segments[] (bearing_deg, distance_mi, cumulative_distance_mi) + total_distance_mi |
+| `gaps` | always | array of {"source": "...", "reason": "..."} objects |
 
 **Daylight key names (8 total):**
 
@@ -160,10 +160,10 @@ Trip report fields include hazard and terrain-detail extractions:
 For any web page, escalate through tiers until content is returned:
 
 1. **WebFetch** — fastest; works for most static sites
-2. **`cloudscrape.py "{url}"`** — httpx with TLS spoofing; no browser; works for many lightly-protected sites
+2. **`cloudscrape.py "{url}"`** — plain httpx with browser-like headers; no browser; works for many sites
 3. **`cloudscrape.py --render "{url}"`** — Patchright stealth headless Chromium; required for Cloudflare-challenged and JS-rendered pages
 
-`cloudscrape.py` always exits 0 (graceful degradation). First `--render` use installs Chromium lazily via `patchright install chromium`; subsequent calls reuse the install.
+`cloudscrape.py` always exits 0 (graceful degradation). Each `--render` invocation runs `patchright install chromium` (idempotent; fast if already installed).
 
 **Known `--render` requirements:** hikeoftheweek.com.
 
@@ -207,7 +207,7 @@ All geodata is fetched deterministically in `fetch_conditions.py` and fails soft
 | :------ | :----- | :---- |
 | `fetch_counties` | FCC Area API | Samples up to 25 points trailhead→summit; dedupes by FIPS |
 | `fetch_nearest_hospital` | OSM Overpass | Up to 3 results; `emergency=yes` preferred; haversine sort |
-| `fetch_ranger_station` | OSM Overpass + USFS ArcGIS EDW | `admin_district` added when trailhead is on NF land |
+| `fetch_ranger_station` | OSM Overpass + USFS ArcGIS EDW | `admin_district` added when summit coordinates intersect a USFS ranger district |
 | `fetch_campgrounds` | OSM Overpass | ~12 mi (20 km) radius; backcountry camps NOT included |
 
 ## Design Decisions

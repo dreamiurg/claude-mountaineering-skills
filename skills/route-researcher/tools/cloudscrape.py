@@ -17,9 +17,8 @@ import json
 
 import click
 import httpx
-from rich.console import Console
 
-console = Console(stderr=True)
+_CHROMIUM_INSTALLED = False
 
 _HEADERS = {
     "User-Agent": (
@@ -43,14 +42,17 @@ def _fetch_with_render(url: str, timeout: int) -> str:
     except ImportError as e:
         raise ImportError("patchright is not installed. Run: uv sync") from e
 
-    import subprocess
+    global _CHROMIUM_INSTALLED
+    if not _CHROMIUM_INSTALLED:
+        import subprocess
 
-    # Lazy Chromium install — only downloads once; subsequent calls are instant.
-    subprocess.run(
-        ["patchright", "install", "chromium"],
-        check=False,
-        capture_output=True,
-    )
+        proc = subprocess.run(
+            ["patchright", "install", "chromium"],
+            check=False,
+            capture_output=True,
+        )
+        if proc.returncode == 0:
+            _CHROMIUM_INSTALLED = True
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)

@@ -196,7 +196,7 @@ AVOID bolding: common descriptors (wet, icy, loose), general skills (scrambling,
 | **Total car-to-car** | **{total_hr} hrs** |
 
 {If itinerary.after_dark is true:}
-> **⚠️ After-Dark Warning:** Projected return time ({return_eta}) is after {dusk_cutoff}. Carry a headlamp; consider an earlier start or a faster pace.
+> **⚠️ After-Dark Warning:** Projected return time ({return_eta}, 24-hr) is after {dusk_cutoff} (AM/PM). Carry a headlamp; consider an earlier start or a faster pace.
 
 {itinerary.note — display the note string from fetch_conditions.py}
 
@@ -377,7 +377,7 @@ IMPORTANT PRIORITY RULES:
 2. If PeakBagger reports are mostly <100 words, PRIORITIZE WTA/Mountaineers reports
 3. WTA trip reports are typically longer and more detailed than brief PeakBagger logs
 4. Mix sources by quality, not by platform - a detailed WTA report should appear before a brief PeakBagger report
-5. If you have WTA trip report URLs from Step 2I, you MUST include them here}
+5. If you have WTA trip report URLs from Step 3B, you MUST include them here}
 
 {If detailed PeakBagger reports exist (>100 words):}
 **PeakBagger:**
@@ -385,7 +385,7 @@ IMPORTANT PRIORITY RULES:
 - **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 {word_count} words{, 📍 GPX if available}
 - **{YYYY-MM-DD}** - [{Climber Name}]({ascent_url}) - 📝 {word_count} words{, 📍 GPX if available}
 
-{If WTA reports found in Step 2I - MANDATORY to include if extracted:}
+{If WTA reports found in Step 3B - MANDATORY to include if extracted:}
 **Washington Trails Association:**
 
 - **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
@@ -394,7 +394,7 @@ IMPORTANT PRIORITY RULES:
 - **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
 - **{YYYY-MM-DD}** - [{Report Title or Author}]({wta_trip_report_url})
 
-{If Mountaineers reports found in Step 2I:}
+{If Mountaineers reports found in Step 3B:}
 **Mountaineers.org:**
 
 - **{YYYY-MM-DD}** - [{Report Title}]({mountaineers_trip_report_url})
@@ -412,7 +412,7 @@ IMPORTANT PRIORITY RULES:
 
 ### Browse All Trip Reports
 
-{Always include PeakBagger. Include other platforms only if URLs were found during data gathering (Step 2D)}
+{Always include PeakBagger. Include other platforms only if URLs were found during data gathering (Step 3B)}
 
 - [PeakBagger Ascents](https://www.peakbagger.com/climber/PeakAscents.aspx?pid={peak_id}) - Individual climb logs with optional GPX tracks and reports
 {If WTA URL found:}

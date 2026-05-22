@@ -14,20 +14,6 @@ from fetch_conditions import build_itinerary, cli, compute_bearings
 # Helpers shared across tests
 # ---------------------------------------------------------------------------
 
-_PATCH_ALL_FETCHERS = (
-    patch("fetch_conditions.fetch_weather", return_value={"forecast": [], "timezone": None}),
-    patch("fetch_conditions.fetch_air_quality", return_value={"rating": "good"}),
-    patch(
-        "fetch_conditions.fetch_daylight",
-        return_value={"sunrise": "5:00 AM", "sunset": "9:00 PM", "nautical_dusk": "10:30 PM"},
-    ),
-    patch("fetch_conditions.fetch_avalanche", return_value={"region": "north-cascades"}),
-    patch("fetch_conditions.fetch_counties", return_value={"counties": []}),
-    patch("fetch_conditions.fetch_nearest_hospital", return_value={"hospitals": []}),
-    patch("fetch_conditions.fetch_ranger_station", return_value={"stations": []}),
-    patch("fetch_conditions.fetch_campgrounds", return_value={"campgrounds": []}),
-)
-
 BASE_CLI_ARGS = [
     "--coordinates",
     "48.77,-121.81",
@@ -272,6 +258,31 @@ class TestBuildItinerary:
             f"turnaround_by {result['turnaround_by']!r} should be same-day for evening start"
         )
 
+    def test_degenerate_zero_distance_zero_gain(self):
+        """distance_mi=0, gain_ft=0: summit==return==start, total_hr==0, no crash."""
+        result = build_itinerary("06:00", 0.0, 0.0, self.DAYLIGHT)
+        assert "start_time" in result
+        assert result["total_hr"] == 0.0
+        assert result["summit_eta"] == "06:00"
+        assert result["return_eta"] == "06:00"
+
+    def test_descent_hr_uses_raw_fast_formula(self):
+        """descent_hr = (dist/3.5 + gain/2000) * 0.5, not times['fast_hr'] * 0.5.
+
+        Using the pre-rounded fast_hr introduces ±3 min rounding error.
+        The raw formula must give a more precise result for non-trivial routes.
+        """
+        from fetch_conditions import estimate_times
+
+        dist, gain = 8.0, 4000
+        times = estimate_times(dist, gain)
+        raw_descent = (dist / 3.5 + gain / 2000) * 0.5
+        # Build the itinerary and verify total_hr uses the raw (unrounded) descent value
+        result = build_itinerary("06:00", dist, gain, self.DAYLIGHT)
+        ascent_hr = times["moderate_hr"]
+        expected_total = round(ascent_hr + raw_descent, 1)
+        assert result["total_hr"] == expected_total
+
 
 # ---------------------------------------------------------------------------
 # 2. compute_bearings helper
@@ -354,7 +365,7 @@ class TestComputeBearings:
         waypoints = [(47.0, -121.0), (48.0, -121.0)]
         result = compute_bearings(waypoints)
         seg = result["segments"][0]
-        assert "from" in seg or "waypoint_index" in seg
+        assert "from" in seg
 
 
 # ---------------------------------------------------------------------------

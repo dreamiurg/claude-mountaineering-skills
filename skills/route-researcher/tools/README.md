@@ -22,7 +22,7 @@ Fetches HTML content from websites, with optional JS-rendering for Cloudflare-pr
 **Usage:**
 
 ```bash
-# Default: fast httpx fetch (TLS-spoofed, no browser)
+# Default: fast httpx fetch (browser-like headers, no browser)
 uv run python cloudscrape.py "https://www.peakbagger.com/peak.aspx?pid=1798"
 
 # --render: Patchright headless browser for JS-rendered / Cloudflare-challenged pages
@@ -36,25 +36,24 @@ uv run python cloudscrape.py --render "https://www.hikeoftheweek.com/some-hike"
 - `--timeout` (optional): Request timeout in seconds (default: 30)
 
 **Output:**
-Returns the full HTML content to stdout. On failure, exits 0 with a JSON error note to stderr so callers always succeed.
+Returns the full HTML content to stdout. On failure, exits 0 with a JSON error note to stdout so callers always succeed.
 
 **Purpose:**
 
-- Default path: fast TLS-spoofed HTTP via httpx (no browser required)
+- Default path: plain httpx with browser-like headers (no browser required, no TLS spoofing)
 - `--render` path: stealth headless Chromium via Patchright for pages that block plain HTTP or require JavaScript execution
 
 **Behavior:**
 
-- Default: httpx with spoofed TLS fingerprint; fast, no external install
+- Default: plain httpx with browser-like headers; fast, no external install, no TLS spoofing
 - `--render`: launches Patchright (undetected Playwright); Chromium is installed lazily on first use via `patchright install chromium` — base install stays light
-- Any failure exits 0 (graceful degradation); error details go to stderr as JSON
+- Any failure exits 0 (graceful degradation); error details go to stdout as JSON
 
 **Dependencies:**
 
 - httpx (default fetch path)
 - patchright (stealth headless browser, `--render` path)
 - click (CLI)
-- rich (console output)
 
 **Use Cases:**
 
@@ -94,7 +93,7 @@ uv run python fetch_conditions.py \
 - `--elevation` (required): Elevation in meters
 - `--peak-name` (required): Peak name
 - `--peak-id` (optional): PeakBagger peak ID for stats/ascents
-- `--trailhead` (optional): Trailhead coordinates as "lat,lon" — enables multi-county sampling and trailhead-relative hospital/ranger lookups
+- `--trailhead` (optional): Trailhead coordinates as "lat,lon" — enables multi-county path sampling (trailhead→summit); hospital/ranger lookups always run from the summit regardless
 - `--date` (optional): Date as YYYY-MM-DD (default: today)
 - `--distance-mi` (optional): Round-trip distance in miles — required for `time_estimates` and `itinerary`
 - `--gain-ft` (optional): Total elevation gain in feet — required for `time_estimates` and `itinerary`
@@ -274,8 +273,8 @@ The skill:
 
 **Typical execution times:**
 
-- `fetch_conditions.py`: 2-5s without --peak-id; 30-120s with --peak-id (peakbagger-cli is slow)
-- `cloudscrape.py`: 1-3s (HTTP with Cloudflare bypass)
+- `fetch_conditions.py`: 5-15s without --peak-id (includes OSM/FCC geodata calls); 30-120s with --peak-id (peakbagger-cli is slow)
+- `cloudscrape.py`: 1-3s default httpx; 10-30s first `--render` (Chromium install), 3-8s subsequent `--render`
 
 **Timeouts:**
 
@@ -335,7 +334,6 @@ Managed in `pyproject.toml`:
 
 - **click** - CLI framework
 - **httpx** - Modern HTTP client
-- **rich** - Rich terminal output
 - **astral** - Astronomy calculations (daylight)
 - **patchright** - Stealth headless browser (`--render` path in cloudscrape.py)
 

@@ -14,7 +14,7 @@ If the user provided a peak name as an argument (e.g., `/mountaineering:conditio
 1. **Search PeakBagger** for the peak:
 
    ```bash
-   uvx --from "peakbagger-cli>=1.10.0" peakbagger peak search "{peak_name}" --format json
+   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak search "{peak_name}" --format json
    ```
 
 2. **Handle results:**
@@ -30,7 +30,7 @@ If the user provided a peak name as an argument (e.g., `/mountaineering:conditio
 Fetch peak coordinates and elevation:
 
 ```bash
-uvx --from "peakbagger-cli>=1.10.0" peakbagger peak show {peak_id} --format json
+uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak show {peak_id} --format json
 ```
 
 Extract: `latitude`, `longitude`, `elevation_m` (elevation in meters), `peak_name`.
@@ -45,6 +45,11 @@ cd ${CLAUDE_PLUGIN_ROOT}/skills/route-researcher/tools && uv run python fetch_co
   --elevation {elevation_m} \
   --peak-name "{peak_name}" \
   --peak-id {peak_id}
+  # Optional enrichment flags:
+  # --trailhead "lat,lon"          multi-county path sampling (trailhead→summit)
+  # --distance-mi N --gain-ft N    enables time_estimates
+  # --start-time HH:MM             enables itinerary (requires distance+gain)
+  # --waypoint "lat,lon" ...       enables bearings (2+ waypoints)
 ```
 
 This returns JSON with `weather`, `air_quality`, `daylight`, `avalanche`, `peakbagger`, `counties`, `nearest_hospital`, `ranger_station`, `campgrounds`, and (when `--distance-mi`/`--gain-ft` provided) `time_estimates` sections.
@@ -70,5 +75,7 @@ Format the conditions data for the user. Include:
 9. **Emergency contacts:** Nearest hospital from `nearest_hospital.hospitals[]` (name, distance, phone); nearest ranger station from `ranger_station.stations[]` + `admin_district` if on NF land; note OSM data may be incomplete in remote areas
 10. **Campgrounds near trailhead:** From `campgrounds.campgrounds[]` — name, distance, type; note backcountry/high camps not included
 11. **Time estimates** (if present): roped (`time_estimates.roped_hr`), unroped (`time_estimates.unroped_hr`), fast/moderate/leisurely — only shown when tool was called with `--distance-mi`/`--gain-ft`
+12. **Itinerary** (if present): start time, summit ETA, turnaround-by, return ETA, total car-to-car hours (`itinerary.total_hr`); if `itinerary.after_dark` is true, surface as a prominent safety warning — only present when `--start-time`, `--distance-mi`, and `--gain-ft` were all provided
+13. **Navigation bearings** (if present): per-segment bearing (degrees true north), distance, and cumulative distance; total route distance — only present when 2 or more `--waypoint` args were provided
 
 Keep the output concise and scannable. Use tables for the weather forecast and twilight.

@@ -92,6 +92,26 @@ class TestRenderPath:
         assert result.exit_code == 0
         assert "rendered" in result.output
 
+    def test_render_forwards_default_timeout(self):
+        """--render passes the default timeout (30) to _fetch_with_render."""
+        runner = CliRunner()
+
+        with patch("cloudscrape._fetch_with_render") as mock_render:
+            mock_render.return_value = "<html/>"
+            runner.invoke(cli, ["https://example.com", "--render"])
+
+        mock_render.assert_called_once_with("https://example.com", 30)
+
+    def test_render_forwards_custom_timeout(self):
+        """--render --timeout 60 passes 60 to _fetch_with_render."""
+        runner = CliRunner()
+
+        with patch("cloudscrape._fetch_with_render") as mock_render:
+            mock_render.return_value = "<html/>"
+            runner.invoke(cli, ["https://example.com", "--render", "--timeout", "60"])
+
+        mock_render.assert_called_once_with("https://example.com", 60)
+
     def test_render_failure_exits_0_with_note(self):
         """Render path failure exits 0 (graceful degradation) with a JSON note."""
         runner = CliRunner()

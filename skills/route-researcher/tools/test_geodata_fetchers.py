@@ -116,6 +116,35 @@ class TestFetchCounties:
         assert "counties" in result
         assert result["counties"] == []
 
+    def test_early_exit_after_five_stale_points(self):
+        """With 25 sample points all returning the same county, stops after 1+5=6 calls.
+
+        First call adds the county (stale resets to 0); next 5 calls add nothing
+        (stale reaches 5) → break.  Total: ≤6 GET calls, not 25.
+        """
+        with patch("fetch_conditions.httpx.Client") as mock_cls:
+            mock_client = _mock_httpx_get(self.FCC_RESPONSE)
+            mock_cls.return_value = mock_client
+            fetch_counties((47.44, -121.41), (48.77, -121.81), n_samples=25)
+
+        assert mock_client.get.call_count <= 6
+
+    def test_early_exit_after_five_consecutive_errors(self):
+        """Five consecutive per-point network errors trigger the stale early-exit.
+
+        A fully-down FCC API must not cause 25 × 30s timeouts.
+        """
+        with patch("fetch_conditions.httpx.Client") as mock_cls:
+            mock_client = MagicMock()
+            mock_client.__enter__ = MagicMock(return_value=mock_client)
+            mock_client.__exit__ = MagicMock(return_value=False)
+            mock_client.get.side_effect = Exception("Connection refused")
+            mock_cls.return_value = mock_client
+
+            fetch_counties((47.44, -121.41), (48.77, -121.81), n_samples=25)
+
+        assert mock_client.get.call_count <= 7
+
 
 # ---------------------------------------------------------------------------
 # fetch_nearest_hospital
@@ -159,8 +188,6 @@ class TestFetchNearestHospital:
         assert len(result["hospitals"]) >= 1
         h = result["hospitals"][0]
         assert "name" in h
-        assert "lat" in h
-        assert "lon" in h
         assert "distance_miles" in h
 
     def test_prefers_emergency_yes(self):
@@ -375,8 +402,6 @@ class TestFetchCampgrounds:
         assert len(result["campgrounds"]) >= 1
         c = result["campgrounds"][0]
         assert "name" in c
-        assert "lat" in c
-        assert "lon" in c
         assert "distance_miles" in c
 
     def test_backcountry_gap_noted(self):

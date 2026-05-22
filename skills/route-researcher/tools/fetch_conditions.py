@@ -6,9 +6,10 @@ Returns unified JSON matching the data contract for the route-researcher skill.
 """
 
 import json
+import math
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import click
@@ -44,7 +45,7 @@ WEATHER_CODES = {
 PEAKBAGGER_CMD = [
     "uvx",
     "--from",
-    "peakbagger-cli>=1.10.0",
+    "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0",
     "peakbagger",
 ]
 
@@ -56,7 +57,7 @@ def fetch_weather(lat: float, lon: float, elevation_m: float, days: int = 7) -> 
         "longitude": lon,
         "elevation": elevation_m,
         "daily": (
-            "temperature_2m_max,temperature_2m_min,precipitation_sum,"
+            "temperature_2m_max,temperature_2m_min,"
             "precipitation_probability_max,wind_speed_10m_max,weather_code"
         ),
         "hourly": "freezing_level_height",
@@ -193,6 +194,8 @@ def fetch_daylight(
         import zoneinfo
 
         from astral import LocationInfo
+        from astral.sun import dawn as astral_dawn
+        from astral.sun import dusk as astral_dusk
         from astral.sun import sun
 
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -203,8 +206,6 @@ def fetch_daylight(
             tz = zoneinfo.ZoneInfo(tz_name) if tz_name else zoneinfo.ZoneInfo("UTC")
         except Exception:
             tz = zoneinfo.ZoneInfo("UTC")
-        from astral.sun import dawn as astral_dawn
-        from astral.sun import dusk as astral_dusk
 
         s = sun(location.observer, date=date_obj, tzinfo=tz)
 
@@ -292,8 +293,6 @@ def fetch_avalanche(lat: float, lon: float) -> dict[str, Any]:
 
 def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Haversine distance in miles between two lat/lon points."""
-    import math
-
     R = 3958.8  # Earth radius in miles
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
@@ -337,8 +336,10 @@ def fetch_counties(
     try:
         points = _sample_line(trailhead, summit, n_samples) if trailhead else [summit]
         seen: dict[str, dict] = {}
+        stale = 0  # consecutive points that added no new counties
         with httpx.Client(timeout=30.0) as client:
             for lat, lon in points:
+                prev_count = len(seen)
                 try:
                     resp = client.get(
                         FCC_AREA_URL,
@@ -356,7 +357,16 @@ def fetch_counties(
                                 "state_code": r.get("state_code"),
                             }
                 except Exception:
+                    stale += 1
+                    if stale >= 5:
+                        break
                     continue  # single-point failure is non-fatal
+                if len(seen) == prev_count:
+                    stale += 1
+                    if stale >= 5:
+                        break
+                else:
+                    stale = 0
 
         if not seen and points:
             return {
@@ -382,10 +392,28 @@ def fetch_counties(
         }
 
 
+def _osm_coords(el: dict) -> tuple[float | None, float | None]:
+    """Extract lat/lon from a node element or a way/relation with a center."""
+    elat = el["lat"] if "lat" in el else (el.get("center") or {}).get("lat")
+    elon = el["lon"] if "lon" in el else (el.get("center") or {}).get("lon")
+    return elat, elon
+
+
+def _overpass_query(query: str) -> list[dict]:
+    """POST query to Overpass API and return elements list.
+
+    Raises on network or HTTP error — callers must catch for graceful degradation.
+    """
+    with httpx.Client(timeout=35.0) as client:
+        resp = client.post(OVERPASS_URL, data={"data": query})
+        resp.raise_for_status()
+        return resp.json().get("elements", [])
+
+
 def fetch_nearest_hospital(lat: float, lon: float) -> dict[str, Any]:
     """Return nearest hospitals via OSM Overpass, sorted by distance.
 
-    Prefers emergency=yes / opening_hours=24/7 but does not require them.
+    Prefers emergency=yes (sorted first); does not require it.
     Returns top 3 results.
     """
     query = f"""
@@ -394,25 +422,17 @@ nwr[amenity=hospital](around:50000,{float(lat)},{float(lon)});
 out center tags;
 """
     try:
-        with httpx.Client(timeout=35.0) as client:
-            resp = client.post(OVERPASS_URL, data={"data": query})
-            resp.raise_for_status()
-            elements = resp.json().get("elements", [])
-
+        elements = _overpass_query(query)
         hospitals = []
         for el in elements:
             tags = el.get("tags", {})
-            elat = el.get("lat") or (el.get("center") or {}).get("lat")
-            elon = el.get("lon") or (el.get("center") or {}).get("lon")
+            elat, elon = _osm_coords(el)
             if elat is None or elon is None:
                 continue
             entry: dict[str, Any] = {
                 "name": tags.get("name", "Unknown hospital"),
-                "lat": elat,
-                "lon": elon,
                 "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
                 "emergency": tags.get("emergency"),
-                "opening_hours": tags.get("opening_hours"),
             }
             if "phone" in tags:
                 entry["phone"] = tags["phone"]
@@ -441,23 +461,16 @@ def fetch_ranger_station(lat: float, lon: float) -> dict[str, Any]:
 out center tags;
 """
     try:
-        with httpx.Client(timeout=35.0) as client:
-            resp = client.post(OVERPASS_URL, data={"data": overpass_query})
-            resp.raise_for_status()
-            elements = resp.json().get("elements", [])
-
+        elements = _overpass_query(overpass_query)
         stations = []
         for el in elements:
             tags = el.get("tags", {})
-            elat = el.get("lat") or (el.get("center") or {}).get("lat")
-            elon = el.get("lon") or (el.get("center") or {}).get("lon")
+            elat, elon = _osm_coords(el)
             if elat is None or elon is None:
                 continue
             stations.append(
                 {
                     "name": tags.get("name", "Unknown station"),
-                    "lat": elat,
-                    "lon": elon,
                     "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
                     "phone": tags.get("phone"),
                     "website": tags.get("website"),
@@ -500,7 +513,7 @@ out center tags;
 
 
 def fetch_campgrounds(lat: float, lon: float) -> dict[str, Any]:
-    """Return established campgrounds within ~20 km via OSM Overpass.
+    """Return established campgrounds within ~12 mi (~20 km) via OSM Overpass.
 
     Note: backcountry/high camps are NOT in any database — they come from
     trip reports and route beta, not this fetcher.
@@ -511,23 +524,16 @@ nwr[tourism=camp_site](around:20000,{float(lat)},{float(lon)});
 out center tags;
 """
     try:
-        with httpx.Client(timeout=35.0) as client:
-            resp = client.post(OVERPASS_URL, data={"data": query})
-            resp.raise_for_status()
-            elements = resp.json().get("elements", [])
-
+        elements = _overpass_query(query)
         campgrounds = []
         for el in elements:
             tags = el.get("tags", {})
-            elat = el.get("lat") or (el.get("center") or {}).get("lat")
-            elon = el.get("lon") or (el.get("center") or {}).get("lon")
+            elat, elon = _osm_coords(el)
             if elat is None or elon is None:
                 continue
             campgrounds.append(
                 {
                     "name": tags.get("name", "Unnamed campground"),
-                    "lat": elat,
-                    "lon": elon,
                     "distance_miles": round(_haversine_miles(lat, lon, elat, elon), 1),
                     "camp_type": tags.get("camp_type"),
                     "backcountry": tags.get("backcountry"),
@@ -555,7 +561,7 @@ def estimate_times(distance_mi: float, gain_ft: float) -> dict[str, Any]:
     Unroped: gain / 1000 ft/hr.
     Standard tiers use Naismith's rule variants.
     """
-    roped_by_distance = distance_mi / 1.0 if distance_mi else 0.0
+    roped_by_distance = distance_mi if distance_mi else 0.0  # 1 mph glacier pace
     roped_by_gain = gain_ft / 1000.0 if gain_ft else 0.0
     roped_hr = max(roped_by_distance, roped_by_gain)
     unroped_hr = gain_ft / 1000.0 if gain_ft else 0.0
@@ -596,8 +602,6 @@ def build_itinerary(
     Dusk is anchored to the start date (or day+1 when the dusk time-of-day is earlier
     than start time-of-day, e.g. a 23:00 start with 22:00 dusk).
     """
-    from datetime import datetime, timedelta
-
     fmt_in = "%H:%M"
 
     def _fmt(dt: datetime, ref: datetime) -> str:
@@ -614,9 +618,9 @@ def build_itinerary(
 
     times = estimate_times(distance_mi, gain_ft)
 
-    # Ascent: moderate pace; descent: fast pace (downhill)
+    # Ascent: moderate pace; descent: half of raw fast pace (downhill, unrounded)
     ascent_hr = times["moderate_hr"]
-    descent_hr = times["fast_hr"] * 0.5
+    descent_hr = (distance_mi / 3.5 + gain_ft / 2000) * 0.5  # raw formula avoids rounding error
     total_hr = round(ascent_hr + descent_hr, 1)
 
     summit_dt = start_dt + timedelta(hours=ascent_hr)
@@ -669,8 +673,6 @@ def compute_bearings(waypoints: list[tuple[float, float]]) -> dict[str, Any]:
 
     Each segment: bearing_deg (0–360), distance_mi, cumulative_distance_mi, from/to indices.
     """
-    import math as _math
-
     if len(waypoints) < 2:
         return {"segments": [], "total_distance_mi": 0.0}
 
@@ -682,12 +684,12 @@ def compute_bearings(waypoints: list[tuple[float, float]]) -> dict[str, Any]:
         lat2, lon2 = float(waypoints[i + 1][0]), float(waypoints[i + 1][1])
 
         # Forward azimuth (bearing) using spherical formula
-        phi1 = _math.radians(lat1)
-        phi2 = _math.radians(lat2)
-        dl = _math.radians(lon2 - lon1)
-        x = _math.sin(dl) * _math.cos(phi2)
-        y = _math.cos(phi1) * _math.sin(phi2) - _math.sin(phi1) * _math.cos(phi2) * _math.cos(dl)
-        bearing = (_math.degrees(_math.atan2(x, y)) + 360) % 360
+        phi1 = math.radians(lat1)
+        phi2 = math.radians(lat2)
+        dl = math.radians(lon2 - lon1)
+        x = math.sin(dl) * math.cos(phi2)
+        y = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dl)
+        bearing = (math.degrees(math.atan2(x, y)) + 360) % 360
 
         dist = _haversine_miles(lat1, lon1, lat2, lon2)
         cumulative += dist

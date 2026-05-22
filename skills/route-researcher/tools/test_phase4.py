@@ -165,18 +165,23 @@ class TestFreezingLevelSnowLine:
         for day in data["weather"]["forecast"]:
             assert "snow_line_note" in day, f"Missing snow_line_note in {day}"
 
-    def test_near_summit_flag_false_when_freezing_level_well_above(self):
-        """near_summit=False when freezing level is > 2000 ft above summit."""
-        # Summit at 10,000 ft, freezing at 8000 ft — freezing is BELOW summit by 2000 ft
-        # "within 2000 ft of summit" means abs(summit_ft - freezing_ft) <= 2000
+    def test_near_summit_flag_false_when_diff_exceeds_2000ft(self):
+        """near_summit=False when abs(summit_ft - freezing_ft) > 2000."""
+        # freezing=8000 ft, summit=3353m≈11,000 ft → diff=3000 ft > 2000 → False
+        result = self._run_cli_with_mock_weather(self.MOCK_FORECAST[:1], elevation_m=3353.0)
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        day = data["weather"]["forecast"][0]
+        assert day["near_summit"] is False
+
+    def test_near_summit_flag_true_when_diff_exactly_2000ft(self):
+        """near_summit=True when abs(summit_ft - freezing_ft) == 2000 (boundary is inclusive)."""
+        # freezing=8000 ft, summit=3048m≈10,000 ft → diff=2000 ft → within → True
         result = self._run_cli_with_mock_weather(self.MOCK_FORECAST[:1], elevation_m=3048.0)
         assert result.exit_code == 0
         data = json.loads(result.output)
         day = data["weather"]["forecast"][0]
-        assert "near_summit" in day
-        # freezing=8000 ft, summit=10,000 ft, diff=2000 ft — on the boundary; test the flag logic
-        # just assert the key exists and is bool
-        assert isinstance(day["near_summit"], bool)
+        assert day["near_summit"] is True
 
     def test_near_summit_flag_true_when_freezing_level_within_2000ft(self):
         """near_summit=True when freezing level is within 2000 ft of summit."""
