@@ -7,6 +7,7 @@ import json
 from unittest.mock import MagicMock, patch
 
 from fetch_conditions import (
+    _OVERPASS_HEADERS,
     fetch_campgrounds,
     fetch_counties,
     fetch_nearest_hospital,
@@ -237,6 +238,28 @@ class TestFetchNearestHospital:
 
         assert "hospitals" in result
         assert result["hospitals"] == []
+
+
+class TestOverpassHeaders:
+    """_OVERPASS_HEADERS sent on every Overpass POST (prevents 406 from overpass-api.de)."""
+
+    def test_overpass_headers_has_user_agent(self):
+        """_OVERPASS_HEADERS must include a User-Agent identifying this project."""
+        assert "User-Agent" in _OVERPASS_HEADERS
+        assert "claude-mountaineering-skills" in _OVERPASS_HEADERS["User-Agent"]
+
+    def test_overpass_headers_has_accept_json(self):
+        """_OVERPASS_HEADERS must include Accept: application/json."""
+        assert _OVERPASS_HEADERS.get("Accept") == "application/json"
+
+    def test_hospital_query_sends_overpass_headers(self):
+        """fetch_nearest_hospital passes _OVERPASS_HEADERS to httpx.Client constructor."""
+        with patch("fetch_conditions.httpx.Client") as mock_cls:
+            mock_cls.return_value = _mock_httpx_post({"elements": []})
+            fetch_nearest_hospital(48.77, -121.81)
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs.get("headers") == _OVERPASS_HEADERS
 
 
 # ---------------------------------------------------------------------------

@@ -399,12 +399,21 @@ def _osm_coords(el: dict) -> tuple[float | None, float | None]:
     return elat, elon
 
 
+_OVERPASS_HEADERS = {
+    "User-Agent": (
+        "claude-mountaineering-skills/route-researcher "
+        "(https://github.com/dreamiurg/claude-mountaineering-skills)"
+    ),
+    "Accept": "application/json",
+}
+
+
 def _overpass_query(query: str) -> list[dict]:
     """POST query to Overpass API and return elements list.
 
     Raises on network or HTTP error — callers must catch for graceful degradation.
     """
-    with httpx.Client(timeout=35.0) as client:
+    with httpx.Client(timeout=35.0, headers=_OVERPASS_HEADERS) as client:
         resp = client.post(OVERPASS_URL, data={"data": query})
         resp.raise_for_status()
         return resp.json().get("elements", [])
