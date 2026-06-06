@@ -39,19 +39,15 @@ Ask Claude to research any mountain. The route-researcher skill pulls from 10+ m
 
 ## Quick Start
 
-```
-/plugin marketplace add dreamiurg/claude-mountaineering-skills
-/plugin install mountaineering@mountaineering-marketplace
-```
-
-Then reload and try:
+Install with [`npx skills`](https://github.com/vercel-labs/skills):
 
 ```
-/reload-plugins
-/mountaineering:research Mount Rainier
+npx skills add dreamiurg/claude-mountaineering-skills
 ```
 
-Or just ask naturally: `"Research Mount Rainier"`. Claude generates a route beta report in your current directory.
+Then just ask naturally: `"Research Mount Rainier"`. Claude generates a route beta report in your current directory.
+
+> `npx skills` installs the `route-researcher` skill, which drives the full workflow from natural-language requests. If you also want the `/mountaineering:*` slash commands, install the plugin instead -- see [Installation](#installation).
 
 ---
 
@@ -122,7 +118,29 @@ Missing data? The skill notes what's unavailable in an "Information Gaps" sectio
 
 ## Installation
 
-**Prerequisites:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview), optionally [uv](https://docs.astral.sh/uv/) for Python tools.
+**Prerequisites:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview), [Node.js](https://nodejs.org) (for `npx`), optionally [uv](https://docs.astral.sh/uv/) for Python tools.
+
+### Recommended: `npx skills`
+
+[`npx skills`](https://github.com/vercel-labs/skills) installs the `route-researcher` skill directly:
+
+```
+npx skills add dreamiurg/claude-mountaineering-skills
+```
+
+Useful flags:
+
+```
+npx skills add dreamiurg/claude-mountaineering-skills --list   # preview before installing
+npx skills add dreamiurg/claude-mountaineering-skills -g        # install globally (all projects)
+npx skills add dreamiurg/claude-mountaineering-skills -y        # skip confirmation prompts
+```
+
+This gives you the full natural-language workflow (`"Research Mount Rainier"`). The `/mountaineering:*` slash commands are **not** included -- install the plugin below if you want them.
+
+### Alternative: Claude Code plugin
+
+The plugin bundles the same skill plus the `/mountaineering:*` slash commands:
 
 ```
 /plugin marketplace add dreamiurg/claude-mountaineering-skills
@@ -178,9 +196,18 @@ If you previously installed the plugin as `mountaineering-skills`, reinstall wit
 
 ## Updates
 
+If you installed with `npx skills`:
+
+```
+npx skills list                       # see installed skills
+npx skills update route-researcher    # update to latest
+```
+
+If you installed the plugin:
+
 ```
 /plugin list                          # check current version
-/plugin update mountaineering  # update to latest
+/plugin update mountaineering         # update to latest
 ```
 
 ---
