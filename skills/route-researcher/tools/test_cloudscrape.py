@@ -7,8 +7,7 @@ import json
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
-from cloudscrape import cli
-from cloudscrape import _looks_like_challenge, _launch_browser
+from cloudscrape import _launch_browser, _looks_like_challenge, cli
 
 
 class TestRenderReliability:
@@ -70,6 +69,31 @@ class TestRenderReliability:
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert "error" in data
+
+    def test_render_returns_html_when_no_challenge(self):
+        """When the page is not a challenge, the render path returns its HTML."""
+        import cloudscrape
+
+        page = MagicMock()
+        page.evaluate.return_value = {"title": "SummitPost", "text": "Overview ..."}
+        page.content.return_value = "<html><body>Overview</body></html>"
+        browser = MagicMock()
+        browser.new_page.return_value = page
+        pw = MagicMock()
+        pw.chromium.launch.return_value = browser
+        ctx = MagicMock()
+        ctx.__enter__.return_value = pw
+        ctx.__exit__.return_value = False
+
+        runner = CliRunner()
+        with patch("patchright.sync_api.sync_playwright", return_value=ctx), \
+             patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True):
+            result = runner.invoke(
+                cli, ["https://example.com", "--render", "--timeout", "1"]
+            )
+
+        assert result.exit_code == 0
+        assert "<body>Overview</body>" in result.output
 
 
 class TestDefaultPath:

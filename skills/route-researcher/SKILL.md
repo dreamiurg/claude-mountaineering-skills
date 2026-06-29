@@ -182,7 +182,7 @@ Task(
 ## Your Assignment
 Research from these sources: PeakBagger, SummitPost
 
-**Discover first (web sources):** for SummitPost, run a `site:summitpost.org` WebSearch to get exact URLs, then fetch those (don't WebFetch guessed paths). PeakBagger is accessed via the CLI below, not by fetching pages.
+**Discover first (web sources):** for SummitPost, run a `site:summitpost.org` WebSearch to get exact URLs, then fetch those (don't WebFetch guessed paths).
 
 ## PeakBagger Research
 1. Search: "{peak_name} site:peakbagger.com"
