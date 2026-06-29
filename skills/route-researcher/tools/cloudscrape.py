@@ -113,7 +113,7 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
                 advice = (
                     "page may be inaccessible; document the gap"
                     if headed
-                    else "try --headed"
+                    else "try --render --headed"
                 )
                 raise RuntimeError(
                     f"Cloudflare challenge not resolved within "
