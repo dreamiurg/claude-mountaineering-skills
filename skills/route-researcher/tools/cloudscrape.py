@@ -56,6 +56,9 @@ def _launch_browser(p, headed: bool):
     try:
         return p.chromium.launch(channel="chrome", **launch_kwargs)
     except Exception:
+        # Broad by design: any Chrome-channel launch failure (not installed,
+        # permissions, lib mismatch) falls back to Patchright's bundled Chromium
+        # so the best-effort scraper still runs rather than aborting.
         return p.chromium.launch(**launch_kwargs)
 
 
@@ -108,7 +111,7 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
 @click.command()
 @click.argument("url")
 @click.option("--timeout", default=30, help="Request timeout in seconds")
-@click.option("--render", is_flag=True, default=False, help="Use Patchright headless browser")
+@click.option("--render", is_flag=True, default=False, help="Use a Patchright browser (real Chrome; waits out Cloudflare challenges)")
 @click.option(
     "--headed",
     is_flag=True,
