@@ -60,11 +60,11 @@ class TestRenderReliability:
         ctx.__exit__.return_value = False
 
         runner = CliRunner()
-        with patch("patchright.sync_api.sync_playwright", return_value=ctx), \
-             patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True):
-            result = runner.invoke(
-                cli, ["https://example.com", "--render", "--timeout", "1"]
-            )
+        with (
+            patch("patchright.sync_api.sync_playwright", return_value=ctx),
+            patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True),
+        ):
+            result = runner.invoke(cli, ["https://example.com", "--render", "--timeout", "1"])
 
         assert result.exit_code == 0
         data = json.loads(result.output)
@@ -86,11 +86,11 @@ class TestRenderReliability:
         ctx.__exit__.return_value = False
 
         runner = CliRunner()
-        with patch("patchright.sync_api.sync_playwright", return_value=ctx), \
-             patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True):
-            result = runner.invoke(
-                cli, ["https://example.com", "--render", "--timeout", "1"]
-            )
+        with (
+            patch("patchright.sync_api.sync_playwright", return_value=ctx),
+            patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True),
+        ):
+            result = runner.invoke(cli, ["https://example.com", "--render", "--timeout", "1"])
 
         assert result.exit_code == 0
         assert "<body>Overview</body>" in result.output

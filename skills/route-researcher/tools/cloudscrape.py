@@ -116,8 +116,7 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
                     else "try --render --headed"
                 )
                 raise RuntimeError(
-                    f"Cloudflare challenge not resolved within "
-                    f"{min(timeout, 30)}s — {advice}"
+                    f"Cloudflare challenge not resolved within {min(timeout, 30)}s — {advice}"
                 )
             return html
         finally:
@@ -127,7 +126,12 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
 @click.command()
 @click.argument("url")
 @click.option("--timeout", default=30, help="Request timeout in seconds")
-@click.option("--render", is_flag=True, default=False, help="Use a Patchright browser (real Chrome; waits out Cloudflare challenges)")
+@click.option(
+    "--render",
+    is_flag=True,
+    default=False,
+    help="Use a Patchright browser (real Chrome; waits out Cloudflare challenges)",
+)
 @click.option(
     "--headed",
     is_flag=True,
