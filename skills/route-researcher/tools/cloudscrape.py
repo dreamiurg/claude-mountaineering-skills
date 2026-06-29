@@ -2,8 +2,9 @@
 """Fetch content from protected websites.
 
 Default path: httpx with browser-like headers (handles most sites).
---render path: Patchright (stealth headless Chromium) for JS-rendered /
-Cloudflare-challenged pages. Prefers real Chrome channel for best Cloudflare
+--render path: Patchright (real Chrome when available, bundled Chromium as
+fallback; headless by default) for JS-rendered / Cloudflare-challenged pages.
+Prefers real Chrome channel for best Cloudflare
 bypass; falls back to bundled Chromium. Waits out Cloudflare challenges up to
 30 s before returning. Patchright installs its own Chromium lazily on first
 --render use via `patchright install chromium`.
@@ -103,7 +104,17 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
                     break
                 page.wait_for_timeout(step_ms)
                 waited_ms += step_ms
-            return page.content()
+            html = page.content()
+            info = page.evaluate(
+                "() => ({title: document.title,"
+                " text: document.body ? document.body.innerText : ''})"
+            )
+            if _looks_like_challenge(info["title"], info["text"]):
+                raise RuntimeError(
+                    f"Cloudflare challenge not resolved within "
+                    f"{min(timeout, 30)}s — try --headed"
+                )
+            return html
         finally:
             browser.close()
 

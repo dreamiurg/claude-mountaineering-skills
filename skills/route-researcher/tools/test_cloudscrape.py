@@ -44,6 +44,33 @@ class TestRenderReliability:
         _, kwargs = p.chromium.launch.call_args
         assert kwargs.get("headless") is False
 
+    def test_render_unresolved_challenge_returns_error_note(self):
+        """If the Cloudflare challenge never clears, the render path emits an
+        error note (exit 0) instead of returning challenge HTML as content."""
+        import cloudscrape
+
+        page = MagicMock()
+        page.evaluate.return_value = {"title": "Just a moment...", "text": ""}
+        page.content.return_value = "<html>Just a moment...</html>"
+        browser = MagicMock()
+        browser.new_page.return_value = page
+        pw = MagicMock()
+        pw.chromium.launch.return_value = browser
+        ctx = MagicMock()
+        ctx.__enter__.return_value = pw
+        ctx.__exit__.return_value = False
+
+        runner = CliRunner()
+        with patch("patchright.sync_api.sync_playwright", return_value=ctx), \
+             patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True):
+            result = runner.invoke(
+                cli, ["https://example.com", "--render", "--timeout", "1"]
+            )
+
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert "error" in data
+
 
 class TestDefaultPath:
     """Tests for the default (non-render) HTTP fetch path."""

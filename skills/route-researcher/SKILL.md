@@ -279,7 +279,7 @@ mountaineers.org reliably returns HTTP 403 to WebFetch/cloudscrape. Use the Moun
 1. `mcp__mountaineers__search_routes` (query "{peak_name}") and `mcp__mountaineers__get_route` to get the route/place page (difficulty, directions, gear).
 2. `mcp__mountaineers__search_trip_reports` (query "{peak_name}") and, when you have a route URL, `mcp__mountaineers__get_route_trip_reports` to enumerate member trip reports.
 3. `mcp__mountaineers__get_trip_report` to pull each relevant report's body + structured fields (date, author, result, road/conditions notes).
-4. Only if the MCP is unavailable, fall back to the fetching ladder.
+4. Only if the MCP is unavailable, document the gap — mountaineers.org reliably returns HTTP 403 to WebFetch/cloudscrape, so scraping is not a viable fallback for this domain.
 
 Note: the Mountaineers MCP is available to Task-dispatched `general-purpose` agents (this agent). Extract route beta, technical requirements, and hazards from the MCP results.
 
