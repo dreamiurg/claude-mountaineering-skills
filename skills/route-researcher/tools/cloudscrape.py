@@ -135,7 +135,7 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
     help="Run the render browser headed (more reliable vs Cloudflare; needs a display)",
 )
 def cli(url: str, timeout: int, render: bool, headed: bool):
-    """Fetch HTML content from a URL, optionally via headless browser."""
+    """Fetch HTML content from a URL, optionally via browser (headless by default; --headed disables headless mode)."""
     if headed and not render:
         click.echo(json.dumps({"error": "--headed requires --render", "url": url}))
         return
