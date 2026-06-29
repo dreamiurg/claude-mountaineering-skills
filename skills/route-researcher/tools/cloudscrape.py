@@ -110,9 +110,14 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
                 " text: document.body ? document.body.innerText : ''})"
             )
             if _looks_like_challenge(info["title"], info["text"]):
+                advice = (
+                    "page may be inaccessible; document the gap"
+                    if headed
+                    else "try --headed"
+                )
                 raise RuntimeError(
                     f"Cloudflare challenge not resolved within "
-                    f"{min(timeout, 30)}s — try --headed"
+                    f"{min(timeout, 30)}s — {advice}"
                 )
             return html
         finally:
