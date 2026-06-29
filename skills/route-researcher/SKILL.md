@@ -182,6 +182,8 @@ Task(
 ## Your Assignment
 Research from these sources: PeakBagger, SummitPost
 
+**Discover first:** run a `site:` WebSearch per source to get exact URLs, then fetch those URLs (don't WebFetch guessed paths).
+
 ## PeakBagger Research
 1. Search: "{peak_name} site:peakbagger.com"
 2. Extract route descriptions from peak page
@@ -255,6 +257,8 @@ Task(
 ## Your Assignment
 Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoftheweek.com, Oregon Hikers Field Guide (oregonhikers.org), Cascade Climbers (cascadeclimbers.com), Mountain Project
 
+**Retrieval strategy — discover URLs, then fetch.** For each source below, FIRST run a `site:` WebSearch (e.g. `"{peak_name} site:wta.org"`, `site:nwhikers.net`, `site:cascadeclimbers.com`) to collect the exact hike-page and individual trip-report URLs. THEN fetch each discovered URL through the fetching ladder. Do not WebFetch a guessed URL — enumerate real URLs first. This recovers reports that one-pass fetching loses to 403/JS blocks.
+
 ## WTA Research
 1. Search: "{peak_name} site:wta.org"
 2. Find the hike page and extract: trail name, difficulty, distance, elevation gain, hazards
@@ -268,10 +272,16 @@ Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoft
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{trip_report_url}"
    ```
 
-## Mountaineers Research
+## Mountaineers Research (use the Mountaineers MCP FIRST — do not scrape)
 
-1. Search: "{peak_name} site:mountaineers.org route"
-2. Extract route beta, technical requirements, hazards
+mountaineers.org reliably returns HTTP 403 to WebFetch/cloudscrape. Use the Mountaineers MCP tools instead — they return structured data:
+
+1. `mcp__mountaineers__search_routes` (query "{peak_name}") and `mcp__mountaineers__get_route` to get the route/place page (difficulty, directions, gear).
+2. `mcp__mountaineers__search_trip_reports` (query "{peak_name}") and, when you have a route URL, `mcp__mountaineers__get_route_trip_reports` to enumerate member trip reports.
+3. `mcp__mountaineers__get_trip_report` to pull each relevant report's body + structured fields (date, author, result, road/conditions notes).
+4. Only if the MCP is unavailable, fall back to the fetching ladder.
+
+Note: the Mountaineers MCP is available to Task-dispatched `general-purpose` agents (this agent). Extract route beta, technical requirements, and hazards from the MCP results.
 
 ## NWHikers Research (northwesthikers.net / nwhikers.net)
 
@@ -355,6 +365,8 @@ Task(
 
 ## Your Assignment
 Research from AllTrails
+
+**Discover first:** run a `site:` WebSearch to get exact URLs, then fetch those URLs (don't WebFetch guessed paths).
 
 ## AllTrails Research
 1. Search: "{peak_name} site:alltrails.com"
@@ -769,7 +781,7 @@ Throughout execution, follow these error handling guidelines:
 
 ### WebFetch/WebSearch Issues
 
-- **Fetching ladder:** WebFetch first → `cloudscrape.py "{url}"` (fast httpx, no browser) → `cloudscrape.py --render "{url}"` (Patchright stealth browser, for JS-rendered or Cloudflare-protected pages)
+- **Fetching ladder:** WebFetch first → `cloudscrape.py "{url}"` (fast httpx, no browser) → `cloudscrape.py --render "{url}"` (real Chrome via Patchright; waits out Cloudflare challenges; add `--headed` if a display is available for stubborn pages)
 - **When to use `--render`:** hikeoftheweek.com and any site where the default path returns `{"error": ...}` on stdout or where content is blocked/JS-rendered
 - **Graceful degradation:** Missing one source shouldn't stop entire research; cloudscrape.py exits 0 on failure
 - **Document gaps:** Note which sources were unavailable (WebFetch AND both cloudscrape.py paths failed)
