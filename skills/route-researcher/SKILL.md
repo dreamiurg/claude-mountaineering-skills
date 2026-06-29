@@ -211,6 +211,9 @@ Research from these sources: PeakBagger, SummitPost
 
    # If the above returns {"error": ...} or content is blocked/JS-rendered:
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{url}"
+
+   # If --render still returns a Cloudflare challenge page, escalate (needs a display):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render --headed "{url}"
    ```
 
 ## Trip Report Extraction
@@ -270,6 +273,9 @@ Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoft
 
    # If output contains {"error": ...} or content is blocked/JS-rendered:
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{trip_report_url}"
+
+   # If --render still returns a Cloudflare challenge page, escalate (needs a display):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render --headed "{trip_report_url}"
    ```
 
 ## Mountaineers Research (use the Mountaineers MCP FIRST — do not scrape)
