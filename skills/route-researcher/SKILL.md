@@ -182,7 +182,7 @@ Task(
 ## Your Assignment
 Research from these sources: PeakBagger, SummitPost
 
-**Discover first:** run a `site:` WebSearch per source to get exact URLs, then fetch those URLs (don't WebFetch guessed paths).
+**Discover first (web sources):** for SummitPost, run a `site:summitpost.org` WebSearch to get exact URLs, then fetch those (don't WebFetch guessed paths). PeakBagger is accessed via the CLI below, not by fetching pages.
 
 ## PeakBagger Research
 1. Search: "{peak_name} site:peakbagger.com"
@@ -257,7 +257,7 @@ Task(
 ## Your Assignment
 Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoftheweek.com, Oregon Hikers Field Guide (oregonhikers.org), Cascade Climbers (cascadeclimbers.com), Mountain Project
 
-**Retrieval strategy — discover URLs, then fetch.** For each source below, FIRST run a `site:` WebSearch (e.g. `"{peak_name} site:wta.org"`, `site:nwhikers.net`, `site:cascadeclimbers.com`) to collect the exact hike-page and individual trip-report URLs. THEN fetch each discovered URL through the fetching ladder. Do not WebFetch a guessed URL — enumerate real URLs first. This recovers reports that one-pass fetching loses to 403/JS blocks.
+**Retrieval strategy — discover URLs, then fetch.** For each web source below (except mountaineers.org — use the Mountaineers MCP, see below), FIRST run a `site:` WebSearch (e.g. `"{peak_name} site:wta.org"`, `site:nwhikers.net`, `site:cascadeclimbers.com`) to collect the exact hike-page and individual trip-report URLs. THEN fetch each discovered URL through the fetching ladder. Do not WebFetch a guessed URL — enumerate real URLs first. This recovers reports that one-pass fetching loses to 403/JS blocks.
 
 ## WTA Research
 1. Search: "{peak_name} site:wta.org"
@@ -296,6 +296,8 @@ Note: the Mountaineers MCP is available to Task-dispatched `general-purpose` age
 
    ```bash
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{url}"
+   # If --render still returns a Cloudflare challenge page, escalate (needs a display):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render --headed "{url}"
    ```
 
 3. Extract: logistics, route narrative, access notes, trailhead directions
@@ -365,8 +367,6 @@ Task(
 
 ## Your Assignment
 Research from AllTrails
-
-**Discover first:** run a `site:` WebSearch to get exact URLs, then fetch those URLs (don't WebFetch guessed paths).
 
 ## AllTrails Research
 1. Search: "{peak_name} site:alltrails.com"

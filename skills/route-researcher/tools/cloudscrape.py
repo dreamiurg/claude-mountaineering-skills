@@ -95,11 +95,11 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
             waited_ms = 0
             step_ms = 2000
             while waited_ms < deadline_ms:
-                title = page.title()
-                body_text = page.evaluate(
-                    "() => document.body ? document.body.innerText : ''"
+                info = page.evaluate(
+                    "() => ({title: document.title,"
+                    " text: document.body ? document.body.innerText : ''})"
                 )
-                if not _looks_like_challenge(title, body_text):
+                if not _looks_like_challenge(info["title"], info["text"]):
                     break
                 page.wait_for_timeout(step_ms)
                 waited_ms += step_ms
