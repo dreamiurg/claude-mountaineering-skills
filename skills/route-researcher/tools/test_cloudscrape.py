@@ -8,6 +8,41 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 from cloudscrape import cli
+from cloudscrape import _looks_like_challenge, _launch_browser
+
+
+class TestRenderReliability:
+    def test_challenge_detected_from_title(self):
+        assert _looks_like_challenge("Just a moment...", "") is True
+
+    def test_challenge_detected_from_body(self):
+        assert _looks_like_challenge("", "Checking your browser before accessing") is True
+
+    def test_real_content_not_flagged(self):
+        assert _looks_like_challenge("Austera Peak : SummitPost", "Overview ...") is False
+
+    def test_launch_prefers_real_chrome_channel(self):
+        p = MagicMock()
+        _launch_browser(p, headed=False)
+        _, kwargs = p.chromium.launch.call_args
+        assert kwargs.get("channel") == "chrome"
+        assert kwargs.get("headless") is True
+
+    def test_launch_falls_back_to_chromium_when_chrome_missing(self):
+        p = MagicMock()
+        sentinel = MagicMock()
+        p.chromium.launch.side_effect = [Exception("chrome not installed"), sentinel]
+        browser = _launch_browser(p, headed=False)
+        assert browser is sentinel
+        assert p.chromium.launch.call_count == 2
+        _, fallback_kwargs = p.chromium.launch.call_args_list[1]
+        assert "channel" not in fallback_kwargs
+
+    def test_launch_headed_sets_headless_false(self):
+        p = MagicMock()
+        _launch_browser(p, headed=True)
+        _, kwargs = p.chromium.launch.call_args
+        assert kwargs.get("headless") is False
 
 
 class TestDefaultPath:
@@ -100,7 +135,7 @@ class TestRenderPath:
             mock_render.return_value = "<html/>"
             runner.invoke(cli, ["https://example.com", "--render"])
 
-        mock_render.assert_called_once_with("https://example.com", 30)
+        mock_render.assert_called_once_with("https://example.com", 30, False)
 
     def test_render_forwards_custom_timeout(self):
         """--render --timeout 60 passes 60 to _fetch_with_render."""
@@ -110,7 +145,7 @@ class TestRenderPath:
             mock_render.return_value = "<html/>"
             runner.invoke(cli, ["https://example.com", "--render", "--timeout", "60"])
 
-        mock_render.assert_called_once_with("https://example.com", 60)
+        mock_render.assert_called_once_with("https://example.com", 60, False)
 
     def test_render_failure_exits_0_with_note(self):
         """Render path failure exits 0 (graceful degradation) with a JSON note."""
