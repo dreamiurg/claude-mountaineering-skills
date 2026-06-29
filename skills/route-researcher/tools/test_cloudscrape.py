@@ -147,6 +147,24 @@ class TestRenderPath:
 
         mock_render.assert_called_once_with("https://example.com", 60, False)
 
+    def test_render_headed_flag_forwarded(self):
+        """--render --headed passes headed=True to _fetch_with_render."""
+        runner = CliRunner()
+
+        with patch("cloudscrape._fetch_with_render") as mock_render:
+            mock_render.return_value = "<html/>"
+            runner.invoke(cli, ["https://example.com", "--render", "--headed"])
+
+        mock_render.assert_called_once_with("https://example.com", 30, True)
+
+    def test_headed_without_render_returns_error_note(self):
+        """--headed without --render exits 0 with a JSON error note (no silent no-op)."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["https://example.com", "--headed"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert "error" in data
+
     def test_render_failure_exits_0_with_note(self):
         """Render path failure exits 0 (graceful degradation) with a JSON note."""
         runner = CliRunner()

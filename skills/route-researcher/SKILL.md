@@ -784,7 +784,7 @@ Throughout execution, follow these error handling guidelines:
 - **Fetching ladder:** WebFetch first → `cloudscrape.py "{url}"` (fast httpx, no browser) → `cloudscrape.py --render "{url}"` (real Chrome via Patchright; waits out Cloudflare challenges; add `--headed` if a display is available for stubborn pages)
 - **When to use `--render`:** hikeoftheweek.com and any site where the default path returns `{"error": ...}` on stdout or where content is blocked/JS-rendered
 - **Graceful degradation:** Missing one source shouldn't stop entire research; cloudscrape.py exits 0 on failure
-- **Document gaps:** Note which sources were unavailable (WebFetch AND both cloudscrape.py paths failed)
+- **Document gaps:** Note which sources were unavailable (WebFetch AND all cloudscrape.py paths failed: fast-path, --render, --render --headed)
 - **Prioritize safety:** If critical safety info (avalanche, hazards) unavailable, emphasize in gaps section
 
 ## Execution Timeouts

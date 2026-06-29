@@ -120,6 +120,9 @@ def _fetch_with_render(url: str, timeout: int, headed: bool = False) -> str:
 )
 def cli(url: str, timeout: int, render: bool, headed: bool):
     """Fetch HTML content from a URL, optionally via headless browser."""
+    if headed and not render:
+        click.echo(json.dumps({"error": "--headed requires --render", "url": url}))
+        return
     if render:
         try:
             html = _fetch_with_render(url, timeout, headed)
