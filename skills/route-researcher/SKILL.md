@@ -53,7 +53,7 @@ Research Progress:
 2. **Search PeakBagger** using peakbagger-cli:
 
    ```bash
-   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak search "{peak_name}" --format json
+   uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak search "{peak_name}" --format json
    ```
 
    - Parse JSON output to extract peak matches
@@ -100,7 +100,7 @@ This phase must complete before Phase 3, as coordinates are required for weather
 Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak show {peak_id} --format json
+uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak show {peak_id} --format json
 ```
 
 This returns structured JSON with:
@@ -187,14 +187,14 @@ Research from these sources: PeakBagger, SummitPost
 2. Extract route descriptions from peak page
 3. List recent ascents with trip reports:
    ```bash
-   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
+   uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
    ```
 
 4. Identify trip reports with content (word_count > 0)
 5. Fetch content for up to 5 recent trip reports using:
 
    ```bash
-   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger ascent show {ascent_id} --format json
+   uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger ascent show {ascent_id} --format json
    ```
 
 ## SummitPost Research
@@ -800,10 +800,12 @@ See `skills/route-researcher/docs/architecture.md` for detailed execution flow, 
 
 ### peakbagger-cli Command Reference (v1.10.0, git source)
 
+> **Requires `patchright` + Google Chrome.** peakbagger-cli runs in its own `uvx` environment and uses a Patchright browser to bypass Cloudflare, so every invocation must include `--with patchright`. Without it the command aborts with `Error: patchright is required to bypass Cloudflare`.
+
 All commands use `--format json` for structured output. Run via:
 
 ```bash
-uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger <command> --format json
+uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger <command> --format json
 ```
 
 **Available Commands:**

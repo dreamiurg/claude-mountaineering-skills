@@ -44,6 +44,8 @@ WEATHER_CODES = {
 
 PEAKBAGGER_CMD = [
     "uvx",
+    "--with",
+    "patchright",
     "--from",
     "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0",
     "peakbagger",
