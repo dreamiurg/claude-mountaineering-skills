@@ -1,7 +1,7 @@
 {
   "name": "mountaineering",
   "version": "5.1.0",
-  "description": "Automated mountain route research combining PeakBagger data, weather forecasts, avalanche conditions, and trip reports into comprehensive beta documents",
+  "description": "Automated mountain route research for climbers, hikers, and mountaineers: aggregates PeakBagger, SummitPost, WTA, AllTrails, weather forecasts, and avalanche bulletins into comprehensive route beta reports for North American peaks",
   "author": {
     "name": "dreamiurg",
     "email": "dreamiurg@users.noreply.github.com"
