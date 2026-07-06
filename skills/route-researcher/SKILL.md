@@ -1,6 +1,6 @@
 ---
 name: route-researcher
-description: Research North American mountain peaks and generate comprehensive route beta reports
+description: Research mountain routes and generate comprehensive route beta reports for North American peaks, aggregating weather forecasts, avalanche conditions, daylight windows, trip reports, and access info from PeakBagger, SummitPost, WTA, AllTrails, and regional avalanche centers. Use when planning a climb, hike, or scramble, or when asked for route beta, trail conditions, peak research, or mountaineering trip planning.
 ---
 
 # Route Researcher
