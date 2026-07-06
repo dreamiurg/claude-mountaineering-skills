@@ -1,5 +1,6 @@
 {
   "name": "mountaineering-marketplace",
+  "description": "Mountain route research skills for Claude Code — automated route beta reports for North American peaks with weather, avalanche conditions, and trip reports",
   "owner": {
     "name": "dreamiurg",
     "url": "https://github.com/dreamiurg"
