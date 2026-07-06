@@ -231,7 +231,7 @@ Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) · [Privacy Policy](PRIVACY.md)
 
 ---
 
