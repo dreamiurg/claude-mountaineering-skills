@@ -7,6 +7,9 @@
   <a href="https://docs.anthropic.com/en/docs/claude-code/overview">
     <img src="https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg" alt="Claude Code Plugin">
   </a>
+  <a href="https://skills.sh/dreamiurg/claude-mountaineering-skills">
+    <img src="https://skills.sh/b/dreamiurg/claude-mountaineering-skills" alt="skills.sh">
+  </a>
 </p>
 
 <h4 align="center">Automated mountain route research for North American peaks, built for <a href="https://claude.com/claude-code" target="_blank">Claude Code</a>.</h4>

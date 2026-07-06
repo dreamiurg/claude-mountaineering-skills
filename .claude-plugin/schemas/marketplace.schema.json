@@ -3,10 +3,14 @@
   "title": "Claude Plugin Marketplace",
   "description": "Schema for .claude-plugin/marketplace.json",
   "type": "object",
-  "required": ["name", "owner", "plugins"],
+  "required": ["name", "description", "owner", "plugins"],
   "additionalProperties": false,
   "properties": {
     "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
       "type": "string",
       "minLength": 1
     },
