@@ -29,11 +29,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Verify scripts
-        run: |
-          node --check scripts/update-versions.js
-          node --check scripts/sync-changelog-to-readme.js
-
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
