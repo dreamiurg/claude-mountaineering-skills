@@ -1,5 +1,6 @@
 {
   "name": "mountaineering-marketplace",
+  "description": "Mountain route research for North American peaks: automated route beta reports with weather forecasts, avalanche conditions, daylight windows, and trip reports aggregated from 10+ sources including PeakBagger, SummitPost, WTA, and AllTrails",
   "owner": {
     "name": "dreamiurg",
     "url": "https://github.com/dreamiurg"
@@ -11,7 +12,7 @@
         "source": "url",
         "url": "https://github.com/dreamiurg/claude-mountaineering-skills.git"
       },
-      "description": "Automated mountain route research combining PeakBagger data, weather forecasts, avalanche conditions, and trip reports into comprehensive beta documents",
+      "description": "Automated mountain route research for climbers, hikers, and mountaineers: aggregates PeakBagger, SummitPost, WTA, AllTrails, weather forecasts, and avalanche bulletins into comprehensive route beta reports for North American peaks",
       "version": "5.1.0"
     }
   ]
