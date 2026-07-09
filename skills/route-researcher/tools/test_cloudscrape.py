@@ -7,7 +7,93 @@ import json
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
-from cloudscrape import cli
+from cloudscrape import _launch_browser, _looks_like_challenge, cli
+
+
+class TestRenderReliability:
+    def test_challenge_detected_from_title(self):
+        assert _looks_like_challenge("Just a moment...", "") is True
+
+    def test_challenge_detected_from_body(self):
+        assert _looks_like_challenge("", "Checking your browser before accessing") is True
+
+    def test_real_content_not_flagged(self):
+        assert _looks_like_challenge("Austera Peak : SummitPost", "Overview ...") is False
+
+    def test_launch_prefers_real_chrome_channel(self):
+        p = MagicMock()
+        _launch_browser(p, headed=False)
+        _, kwargs = p.chromium.launch.call_args
+        assert kwargs.get("channel") == "chrome"
+        assert kwargs.get("headless") is True
+
+    def test_launch_falls_back_to_chromium_when_chrome_missing(self):
+        p = MagicMock()
+        sentinel = MagicMock()
+        p.chromium.launch.side_effect = [Exception("chrome not installed"), sentinel]
+        browser = _launch_browser(p, headed=False)
+        assert browser is sentinel
+        assert p.chromium.launch.call_count == 2
+        _, fallback_kwargs = p.chromium.launch.call_args_list[1]
+        assert "channel" not in fallback_kwargs
+
+    def test_launch_headed_sets_headless_false(self):
+        p = MagicMock()
+        _launch_browser(p, headed=True)
+        _, kwargs = p.chromium.launch.call_args
+        assert kwargs.get("headless") is False
+
+    def test_render_unresolved_challenge_returns_error_note(self):
+        """If the Cloudflare challenge never clears, the render path emits an
+        error note (exit 0) instead of returning challenge HTML as content."""
+        import cloudscrape
+
+        page = MagicMock()
+        page.evaluate.return_value = {"title": "Just a moment...", "text": ""}
+        page.content.return_value = "<html>Just a moment...</html>"
+        browser = MagicMock()
+        browser.new_page.return_value = page
+        pw = MagicMock()
+        pw.chromium.launch.return_value = browser
+        ctx = MagicMock()
+        ctx.__enter__.return_value = pw
+        ctx.__exit__.return_value = False
+
+        runner = CliRunner()
+        with (
+            patch("patchright.sync_api.sync_playwright", return_value=ctx),
+            patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True),
+        ):
+            result = runner.invoke(cli, ["https://example.com", "--render", "--timeout", "1"])
+
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert "error" in data
+
+    def test_render_returns_html_when_no_challenge(self):
+        """When the page is not a challenge, the render path returns its HTML."""
+        import cloudscrape
+
+        page = MagicMock()
+        page.evaluate.return_value = {"title": "SummitPost", "text": "Overview ..."}
+        page.content.return_value = "<html><body>Overview</body></html>"
+        browser = MagicMock()
+        browser.new_page.return_value = page
+        pw = MagicMock()
+        pw.chromium.launch.return_value = browser
+        ctx = MagicMock()
+        ctx.__enter__.return_value = pw
+        ctx.__exit__.return_value = False
+
+        runner = CliRunner()
+        with (
+            patch("patchright.sync_api.sync_playwright", return_value=ctx),
+            patch.object(cloudscrape, "_CHROMIUM_INSTALLED", True),
+        ):
+            result = runner.invoke(cli, ["https://example.com", "--render", "--timeout", "1"])
+
+        assert result.exit_code == 0
+        assert "<body>Overview</body>" in result.output
 
 
 class TestDefaultPath:
@@ -100,7 +186,7 @@ class TestRenderPath:
             mock_render.return_value = "<html/>"
             runner.invoke(cli, ["https://example.com", "--render"])
 
-        mock_render.assert_called_once_with("https://example.com", 30)
+        mock_render.assert_called_once_with("https://example.com", 30, False)
 
     def test_render_forwards_custom_timeout(self):
         """--render --timeout 60 passes 60 to _fetch_with_render."""
@@ -110,7 +196,25 @@ class TestRenderPath:
             mock_render.return_value = "<html/>"
             runner.invoke(cli, ["https://example.com", "--render", "--timeout", "60"])
 
-        mock_render.assert_called_once_with("https://example.com", 60)
+        mock_render.assert_called_once_with("https://example.com", 60, False)
+
+    def test_render_headed_flag_forwarded(self):
+        """--render --headed passes headed=True to _fetch_with_render."""
+        runner = CliRunner()
+
+        with patch("cloudscrape._fetch_with_render") as mock_render:
+            mock_render.return_value = "<html/>"
+            runner.invoke(cli, ["https://example.com", "--render", "--headed"])
+
+        mock_render.assert_called_once_with("https://example.com", 30, True)
+
+    def test_headed_without_render_returns_error_note(self):
+        """--headed without --render exits 0 with a JSON error note (no silent no-op)."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["https://example.com", "--headed"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert "error" in data
 
     def test_render_failure_exits_0_with_note(self):
         """Render path failure exits 0 (graceful degradation) with a JSON note."""

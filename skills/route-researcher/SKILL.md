@@ -53,7 +53,7 @@ Research Progress:
 2. **Search PeakBagger** using peakbagger-cli:
 
    ```bash
-   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak search "{peak_name}" --format json
+   uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak search "{peak_name}" --format json
    ```
 
    - Parse JSON output to extract peak matches
@@ -100,7 +100,7 @@ This phase must complete before Phase 3, as coordinates are required for weather
 Retrieve detailed peak information using the peak ID from Phase 1:
 
 ```bash
-uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak show {peak_id} --format json
+uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak show {peak_id} --format json
 ```
 
 This returns structured JSON with:
@@ -182,19 +182,21 @@ Task(
 ## Your Assignment
 Research from these sources: PeakBagger, SummitPost
 
+**Discover first (web sources):** for SummitPost, run a `site:summitpost.org` WebSearch to get exact URLs, then fetch those (don't WebFetch guessed paths).
+
 ## PeakBagger Research
 1. Search: "{peak_name} site:peakbagger.com"
 2. Extract route descriptions from peak page
 3. List recent ascents with trip reports:
    ```bash
-   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
+   uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger peak ascents {peak_id} --format json --with-tr --limit 20
    ```
 
 4. Identify trip reports with content (word_count > 0)
 5. Fetch content for up to 5 recent trip reports using:
 
    ```bash
-   uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger ascent show {ascent_id} --format json
+   uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger ascent show {ascent_id} --format json
    ```
 
 ## SummitPost Research
@@ -209,6 +211,9 @@ Research from these sources: PeakBagger, SummitPost
 
    # If the above returns {"error": ...} or content is blocked/JS-rendered:
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{url}"
+
+   # If --render still returns a Cloudflare challenge page, escalate (needs a display):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render --headed "{url}"
    ```
 
 ## Trip Report Extraction
@@ -255,6 +260,8 @@ Task(
 ## Your Assignment
 Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoftheweek.com, Oregon Hikers Field Guide (oregonhikers.org), Cascade Climbers (cascadeclimbers.com), Mountain Project
 
+**Retrieval strategy — discover URLs, then fetch.** For each web source below (except mountaineers.org — use the Mountaineers MCP, see below), FIRST run a `site:` WebSearch (e.g. `"{peak_name} site:wta.org"`, `site:nwhikers.net`, `site:cascadeclimbers.com`) to collect the exact hike-page and individual trip-report URLs. THEN fetch each discovered URL through the fetching ladder. Do not WebFetch a guessed URL — enumerate real URLs first. This recovers reports that one-pass fetching loses to 403/JS blocks.
+
 ## WTA Research
 1. Search: "{peak_name} site:wta.org"
 2. Find the hike page and extract: trail name, difficulty, distance, elevation gain, hazards
@@ -266,12 +273,21 @@ Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoft
 
    # If output contains {"error": ...} or content is blocked/JS-rendered:
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{trip_report_url}"
+
+   # If --render still returns a Cloudflare challenge page, escalate (needs a display):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render --headed "{trip_report_url}"
    ```
 
-## Mountaineers Research
+## Mountaineers Research (use the Mountaineers MCP FIRST — do not scrape)
 
-1. Search: "{peak_name} site:mountaineers.org route"
-2. Extract route beta, technical requirements, hazards
+mountaineers.org reliably returns HTTP 403 to WebFetch/cloudscrape. Use the Mountaineers MCP tools instead — they return structured data:
+
+1. `mcp__mountaineers__search_routes` (query "{peak_name}") and `mcp__mountaineers__get_route` to get the route/place page (difficulty, directions, gear).
+2. `mcp__mountaineers__search_trip_reports` (query "{peak_name}") and, when you have a route URL, `mcp__mountaineers__get_route_trip_reports` to enumerate member trip reports.
+3. `mcp__mountaineers__get_trip_report` to pull each relevant report's body + structured fields (date, author, result, road/conditions notes).
+4. Only if the MCP is unavailable, document the gap — mountaineers.org reliably returns HTTP 403 to WebFetch/cloudscrape, so scraping is not a viable fallback for this domain.
+
+Note: the Mountaineers MCP is available to Task-dispatched `general-purpose` agents (this agent). Extract route beta, technical requirements, and hazards from the MCP results.
 
 ## NWHikers Research (northwesthikers.net / nwhikers.net)
 
@@ -286,6 +302,8 @@ Research from these sources: WTA, Mountaineers.org, northwesthikers.net, hikeoft
 
    ```bash
    uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render "{url}"
+   # If --render still returns a Cloudflare challenge page, escalate (needs a display):
+   uv run python {repo_root}/skills/route-researcher/tools/cloudscrape.py --render --headed "{url}"
    ```
 
 3. Extract: logistics, route narrative, access notes, trailhead directions
@@ -769,10 +787,10 @@ Throughout execution, follow these error handling guidelines:
 
 ### WebFetch/WebSearch Issues
 
-- **Fetching ladder:** WebFetch first → `cloudscrape.py "{url}"` (fast httpx, no browser) → `cloudscrape.py --render "{url}"` (Patchright stealth browser, for JS-rendered or Cloudflare-protected pages)
+- **Fetching ladder:** WebFetch first → `cloudscrape.py "{url}"` (fast httpx, no browser) → `cloudscrape.py --render "{url}"` (real Chrome via Patchright; waits out Cloudflare challenges; add `--headed` if a display is available for stubborn pages)
 - **When to use `--render`:** hikeoftheweek.com and any site where the default path returns `{"error": ...}` on stdout or where content is blocked/JS-rendered
 - **Graceful degradation:** Missing one source shouldn't stop entire research; cloudscrape.py exits 0 on failure
-- **Document gaps:** Note which sources were unavailable (WebFetch AND both cloudscrape.py paths failed)
+- **Document gaps:** Note which sources were unavailable (WebFetch AND all cloudscrape.py paths failed: fast-path, --render, --render --headed)
 - **Prioritize safety:** If critical safety info (avalanche, hazards) unavailable, emphasize in gaps section
 
 ## Execution Timeouts
@@ -800,10 +818,12 @@ See `skills/route-researcher/docs/architecture.md` for detailed execution flow, 
 
 ### peakbagger-cli Command Reference (v1.10.0, git source)
 
+> **Requires `patchright` + Google Chrome.** peakbagger-cli runs in its own `uvx` environment and uses a Patchright browser to bypass Cloudflare, so every invocation must include `--with patchright`. Without it the command aborts with `Error: patchright is required to bypass Cloudflare`.
+
 All commands use `--format json` for structured output. Run via:
 
 ```bash
-uvx --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger <command> --format json
+uvx --with patchright --from "git+https://github.com/dreamiurg/peakbagger-cli.git@v1.10.0" peakbagger <command> --format json
 ```
 
 **Available Commands:**
